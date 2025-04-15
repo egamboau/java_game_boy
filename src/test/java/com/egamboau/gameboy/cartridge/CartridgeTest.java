@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.egamboau.test.TestUtils;
@@ -49,8 +50,14 @@ class CartridgeTest {
         outStream.write(data);
         outStream.close();
         LOGGER.info("File Written");
+        
+    }
+
+    @BeforeEach
+    void setUpEach() throws IOException {
         cartridge = new Cartridge(tempFile.getAbsolutePath());
     }
+
 
     @AfterAll
     static void tearDown() {
