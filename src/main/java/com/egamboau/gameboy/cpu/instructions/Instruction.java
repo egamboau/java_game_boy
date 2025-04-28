@@ -1,37 +1,38 @@
 package com.egamboau.gameboy.cpu.instructions;
 
-public class Instruction {
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-    private InstrtuctionType instrtuctionType = null;
+import com.egamboau.gameboy.cpu.CPU;
+
+public abstract class Instruction {
+
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private AddressMode addressMode = null;
-    private RegisterType firstRegister = null;
-    private RegisterType secondRegister = null;
+    private RegisterType sourceRegister = null;
+    private RegisterType destinationRegister = null;
     private InstructionCondition condition = null;
     private Byte parameter = 0;
 
-    public Instruction(InstrtuctionType instrtuctionType, AddressMode addressMode, RegisterType firstRegister,RegisterType secondRegister, InstructionCondition condition, Byte parameter) {
-        this.instrtuctionType = instrtuctionType;
+    public Instruction(AddressMode addressMode, RegisterType sourceRegister,RegisterType destinationRegister, InstructionCondition condition, Byte parameter) {
         this.addressMode = addressMode;
-        this.firstRegister = firstRegister;
-        this.secondRegister = secondRegister;
+        this.sourceRegister = sourceRegister;
+        this.destinationRegister = destinationRegister;
         this.condition = condition;
         this.parameter = parameter;
-    }
-
-    public InstrtuctionType getInstrtuctionType() {
-        return instrtuctionType;
     }
 
     public AddressMode getAddressMode() {
         return addressMode;
     }
 
-    public RegisterType getFirstRegister() {
-        return firstRegister;
+    public RegisterType getSourceRegister() {
+        return sourceRegister;
     }
 
-    public RegisterType getSecondRegister() {
-        return secondRegister;
+    public RegisterType getDestinationRegister() {
+        return destinationRegister;
     }
 
     public InstructionCondition getCondition() {
@@ -42,5 +43,38 @@ public class Instruction {
         return parameter;
     }
 
-    
+    private int[] fetch_data(CPU currentCpu) {
+        LOGGER.info("Fetching data needed for instruction {}", this);
+        if(getAddressMode() == null) {
+            return new int[0];
+        } else {
+            switch (getAddressMode()) {
+                case REGISTER_TO_MEMORY_ADDRESS_DATA:
+                case DATA_16_BITS_TO_REGISTER:
+                    //read 2 bytes from memory.
+                    int firstByte = currentCpu.getDataFromPCAndIncrement();
+                    int secondByte = currentCpu.getDataFromPCAndIncrement();
+                    return new int[] {firstByte, secondByte};
+                case DATA_8_BIT_TO_REGISTER:
+                    int data = currentCpu.getDataFromPCAndIncrement();
+                    return new int[]{data};
+                case REGISTER:
+                case REGISTER_TO_REGISTER:
+                case REGISTER_16_BIT:
+                case REGISTER_TO_MEMORY_ADDRESS_REGISTER:
+                case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
+                    //data is on the register itself, so no data to fetch
+                    return new int[0];
+                default:
+                    throw new IllegalArgumentException("Address mode not supported: " + getAddressMode());
+            }
+        }
+    }
+
+    public void executeInstruction(CPU currentCpu) {
+        int[] data = fetch_data(currentCpu);
+        run_instruction_logic(currentCpu, data);
+    }
+
+    protected abstract void run_instruction_logic(CPU currentCpu, int[] data);    
 }

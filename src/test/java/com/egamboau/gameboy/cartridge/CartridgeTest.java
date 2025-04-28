@@ -150,20 +150,20 @@ class CartridgeTest {
     void testReadByteFromAddress() {
         int address = TestUtils.getRandomIntegerInRange(0, data.length);
         byte expected = data[address];
-        byte result = cartridge.readByteFromAddress(address);
+        int result = cartridge.readByteFromAddress(address);
         assertEquals(expected, result);
     }
 
     @Test
     void testWriteByteToAddress() {
         int address = TestUtils.getRandomIntegerInRange(0, data.length);
-        byte value = 0x0000;
+        int value = 0x0000;
         do {
-            value = (byte) TestUtils.getRandomIntegerInRange(0, data.length);
+            value = TestUtils.getRandomIntegerInRange(0, 0xFF);
         } while (value == data[address]);
         
         cartridge.writeByteToAddress(address, value);
-        byte readValue = cartridge.readByteFromAddress(address);
+        int readValue = cartridge.readByteFromAddress(address);
         assertEquals(value, readValue);
         assertNotEquals(value, data[address]);
     }

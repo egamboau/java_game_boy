@@ -8,10 +8,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Cartridge {
 
     private String fileName;
     private byte[] romData;
+
+    private final Logger LOGGER = LogManager.getLogger();
 
     public Cartridge(String fileName) throws IOException {
         this.fileName = fileName;
@@ -41,7 +46,7 @@ public class Cartridge {
      * @return the entry point bytes for the rom
      */
     public byte[] getEntryPoint() {
-        return Arrays.copyOfRange(romData, 0x100, 0x104);
+        return Arrays.copyOfRange(getRomData(), 0x100, 0x104);
     }
 
     /**
@@ -58,14 +63,14 @@ public class Cartridge {
      * @return the raw bytes for the logo.
      */
     public byte[] getLogo() {
-        return Arrays.copyOfRange(romData, 0x104, 0x134);
+        return Arrays.copyOfRange(getRomData(), 0x104, 0x134);
     }
     /**
      * Get the title of the game in upper case ASCII. If the title is less than 16 characters long, the remaining bytes should be padded with $00s
      * @return the game title
      */
     public String getTitle() {
-        return new String(Arrays.copyOfRange(romData, 0x0134, 0x0143), StandardCharsets.US_ASCII);
+        return new String(Arrays.copyOfRange(getRomData(), 0x0134, 0x0143), StandardCharsets.US_ASCII);
     }
 
     /**
@@ -73,7 +78,7 @@ public class Cartridge {
      * @return the valie for the CGB flag
      */
     public CGBValues getCGBFlag() {
-        return CGBValues.fromByte(romData[0x0143]);
+        return CGBValues.fromByte(getRomData()[0x0143]);
     }
 
     /**
@@ -83,7 +88,7 @@ public class Cartridge {
     public NewLicensee getNewLicenseeCode() {
         OldLicensee oldLicensee = getOldLicensee();
         if(oldLicensee == OldLicensee.NEW_LICENSEE) {
-            return NewLicensee.fromCode(new String(Arrays.copyOfRange(romData, 0x0144, 0x0146)));
+            return NewLicensee.fromCode(new String(Arrays.copyOfRange(getRomData(), 0x0144, 0x0146)));
         } else {
             return NewLicensee.NOT_AVAILABLE;
         }
@@ -94,7 +99,7 @@ public class Cartridge {
      * @return the hardware type
      */
     public Roms getRomType(){
-        byte value = romData[0x0147];
+        byte value = getRomData()[0x0147];
         return Roms.fromByte(value);
     }
 
@@ -103,7 +108,7 @@ public class Cartridge {
      * @return how much ROM is present on the cartridge
      */
     public RomSize getRomSize() {
-        return RomSize.fromByte(romData[0x0148]);
+        return RomSize.fromByte(getRomData()[0x0148]);
     }
     
     /**
@@ -111,7 +116,7 @@ public class Cartridge {
      * @return the destination on the ROM
      */
     public Destination getDestination() {
-        return Destination.fromByte(romData[0x14A]);
+        return Destination.fromByte(getRomData()[0x14A]);
     }
 
     /**
@@ -119,7 +124,7 @@ public class Cartridge {
      * @return the old license code stored
      */
     public OldLicensee getOldLicensee() {
-        return OldLicensee.fromByte(romData[0x14A]);
+        return OldLicensee.fromByte(getRomData()[0x14A]);
     }
 
     /**
@@ -127,7 +132,7 @@ public class Cartridge {
      * @return
      */
     public byte getChecksum() {
-        return romData[0x14d];
+        return getRomData()[0x14d];
     }
 
     /**
@@ -135,7 +140,7 @@ public class Cartridge {
      * @return the checksum
      */
     public long getGlobalChecksum() {
-        return new BigInteger(Arrays.copyOfRange(romData, 0x014e, 0x0150)).longValue();
+        return new BigInteger(Arrays.copyOfRange(getRomData(), 0x014e, 0x0150)).longValue();
     }
 
     /**
@@ -145,7 +150,7 @@ public class Cartridge {
     public boolean isHeaderValid() {
         byte checksum = 0;
         for (int address = 0x0134; address <= 0x014C; address++) {
-            checksum = (byte)(checksum - romData[address] - 1);
+            checksum = (byte)(checksum - getRomData()[address] - 1);
         }
         return checksum == getChecksum();
     }
@@ -155,8 +160,9 @@ public class Cartridge {
      * @param address the address to read
      * @return the value of the given address.
      */
-    public byte readByteFromAddress(int address) {
-        return romData[address];
+    public int readByteFromAddress(int address) {
+        byte value = getRomData()[address];
+        return (value & 0x00FF);
     }
 
     /**
@@ -164,12 +170,13 @@ public class Cartridge {
      * @param address the destination address
      * @param value the value to be read.
      */
-    public void writeByteToAddress(int address, byte value) {
+    public void writeByteToAddress(int address, int value) {
         //rom only has no write
         if (this.getRomType() == Roms.ROM_ONLY) {
+            LOGGER.info("Current cart is ROM only, writes are not allowed");
             return;
         } else {
-            romData[address] = value;
+            getRomData()[address] = (byte) (value & 0xFF) ;
         }
         
     }
