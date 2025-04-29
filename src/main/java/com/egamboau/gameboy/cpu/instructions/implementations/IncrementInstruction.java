@@ -34,7 +34,7 @@ public class IncrementInstruction extends Instruction{
 
     private void incrementRegister(CPU currentCpu) {
         int result = getIncrementedRegisterData(currentCpu) & 0xFF;
-        currentCpu.setValueInRegister(result, getSourceRegister());
+        currentCpu.setValueInRegister(result, getDestinationRegister());
 
         //based on the result, set the needed flags on the F register.
         currentCpu.setZero(result == 0);
@@ -43,7 +43,7 @@ public class IncrementInstruction extends Instruction{
     }
     
     private void incrementRegisterPair(CPU currentCpu) {
-        int result = getIncrementedRegisterData(currentCpu);
-        currentCpu.setValueInRegister(result, getSourceRegister());
+        int result = getIncrementedRegisterData(currentCpu) & 0xFFFF;
+        currentCpu.setValueInRegister(result, getDestinationRegister());
     }
 }

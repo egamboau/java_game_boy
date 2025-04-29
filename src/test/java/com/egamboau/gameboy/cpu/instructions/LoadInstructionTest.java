@@ -33,6 +33,24 @@ public class LoadInstructionTest extends CPUTest{
     }
 
     @Test
+    void testLD_DE_d16() {
+        /*
+         * Load the 2 bytes of immediate data into register pair DE.
+         * The first byte of immediate data is the lower byte (i.e., bits 0-7), 
+         * and the second byte of immediate data is the higher byte (i.e., bits 8-15).
+         */
+        int lowerByte = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int upperByte = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x11, //the opcode
+            lowerByte, //lower byte of data
+            upperByte //and the upper byte.
+            );
+        
+        runLoadTestWithInmediateData(upperByte, lowerByte, RegisterType.REGISTER_DE);
+    }
+
+    @Test
     void testLD_indirect_BC_A() {
         /*
          * Store the contents of register A in the memory location specified by register pair BC.
@@ -49,6 +67,22 @@ public class LoadInstructionTest extends CPUTest{
     }
 
     @Test
+    void testLD_indirect_DE_A() {
+        /*
+         * Store the contents of register A in the memory location specified by register pair BC.
+         */
+        int registerData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int d_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int e_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x12//the opcode
+            );
+
+        runLoadTestIndirectRegister(d_register_data, e_register_data,registerData, RegisterType.REGISTER_DE);
+    }
+
+    @Test
     void testLD_B_d8() {
         /*
          * Load the 8-bit immediate operand d8 into register B.
@@ -59,6 +93,20 @@ public class LoadInstructionTest extends CPUTest{
             data //lower byte of data
             );
         runLoadTestWithInmediateData(data, RegisterType.REGISTER_B, false);
+
+    }
+
+    @Test
+    void testLD_C_d8() {
+        /*
+         * Load the 8-bit immediate operand d8 into register C.
+         */
+        int data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x0E, //the opcode
+            data //lower byte of data
+            );
+        runLoadTestWithInmediateData(data, RegisterType.REGISTER_C, false);
 
     }
 

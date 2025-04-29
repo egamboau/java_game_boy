@@ -16,21 +16,34 @@ public class DecrementInstruction extends Instruction{
     @Override
     public void run_instruction_logic(CPU currentCpu, int[] data) {
         switch (getAddressMode()) {
-            case REGISTER:
+            case REGISTER:            
                 decrementRegister(currentCpu);
-                break;            
+                break;
+            case REGISTER_16_BIT:
+                decrementRegisterPair(currentCpu);
+                break;        
             default:
                 throw new IllegalArgumentException(String.format("Address mode %s not supported", getAddressMode()));
         }
     }
 
+
+    private void decrementRegisterPair(CPU currentCpu) {
+        int result = getDecrementedRegisterData(currentCpu) & 0xFFFF;
+        currentCpu.setValueInRegister(result, getSourceRegister());
+    }
+
     private void decrementRegister(CPU currentCpu) {
-        int original_value = currentCpu.getValueFromRegister(getSourceRegister());
-        int result = original_value -1;
+        int result = getDecrementedRegisterData(currentCpu)  & 0xFF;
         currentCpu.setValueInRegister(result, getSourceRegister());
         currentCpu.setZero(result == 0);
         currentCpu.setSubtract(true);
         currentCpu.setHalfCarry((result & 0x0F) == 0x0F);
+    }
+
+    private int getDecrementedRegisterData(CPU currentCpu) {
+        int original_value = currentCpu.getValueFromRegister(getSourceRegister());
+        return original_value -1;
     }
 
 }

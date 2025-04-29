@@ -18,6 +18,7 @@ public class LoadInstruction extends Instruction{
         switch (getAddressMode()) {
             case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
                 storeMemoryDataintoRegister(currentCpu);
+                break;
             case DATA_16_BITS_TO_REGISTER:
             case DATA_8_BIT_TO_REGISTER:
                 storeDataInRegister(currentCpu, data);
