@@ -16,7 +16,7 @@ public class IncrementInstruction extends Instruction{
     @Override
     public void run_instruction_logic(CPU currentCpu, int[] data) {
         switch (getAddressMode()) {
-            case REGISTER:
+            case REGISTER_8_BIT:
                 incrementRegister(currentCpu);
                 break;
             case REGISTER_16_BIT:

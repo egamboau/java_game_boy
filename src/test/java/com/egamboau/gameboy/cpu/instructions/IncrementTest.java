@@ -27,23 +27,9 @@ public class IncrementTest  extends CPUTest{
         );
         executeIncrementTest(b_register_data, c_register_data, RegisterType.REGISTER_BC);
     }
-
-    @Test
-    void testIncDE() {
-        /*
-         * Increment the contents of register pair BC by 1.
-         */
-        int d_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        int e_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x13//the opcode
-        );
-        executeIncrementTest(d_register_data, e_register_data, RegisterType.REGISTER_DE);
-    }
     
     @Test
-    void testIncBWithZeroVAlue() {
+    void testIncB_WithZeroValue() {
         /*
          * Increment the contents of register B by 1.
          * Initializes the register to 0 first, and then test the result
@@ -116,7 +102,7 @@ public class IncrementTest  extends CPUTest{
     }
 
     @Test
-    void testIncCWithZeroVAlue() {
+    void testIncC_WithZeroValue() {
         /*
          * Increment the contents of register C by 1.
          * Initializes the register to 0 first, and then test the result
@@ -174,7 +160,7 @@ public class IncrementTest  extends CPUTest{
     @Test
     void testIncC_ZeroFlagSet() {
         /*
-         * Increment the contents of register B by 1.
+         * Increment the contents of register C by 1.
          * Test if the Zero flag is set when result is 0
          */
         int b_register_data = 0xFF;
@@ -183,6 +169,253 @@ public class IncrementTest  extends CPUTest{
         );
 
         executeIncTestWithSingleRegister(b_register_data, RegisterType.REGISTER_C);
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertTrue(currentCpu.getZero(), "Zero flag was not set correctly");
+    }
+
+    @Test
+    void testIncDE() {
+        /*
+         * Increment the contents of register pair DE by 1.
+         */
+        int d_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int e_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x13//the opcode
+        );
+        executeIncrementTest(d_register_data, e_register_data, RegisterType.REGISTER_DE);
+    }
+
+    @Test
+    void testIncD_WithZeroValue() {
+        /*
+         * Increment the contents of register D by 1.
+         * Initializes the register to 0 first, and then test the result
+         */
+        int c_register_data = 0;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x14//the opcode
+        );
+
+        executeIncTestWithSingleRegister(c_register_data, RegisterType.REGISTER_D);
+
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
+
+    }
+
+    @Test
+    void testIncD_HalfCarrySet() {
+        /*
+         * Increment the contents of register D by 1.
+         * Checks if half carry is set as needed
+         */
+        int C_register_data = 0x0F;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x14//the opcode
+        );
+
+        executeIncTestWithSingleRegister(C_register_data, RegisterType.REGISTER_D);
+        
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
+
+    }
+
+    @Test
+    void testIncD_HalfCarryNotSet() {
+        /*
+         * Increment the contents of register D by 1.
+         * Checks if half carry is not set after the addition
+         */
+        int c_register_data = 0x0E;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x14//the opcode
+        );
+
+        executeIncTestWithSingleRegister(c_register_data, RegisterType.REGISTER_D);
+
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
+    }
+
+    @Test
+    void testIncD_ZeroFlagSet() {
+        /*
+         * Increment the contents of register D by 1.
+         * Test if the Zero flag is set when result is 0
+         */
+        int b_register_data = 0xFF;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x14//the opcode
+        );
+
+        executeIncTestWithSingleRegister(b_register_data, RegisterType.REGISTER_D);
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertTrue(currentCpu.getZero(), "Zero flag was not set correctly");
+    }
+
+    @Test
+    void testIncE_WithZeroValue() {
+        /*
+         * Increment the contents of register E by 1.
+         * Initializes the register to 0 first, and then test the result
+         */
+        int c_register_data = 0;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x1C//the opcode
+        );
+
+        executeIncTestWithSingleRegister(c_register_data, RegisterType.REGISTER_E);
+
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
+
+    }
+
+    @Test
+    void testIncE_HalfCarrySet() {
+        /*
+         * Increment the contents of register E by 1.
+         * Checks if half carry is set as needed
+         */
+        int C_register_data = 0x0F;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x1C//the opcode
+        );
+
+        executeIncTestWithSingleRegister(C_register_data, RegisterType.REGISTER_E);
+        
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
+
+    }
+
+    @Test
+    void testIncE_HalfCarryNotSet() {
+        /*
+         * Increment the contents of register E by 1.
+         * Checks if half carry is not set after the addition
+         */
+        int c_register_data = 0x0E;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x1C//the opcode
+        );
+
+        executeIncTestWithSingleRegister(c_register_data, RegisterType.REGISTER_E);
+
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
+    }
+
+    @Test
+    void testIncE_ZeroFlagSet() {
+        /*
+         * Increment the contents of register E by 1.
+         * Test if the Zero flag is set when result is 0
+         */
+        int b_register_data = 0xFF;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x1C    //the opcode
+        );
+
+        executeIncTestWithSingleRegister(b_register_data, RegisterType.REGISTER_E);
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertTrue(currentCpu.getZero(), "Zero flag was not set correctly");
+    }
+
+    @Test
+    void testIncHL() {
+        /*
+         * Increment the contents of register pair HL by 1.
+         */
+        int h_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int l_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x23//the opcode
+        );
+        executeIncrementTest(h_register_data, l_register_data, RegisterType.REGISTER_HL);
+    }
+
+    @Test
+    void testIncH_WithZeroValue() {
+        /*
+         * Increment the contents of register H by 1.
+         * Initializes the register to 0 first, and then test the result
+         */
+        int c_register_data = 0;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x24//the opcode
+        );
+
+        executeIncTestWithSingleRegister(c_register_data, RegisterType.REGISTER_H);
+
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
+
+    }
+
+    @Test
+    void testIncH_HalfCarrySet() {
+        /*
+         * Increment the contents of register H by 1.
+         * Checks if half carry is set as needed
+         */
+        int C_register_data = 0x0F;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x24//the opcode
+        );
+
+        executeIncTestWithSingleRegister(C_register_data, RegisterType.REGISTER_H);
+        
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
+
+    }
+
+    @Test
+    void testIncH_HalfCarryNotSet() {
+        /*
+         * Increment the contents of register H by 1.
+         * Checks if half carry is not set after the addition
+         */
+        int c_register_data = 0x0E;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x24//the opcode
+        );
+
+        executeIncTestWithSingleRegister(c_register_data, RegisterType.REGISTER_H);
+
+        assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
+        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
+        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
+    }
+
+    @Test
+    void testIncH_ZeroFlagSet() {
+        /*
+         * Increment the contents of register H by 1.
+         * Test if the Zero flag is set when result is 0
+         */
+        int b_register_data = 0xFF;
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x24    //the opcode
+        );
+
+        executeIncTestWithSingleRegister(b_register_data, RegisterType.REGISTER_H);
         assertFalse(currentCpu.getSubtract(), "N flag was not set correctly");
         assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
         assertTrue(currentCpu.getZero(), "Zero flag was not set correctly");

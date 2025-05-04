@@ -16,7 +16,7 @@ public class DecrementInstruction extends Instruction{
     @Override
     public void run_instruction_logic(CPU currentCpu, int[] data) {
         switch (getAddressMode()) {
-            case REGISTER:            
+            case REGISTER_8_BIT:            
                 decrementRegister(currentCpu);
                 break;
             case REGISTER_16_BIT:
@@ -30,12 +30,12 @@ public class DecrementInstruction extends Instruction{
 
     private void decrementRegisterPair(CPU currentCpu) {
         int result = getDecrementedRegisterData(currentCpu) & 0xFFFF;
-        currentCpu.setValueInRegister(result, getSourceRegister());
+        currentCpu.setValueInRegister(result, getDestinationRegister());
     }
 
     private void decrementRegister(CPU currentCpu) {
         int result = getDecrementedRegisterData(currentCpu)  & 0xFF;
-        currentCpu.setValueInRegister(result, getSourceRegister());
+        currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setZero(result == 0);
         currentCpu.setSubtract(true);
         currentCpu.setHalfCarry((result & 0x0F) == 0x0F);

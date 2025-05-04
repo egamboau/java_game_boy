@@ -58,11 +58,12 @@ public abstract class Instruction {
                 case DATA_8_BIT_TO_REGISTER:
                     int data = currentCpu.getDataFromPCAndIncrement();
                     return new int[]{data};
-                case REGISTER:
+                case REGISTER_8_BIT:
                 case REGISTER_TO_REGISTER:
                 case REGISTER_16_BIT:
                 case REGISTER_TO_MEMORY_ADDRESS_REGISTER:
                 case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
+                case MEMORY_ADDRESS_REGISTER_INCREMENT_TO_REGISTER: 
                     //data is on the register itself, so no data to fetch
                     return new int[0];
                 default:

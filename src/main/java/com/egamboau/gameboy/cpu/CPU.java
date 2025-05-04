@@ -5,13 +5,17 @@ import org.apache.logging.log4j.Logger;
 
 import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.Instruction;
+import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.cpu.instructions.implementations.AddInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecrementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.IncrementInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.JumpRelativeInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.LoadInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.NoopInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftCircularInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.RotateRightInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateRigthCircularInstruction;
 import com.egamboau.gameboy.memory.Bus;
 
@@ -85,19 +89,17 @@ public class CPU {
 
     
 
-    public void incrementRegisterPair(Instruction instruction, int[] data) {
-        switch (instruction.getSourceRegister()) {
-            case REGISTER_BC:
-                int value = Register.combine(b, c);
+    public void incrementRegisterPair(RegisterType register) {
+        switch (register) {
+            case REGISTER_HL:
+                int value = Register.combine(h, l);
                 value += 1;
                 //split the value again
-                Register.split(value, b, c);
+                Register.split(value, h, l);
                 break;
-        
             default:
-                throw new IllegalArgumentException(String.format("Register %s not supported for 16 bit increment instruction %s", instruction.getSourceRegister()));
+                throw new IllegalArgumentException(String.format("Register %s not supported for 16 bit increment instruction", register));
         }
-        incrementCpuCycles(1L);
     }
 
     /**
@@ -110,47 +112,44 @@ public class CPU {
         instructions[0x01] = new LoadInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.REGISTER_BC, null, null);
         instructions[0x02] = new LoadInstruction(AddressMode.REGISTER_TO_MEMORY_ADDRESS_REGISTER, RegisterType.REGISTER_A, RegisterType.REGISTER_BC,  null, null);
         instructions[0x03] = new IncrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.REGISTER_BC, RegisterType.REGISTER_BC, null, null);
-        instructions[0x04] = new IncrementInstruction(AddressMode.REGISTER, RegisterType.REGISTER_B, RegisterType.REGISTER_B, null, null);
-        instructions[0x05] = new DecrementInstruction(AddressMode.REGISTER, RegisterType.REGISTER_B, RegisterType.REGISTER_B, null, null);
+        instructions[0x04] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_B, RegisterType.REGISTER_B, null, null);
+        instructions[0x05] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_B, RegisterType.REGISTER_B, null, null);
         instructions[0x06] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null,  RegisterType.REGISTER_B, null, null);
-        instructions[0x07] = new RotateLeftCircularInstruction(AddressMode.REGISTER,RegisterType.REGISTER_A, RegisterType.REGISTER_A, null, null);
+        instructions[0x07] = new RotateLeftCircularInstruction(AddressMode.REGISTER_8_BIT,RegisterType.REGISTER_A, RegisterType.REGISTER_A, null, null);
         instructions[0x08] = new LoadInstruction(AddressMode.REGISTER_TO_MEMORY_ADDRESS_DATA,RegisterType.REGISTER_SP, null, null, null);
         instructions[0x09] = new AddInstruction(AddressMode.REGISTER_TO_REGISTER,RegisterType.REGISTER_BC,RegisterType.REGISTER_HL,null, null);
         instructions[0x0A] = new LoadInstruction(AddressMode.MEMORY_ADDRESS_REGISTER_TO_REGISTER,RegisterType.REGISTER_BC,RegisterType.REGISTER_A , null, null);
-        instructions[0x0B] = new DecrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.REGISTER_BC, null, null, null);
-        instructions[0x0C] = new IncrementInstruction(AddressMode.REGISTER, RegisterType.REGISTER_C, RegisterType.REGISTER_C, null, null);
-        instructions[0x0D] = new DecrementInstruction(AddressMode.REGISTER, RegisterType.REGISTER_C, RegisterType.REGISTER_C, null, null);
+        instructions[0x0B] = new DecrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.REGISTER_BC, RegisterType.REGISTER_BC, null, null);
+        instructions[0x0C] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_C, RegisterType.REGISTER_C, null, null);
+        instructions[0x0D] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_C, RegisterType.REGISTER_C, null, null);
         instructions[0x0E] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.REGISTER_C, null, null);
-        instructions[0x0F] = new RotateRigthCircularInstruction(AddressMode.REGISTER,RegisterType.REGISTER_A, RegisterType.REGISTER_A,null, null);
+        instructions[0x0F] = new RotateRigthCircularInstruction(AddressMode.REGISTER_8_BIT,RegisterType.REGISTER_A, RegisterType.REGISTER_A,null, null);
         //1x
         instructions[0x10] = new StopInstruction(null, null, null, null, null);
-        instructions[0x11] = new LoadInstruction( AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.REGISTER_DE, null, null);
+        instructions[0x11] = new LoadInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.REGISTER_DE, null, null);
         instructions[0x12] = new LoadInstruction(AddressMode.REGISTER_TO_MEMORY_ADDRESS_REGISTER, RegisterType.REGISTER_A, RegisterType.REGISTER_DE,  null, null);
         instructions[0x13] = new IncrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.REGISTER_DE, RegisterType.REGISTER_DE, null, null);
+        instructions[0x14] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_D, RegisterType.REGISTER_D, null, null);
+        instructions[0x15] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_D, RegisterType.REGISTER_D, null, null);
+        instructions[0x16] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.REGISTER_D, null, null);
+        instructions[0x17] = new RotateLeftInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_A,RegisterType.REGISTER_A, null, null);
+        instructions[0x18] = new JumpRelativeInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.REGISTER_PC, null, null);
+        instructions[0x19] = new AddInstruction(AddressMode.REGISTER_TO_REGISTER,RegisterType.REGISTER_DE, RegisterType.REGISTER_HL,  null, null);
+        instructions[0x1A] = new LoadInstruction(AddressMode.MEMORY_ADDRESS_REGISTER_TO_REGISTER, RegisterType.REGISTER_DE, RegisterType.REGISTER_A, null, null);
+        instructions[0x1B] = new DecrementInstruction( AddressMode.REGISTER_16_BIT, RegisterType.REGISTER_DE, RegisterType.REGISTER_DE, null, null);
+        instructions[0x1C] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_E, RegisterType.REGISTER_E, null, null);
+        instructions[0x1D] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_E, RegisterType.REGISTER_E, null, null);
+        instructions[0x1E] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.REGISTER_E, null, null);
+        instructions[0x1F] = new RotateRightInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_A,RegisterType.REGISTER_A, null, null);
+        //2x
+        instructions[0x20] = new JumpRelativeInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.REGISTER_PC, InstructionCondition.Z_FLAG_NOT_SET, null);
+        instructions[0x21] = new LoadInstruction(AddressMode.DATA_16_BITS_TO_REGISTER,  null, RegisterType.REGISTER_HL, null, null);
+        instructions[0x22] = new LoadInstruction(AddressMode.MEMORY_ADDRESS_REGISTER_INCREMENT_TO_REGISTER,  RegisterType.REGISTER_A,RegisterType.REGISTER_HL, null, null);
+        instructions[0x23] = new IncrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.REGISTER_HL, RegisterType.REGISTER_HL, null, null);
+        instructions[0x24] = new IncrementInstruction( AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_H, RegisterType.REGISTER_H, null, null);
 
         /*
         
-        
-        
-        instructions[0x14] = new Instruction(InstrtuctionType.INCREMENT, AddressMode.REGISTER, RegisterType.REGISTER_D, null, null, null);
-        instructions[0x15] = new Instruction(InstrtuctionType.DECREMENT, AddressMode.REGISTER, RegisterType.REGISTER_D, null, null, null);
-        instructions[0x16] = new Instruction(InstrtuctionType.LOAD, AddressMode.REGISTER_TO_8_BIT_DATA, RegisterType.REGISTER_D, null, null, null);
-        instructions[0x17] = new Instruction(InstrtuctionType.ROTATE_LEFT_A, null,null, null, null, null);
-        instructions[0x18] = new Instruction(InstrtuctionType.JUMP_RELATIVE, AddressMode.DATA_8_BIT, null, null, null, null);
-        instructions[0x19] = new Instruction(InstrtuctionType.ADD, AddressMode.REGISTER_TO_REGISTER,RegisterType.REGISTER_HL, RegisterType.REGISTER_DE, null, null);
-        instructions[0x1A] = new Instruction(InstrtuctionType.LOAD, AddressMode.REGISTER_TO_MEMORY_ADDRESS_REGISTER,RegisterType.REGISTER_A, RegisterType.REGISTER_DE, null, null);
-        instructions[0x1B] = new Instruction(InstrtuctionType.DECREMENT, AddressMode.REGISTER, RegisterType.REGISTER_DE, null, null, null);
-        instructions[0x1C] = new Instruction(InstrtuctionType.INCREMENT, AddressMode.REGISTER, RegisterType.REGISTER_E, null, null, null);
-        instructions[0x1D] = new Instruction(InstrtuctionType.DECREMENT, AddressMode.REGISTER, RegisterType.REGISTER_E, null, null, null);
-        instructions[0x1E] = new Instruction(InstrtuctionType.LOAD, AddressMode.REGISTER_TO_8_BIT_DATA, RegisterType.REGISTER_E, null, null, null);
-        instructions[0x1F] = new Instruction(InstrtuctionType.ROTATE_RIGTH_A, null,null, null, null, null);
-
-        //2x
-        instructions[0x20] = new Instruction(InstrtuctionType.JUMP_RELATIVE, AddressMode.DATA_8_BIT, null, null, InstructionCondition.Z_FLAG_NOT_SET, null);
-        instructions[0x21] = new Instruction(InstrtuctionType.LOAD, AddressMode.REGISTER_TO_16_BIT_DATA, RegisterType.REGISTER_HL, null, null, null);
-        instructions[0x22] = new Instruction(InstrtuctionType.LOAD, AddressMode.INCREMENT_HL_REGISTER_TO_MEMORY, RegisterType.REGISTER_HL, RegisterType.REGISTER_A, null, null);
-        instructions[0x23] = new Instruction(InstrtuctionType.INCREMENT, AddressMode.REGISTER, RegisterType.REGISTER_HL, null, null, null);
-        instructions[0x24] = new Instruction(InstrtuctionType.INCREMENT, AddressMode.REGISTER, RegisterType.REGISTER_H, null, null, null);
         instructions[0x25] = new Instruction(InstrtuctionType.DECREMENT, AddressMode.REGISTER, RegisterType.REGISTER_H, null, null, null);
         instructions[0x26] = new Instruction(InstrtuctionType.LOAD, AddressMode.REGISTER_TO_8_BIT_DATA, RegisterType.REGISTER_H, null, null, null);
         instructions[0x27] = new Instruction(InstrtuctionType.DECIMAL_ACUMULATOR_ADJUSTMENT, AddressMode.REGISTER,RegisterType.REGISTER_A, null, null, null);
@@ -427,38 +426,54 @@ public class CPU {
     }
 
     public int getValueFromRegister(RegisterType register) {
+        int result;
         switch (register) {
             case REGISTER_A:
-                return a.get();
+                result = a.get();
+                break;
             case REGISTER_AF:
-                return Register.combine(a, f);
+                result =  Register.combine(a, f);
+                break;
             case REGISTER_B:
-                return b.get();
+                result =  b.get();
+                break;
             case REGISTER_BC:
-                return Register.combine(b, c);
+                result =  Register.combine(b, c);
+                break;
             case REGISTER_C:
-                return c.get();
+                result =  c.get();
+                break;
             case REGISTER_D:
-                return d.get();
+                result =  d.get();
+                break;
             case REGISTER_DE:
-                return Register.combine(d, e);
+                result =  Register.combine(d, e);
+                break;
             case REGISTER_E:
-                return e.get();
+                result =  e.get();
+                break;
             case REGISTER_F:
-                return f.get();
+                result =  f.get();
+                break;
             case REGISTER_H:
-                return h.get();
+                result =  h.get();
+                break;
             case REGISTER_HL:
-                return Register.combine(h, l);
+                result =  Register.combine(h, l);
+                break;
             case REGISTER_L:
-                return l.get();
+                result =  l.get();
+                break;
             case REGISTER_PC:
-                return PC;
+                result =  PC & 0xFFFF;
+                break;
             case REGISTER_SP:
-                return SP;
+                result =  SP & 0xFFFF;
+                break;
             default:
                 throw new IllegalArgumentException("Retrieving data not supported for this register " + register);
         }
+        return result;
     }
 
     public void setSubtract(boolean value) {
@@ -532,6 +547,12 @@ public class CPU {
             case REGISTER_C:
                 c.set(data[0]);
                 break;
+            case REGISTER_D:
+                d.set(data[0]);
+                break;
+            case REGISTER_E:
+                e.set(data[0]);
+                break;
             case REGISTER_BC:
                 c.set(data[0]);
                 b.set(data[1]);
@@ -539,6 +560,10 @@ public class CPU {
             case REGISTER_DE:
                 e.set(data[0]);
                 d.set(data[1]);
+                break;
+            case REGISTER_HL:
+                l.set(data[0]);
+                h.set(data[1]);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown destination register: " + destinationRegister);
@@ -563,5 +588,10 @@ public class CPU {
 
     public boolean getZero() {
         return f.getZero();
+    }
+
+    public void incrementPCRegister(byte address) {
+        this.PC += address;
+        this.incrementCpuCycles(1);
     }
 }
