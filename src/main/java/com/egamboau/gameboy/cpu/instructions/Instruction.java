@@ -61,9 +61,11 @@ public abstract class Instruction {
                 case REGISTER_8_BIT:
                 case REGISTER_TO_REGISTER:
                 case REGISTER_16_BIT:
+                case REGISTER_16_BIT_TO_REGISTER_16_BIT:
                 case REGISTER_TO_MEMORY_ADDRESS_REGISTER:
                 case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
-                case MEMORY_ADDRESS_REGISTER_INCREMENT_TO_REGISTER: 
+                case REGISTER_TO_INCREMENT_16_BIT_MEMORY_ADDRESS:
+                case INCREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER:
                     //data is on the register itself, so no data to fetch
                     return new int[0];
                 default:

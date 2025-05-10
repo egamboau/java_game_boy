@@ -25,6 +25,9 @@ public class JumpRelativeInstruction extends Instruction{
                 case Z_FLAG_NOT_SET:
                     shouldJump = !currentCpu.getZero();
                     break;
+                case Z_FLAG_SET:
+                    shouldJump = currentCpu.getZero();
+                    break;
                 default:
                     throw new IllegalArgumentException(String.format("Condition not supported for jump: %s", getCondition()));
             }

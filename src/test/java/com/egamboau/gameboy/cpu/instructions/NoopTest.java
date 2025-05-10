@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import com.egamboau.gameboy.cpu.CPUTest;
 
-public class NoopInstructionTest extends CPUTest {
+public class NoopTest extends CPUTest {
     
     
     @Test

@@ -8,11 +8,13 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.cpu.instructions.implementations.AddInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.DecimalAdjustAccumulatorInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecrementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.IncrementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.JumpRelativeInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.LoadInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.NoopInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.OneComplementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftCircularInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateRightInstruction;
@@ -117,7 +119,7 @@ public class CPU {
         instructions[0x06] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null,  RegisterType.REGISTER_B, null, null);
         instructions[0x07] = new RotateLeftCircularInstruction(AddressMode.REGISTER_8_BIT,RegisterType.REGISTER_A, RegisterType.REGISTER_A, null, null);
         instructions[0x08] = new LoadInstruction(AddressMode.REGISTER_TO_MEMORY_ADDRESS_DATA,RegisterType.REGISTER_SP, null, null, null);
-        instructions[0x09] = new AddInstruction(AddressMode.REGISTER_TO_REGISTER,RegisterType.REGISTER_BC,RegisterType.REGISTER_HL,null, null);
+        instructions[0x09] = new AddInstruction(AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT,RegisterType.REGISTER_BC,RegisterType.REGISTER_HL,null, null);
         instructions[0x0A] = new LoadInstruction(AddressMode.MEMORY_ADDRESS_REGISTER_TO_REGISTER,RegisterType.REGISTER_BC,RegisterType.REGISTER_A , null, null);
         instructions[0x0B] = new DecrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.REGISTER_BC, RegisterType.REGISTER_BC, null, null);
         instructions[0x0C] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_C, RegisterType.REGISTER_C, null, null);
@@ -134,7 +136,7 @@ public class CPU {
         instructions[0x16] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.REGISTER_D, null, null);
         instructions[0x17] = new RotateLeftInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_A,RegisterType.REGISTER_A, null, null);
         instructions[0x18] = new JumpRelativeInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.REGISTER_PC, null, null);
-        instructions[0x19] = new AddInstruction(AddressMode.REGISTER_TO_REGISTER,RegisterType.REGISTER_DE, RegisterType.REGISTER_HL,  null, null);
+        instructions[0x19] = new AddInstruction(AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT,RegisterType.REGISTER_DE, RegisterType.REGISTER_HL,  null, null);
         instructions[0x1A] = new LoadInstruction(AddressMode.MEMORY_ADDRESS_REGISTER_TO_REGISTER, RegisterType.REGISTER_DE, RegisterType.REGISTER_A, null, null);
         instructions[0x1B] = new DecrementInstruction( AddressMode.REGISTER_16_BIT, RegisterType.REGISTER_DE, RegisterType.REGISTER_DE, null, null);
         instructions[0x1C] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_E, RegisterType.REGISTER_E, null, null);
@@ -144,23 +146,26 @@ public class CPU {
         //2x
         instructions[0x20] = new JumpRelativeInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.REGISTER_PC, InstructionCondition.Z_FLAG_NOT_SET, null);
         instructions[0x21] = new LoadInstruction(AddressMode.DATA_16_BITS_TO_REGISTER,  null, RegisterType.REGISTER_HL, null, null);
-        instructions[0x22] = new LoadInstruction(AddressMode.MEMORY_ADDRESS_REGISTER_INCREMENT_TO_REGISTER,  RegisterType.REGISTER_A,RegisterType.REGISTER_HL, null, null);
+        instructions[0x22] = new LoadInstruction(AddressMode.REGISTER_TO_INCREMENT_16_BIT_MEMORY_ADDRESS,  RegisterType.REGISTER_A,RegisterType.REGISTER_HL, null, null);
         instructions[0x23] = new IncrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.REGISTER_HL, RegisterType.REGISTER_HL, null, null);
         instructions[0x24] = new IncrementInstruction( AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_H, RegisterType.REGISTER_H, null, null);
-
+        instructions[0x25] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_H, RegisterType.REGISTER_H, null, null);
+        instructions[0x26] = new LoadInstruction( AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.REGISTER_H, null, null);
+        instructions[0x27] = new DecimalAdjustAccumulatorInstruction(AddressMode.REGISTER_8_BIT,null, RegisterType.REGISTER_A, null, null);
+        instructions[0x28] = new JumpRelativeInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.REGISTER_PC, InstructionCondition.Z_FLAG_SET, null);
+        instructions[0x29] = new AddInstruction(AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT,RegisterType.REGISTER_HL, RegisterType.REGISTER_HL, null, null);
+        instructions[0x2A] = new LoadInstruction(AddressMode.INCREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER,RegisterType.REGISTER_HL, RegisterType.REGISTER_A, null, null);
+        instructions[0x2B] = new DecrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.REGISTER_HL, RegisterType.REGISTER_HL, null, null);
+        instructions[0x2C] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_L, RegisterType.REGISTER_L, null, null);
+        instructions[0x2D] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_L, RegisterType.REGISTER_L, null, null);
+        instructions[0x2E] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER,  null, RegisterType.REGISTER_L, null, null);
+        instructions[0x2F] = new OneComplementInstruction(AddressMode.REGISTER_8_BIT,RegisterType.REGISTER_A, RegisterType.REGISTER_A, null, null);
         /*
         
-        instructions[0x25] = new Instruction(InstrtuctionType.DECREMENT, AddressMode.REGISTER, RegisterType.REGISTER_H, null, null, null);
-        instructions[0x26] = new Instruction(InstrtuctionType.LOAD, AddressMode.REGISTER_TO_8_BIT_DATA, RegisterType.REGISTER_H, null, null, null);
-        instructions[0x27] = new Instruction(InstrtuctionType.DECIMAL_ACUMULATOR_ADJUSTMENT, AddressMode.REGISTER,RegisterType.REGISTER_A, null, null, null);
-        instructions[0x28] = new Instruction(InstrtuctionType.JUMP_RELATIVE, AddressMode.DATA_8_BIT, null, null, InstructionCondition.Z_FLAG_SET, null);
-        instructions[0x29] = new Instruction(InstrtuctionType.ADD, AddressMode.REGISTER_TO_REGISTER,RegisterType.REGISTER_HL, RegisterType.REGISTER_HL, null, null);
-        instructions[0x2A] = new Instruction(InstrtuctionType.LOAD, AddressMode.INCREMENT_HL_REGISTER_TO_REGISTER,RegisterType.REGISTER_HL, RegisterType.REGISTER_A, null, null);
-        instructions[0x2B] = new Instruction(InstrtuctionType.DECREMENT, AddressMode.REGISTER, RegisterType.REGISTER_HL, null, null, null);
-        instructions[0x2C] = new Instruction(InstrtuctionType.INCREMENT, AddressMode.REGISTER, RegisterType.REGISTER_L, null, null, null);
-        instructions[0x2D] = new Instruction(InstrtuctionType.DECREMENT, AddressMode.REGISTER, RegisterType.REGISTER_L, null, null, null);
-        instructions[0x2E] = new Instruction(InstrtuctionType.LOAD, AddressMode.REGISTER_TO_8_BIT_DATA, RegisterType.REGISTER_L, null, null, null);
-        instructions[0x2F] = new Instruction(InstrtuctionType.ONE_COMPLEMENT, AddressMode.REGISTER,RegisterType.REGISTER_A, null, null, null);
+        
+        
+        
+        
 
         //3x
         instructions[0x30] = new Instruction(InstrtuctionType.JUMP_RELATIVE, AddressMode.DATA_8_BIT, null, null, InstructionCondition.CARRY_FLAG_NOT_SET, null);
@@ -552,6 +557,12 @@ public class CPU {
                 break;
             case REGISTER_E:
                 e.set(data[0]);
+                break;
+            case REGISTER_H:
+                h.set(data[0]);
+                break;
+            case REGISTER_L:
+                l.set(data[0]);
                 break;
             case REGISTER_BC:
                 c.set(data[0]);

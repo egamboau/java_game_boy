@@ -19,17 +19,28 @@ public class AddInstruction extends Instruction{
             case REGISTER_TO_REGISTER:
                 this.add_registers(currentCpu);
                 break;
+            case REGISTER_16_BIT_TO_REGISTER_16_BIT:
+                this.add_registers_pairs(currentCpu);
+                break;
             default:
                 throw new IllegalArgumentException("Address mode not supported for ADD instruction: " + getAddressMode());
         }
+    }
+
+    private void add_registers_pairs(CPU currentCpu) {
+        int result = currentCpu.getValueFromRegister(getSourceRegister()) + currentCpu.getValueFromRegister(getDestinationRegister());
+        currentCpu.setValueInRegister(result, getDestinationRegister());
+        currentCpu.setSubtract(false);
+        currentCpu.setHalfCarry((result & 0xFFFFF000) != 0);
+        currentCpu.setCarry(result > 0xFFFF);
     }
 
     private void add_registers(CPU currentCpu) {
         int result = currentCpu.getValueFromRegister(getSourceRegister()) + currentCpu.getValueFromRegister(getDestinationRegister());
         currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry((result & 0x0FFF) == 0);
-        currentCpu.setCarry(result > 0xFFFF);
+        currentCpu.setHalfCarry((result & 0xFFFFFFF0) != 0);
+        currentCpu.setCarry(result > 0xFF);
     }
 
 }

@@ -188,6 +188,82 @@ public class AddTest extends CPUTest{
         assertFalse(this.currentCpu.getCarry());
     }
 
+    @Test
+    void testADD_HL_HL() {
+        /*
+         * * Add the contents of register pair HL to the contents of register pair HL, and store the results in register pair HL.
+         */
+        int lowerByteHL = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
+        int upperByteHL = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
+
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x29 //the opcode
+        );
+
+        executeAddTest(lowerByteHL, upperByteHL, lowerByteHL, upperByteHL,  RegisterType.REGISTER_HL, RegisterType.REGISTER_HL);
+    }
+
+    @Test
+    void testADD_HL_HL_setCarryFlagCorrectly() {
+        /*
+         * Add the contents of register pair HL to the contents of register pair HL, and store the results in register pair HL.
+         * Checks if the carry flag is set correctly
+         */
+        int lowerByteHL = 0xFF;
+        int upperByteHL = 0xFF;
+
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x29 //the opcode
+        );
+
+        executeAddTest(lowerByteHL, upperByteHL, lowerByteHL, upperByteHL,  RegisterType.REGISTER_HL, RegisterType.REGISTER_HL);
+
+        assertFalse(this.currentCpu.getSubtract());
+        assertTrue(this.currentCpu.getHalfCarry());
+        assertTrue(this.currentCpu.getCarry());
+    }
+
+    @Test
+    void estADD_HL_HL_setHalfCarryFlagCorrectly() {
+        /*
+         * Add the contents of register pair HL to the contents of register pair HL, and store the results in register pair HL.
+         * Checks if the half carry is set correctly
+         */
+        int lowerByteHL = 0xFF;
+        int upperByteHL = 0x0F;
+
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x29 //the opcode
+        );
+
+        executeAddTest(lowerByteHL, upperByteHL, lowerByteHL, upperByteHL,  RegisterType.REGISTER_HL, RegisterType.REGISTER_HL);
+
+        assertFalse(this.currentCpu.getSubtract());
+        assertTrue(this.currentCpu.getHalfCarry());
+        assertFalse(this.currentCpu.getCarry());
+    }
+
+    @Test
+    void estADD_HL_HL_unsetFlagsCorrectly() {
+        /*
+         * Add the contents of register pair HL to the contents of register pair HL, and store the results in register pair HL.
+         * Checks if the flags are unset correctly
+         */
+        int lowerByteHL = 0;
+        int upperByteHL = 0;
+
+        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+            0x29 //the opcode
+        );
+
+        executeAddTest(lowerByteHL, upperByteHL, lowerByteHL, upperByteHL,  RegisterType.REGISTER_HL, RegisterType.REGISTER_HL);
+
+        assertFalse(this.currentCpu.getSubtract());
+        assertFalse(this.currentCpu.getHalfCarry());
+        assertFalse(this.currentCpu.getCarry());
+    }
+
+
 
     private void executeAddTest(int firstRegisterLowerByte, int firstRegisterUpperByte, int secondRegisterLowerByte, int secondRegisterUpperByte, RegisterType firstRegister, RegisterType secondRegister) {
         int firstRegisterValue = (firstRegisterUpperByte << 8 | firstRegisterLowerByte);
