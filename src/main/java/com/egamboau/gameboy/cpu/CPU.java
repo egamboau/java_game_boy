@@ -33,14 +33,12 @@ public class CPU {
     private FlagRegister f;
     private Register h;
     private Register l;
-    private int SP;
-    private int PC;
+    private int spRegister;
+    private int pcRegister;
 
     private boolean halted;
 
-    private boolean stepping;
-
-    private Instruction instructions[] = new Instruction[0x100];
+    private Instruction[] instructions = new Instruction[0x100];
 
     private Bus memoryBus;
 
@@ -72,8 +70,8 @@ public class CPU {
     /**
      * Executes one step on the CPU, basically reading and executing instructions one at a time
      */
-    public void cpu_step(){
-        Instruction instruction = this.fetch_instruction();
+    public void cpuStep(){
+        Instruction instruction = this.fetchInstruction();
         instruction.executeInstruction(this);
     }
 
@@ -82,9 +80,9 @@ public class CPU {
      * This method will also increment the PC register by 1 
      * @return the instruction based on the opcode read from memory
      */
-    private Instruction fetch_instruction() {
+    private Instruction fetchInstruction() {
         LOGGER.info("Fetching OPCODE instruction from memory");
-        int opcode = this.memoryBus.readByteFromAddress(this.PC++);
+        int opcode = this.memoryBus.readByteFromAddress(this.pcRegister++);
         incrementCpuCycles(1L);
         return this.instructions[opcode];
     }
@@ -92,15 +90,24 @@ public class CPU {
     
 
     public void incrementRegisterPair(RegisterType register) {
-        switch (register) {
-            case REGISTER_HL:
-                int value = Register.combine(h, l);
-                value += 1;
-                //split the value again
-                Register.split(value, h, l);
-                break;
-            default:
-                throw new IllegalArgumentException(String.format("Register %s not supported for 16 bit increment instruction", register));
+        if(register == RegisterType.REGISTER_HL) {
+            int value = Register.combine(h, l);
+            value += 1;
+            //split the value again
+            Register.split(value, h, l);
+        } else {
+            throw new IllegalArgumentException(String.format("Register %s not supported for 16 bit increment instruction", register));
+        }
+    }
+
+    public void decrementRegisterPair(RegisterType register) {
+        if(register == RegisterType.REGISTER_HL) {
+            int value = Register.combine(h, l);
+            value -= 1;
+            //split the value again
+            Register.split(value, h, l);
+        } else {
+            throw new IllegalArgumentException(String.format("Register %s not supported for 16 bit increment instruction", register));
         }
     }
 
@@ -160,17 +167,13 @@ public class CPU {
         instructions[0x2D] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.REGISTER_L, RegisterType.REGISTER_L, null, null);
         instructions[0x2E] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER,  null, RegisterType.REGISTER_L, null, null);
         instructions[0x2F] = new OneComplementInstruction(AddressMode.REGISTER_8_BIT,RegisterType.REGISTER_A, RegisterType.REGISTER_A, null, null);
+        //3x
+        instructions[0x30] = new JumpRelativeInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.REGISTER_PC, InstructionCondition.CARRY_FLAG_NOT_SET, null);
+        instructions[0x31] = new LoadInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.REGISTER_SP, null, null);
+        instructions[0x32] = new LoadInstruction(AddressMode.REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS, RegisterType.REGISTER_A, RegisterType.REGISTER_HL,  null, null);
+
         /*
         
-        
-        
-        
-        
-
-        //3x
-        instructions[0x30] = new Instruction(InstrtuctionType.JUMP_RELATIVE, AddressMode.DATA_8_BIT, null, null, InstructionCondition.CARRY_FLAG_NOT_SET, null);
-        instructions[0x31] = new Instruction(InstrtuctionType.LOAD, AddressMode.REGISTER_TO_16_BIT_DATA, RegisterType.REGISTER_SP, null, null, null);
-        instructions[0x32] = new Instruction(InstrtuctionType.LOAD, AddressMode.DECREMENT_HL_REGISTER_TO_MEMORY, RegisterType.REGISTER_HL, RegisterType.REGISTER_A, null, null);
         instructions[0x33] = new Instruction(InstrtuctionType.INCREMENT, AddressMode.REGISTER, RegisterType.REGISTER_SP, null, null, null);
         instructions[0x34] = new Instruction(InstrtuctionType.INCREMENT, AddressMode.MEMORY_ADDRESS, RegisterType.REGISTER_HL, null, null, null);
         instructions[0x35] = new Instruction(InstrtuctionType.DECREMENT, AddressMode.MEMORY_ADDRESS, RegisterType.REGISTER_HL, null, null, null);
@@ -413,10 +416,9 @@ public class CPU {
         this.f = new FlagRegister();
         this.h = new Register();
         this.l = new Register();
-        this.SP = 0;
-        this.PC = 0;
+        this.spRegister = 0;
+        this.pcRegister = 0;
         this.halted = false;
-        this.stepping = false;
         this.cycles = 0;
     }
 
@@ -470,10 +472,10 @@ public class CPU {
                 result =  l.get();
                 break;
             case REGISTER_PC:
-                result =  PC & 0xFFFF;
+                result =  pcRegister & 0xFFFF;
                 break;
             case REGISTER_SP:
-                result =  SP & 0xFFFF;
+                result =  spRegister & 0xFFFF;
                 break;
             default:
                 throw new IllegalArgumentException("Retrieving data not supported for this register " + register);
@@ -518,7 +520,8 @@ public class CPU {
                 l.set(data);
                 break;
             case REGISTER_SP:
-                SP = data;
+                spRegister = data & 0xFFFF;
+                break;
             case REGISTER_HL:
                 Register.split(data, h , l);
                 incrementCpuCycles(1L);
@@ -541,7 +544,7 @@ public class CPU {
     }
 
     public int getDataFromPCAndIncrement() {
-        return readByteFromAddress(PC++);
+        return readByteFromAddress(pcRegister++);
     }
 
     public void setValueInRegister(int[] data, RegisterType destinationRegister) {
@@ -576,6 +579,9 @@ public class CPU {
                 l.set(data[0]);
                 h.set(data[1]);
                 break;
+            case REGISTER_SP:
+                this.spRegister = ((data[1]<<8) | data[0]) & 0xFFFF;
+                break;
             default:
                 throw new IllegalArgumentException("Unknown destination register: " + destinationRegister);
         }
@@ -602,7 +608,7 @@ public class CPU {
     }
 
     public void incrementPCRegister(byte address) {
-        this.PC += address;
+        this.pcRegister += address;
         this.incrementCpuCycles(1);
     }
 }

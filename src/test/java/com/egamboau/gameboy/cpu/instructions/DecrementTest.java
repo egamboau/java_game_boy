@@ -1,524 +1,113 @@
 package com.egamboau.gameboy.cpu.instructions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import org.junit.jupiter.api.Test;
+import java.util.stream.Stream;
 
-import com.egamboau.gameboy.cpu.CPUTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import com.egamboau.gameboy.cpu.CPUTestBase;
 import com.egamboau.test.TestUtils;
 
-public class DecrementTest extends CPUTest {
+class DecrementTest extends CPUTestBase {
 
-    @Test
-    void testDecB_WithZeroVAlue() {
-        /*
-         * Decrement the contents of register B by 1.
-         * Initilizes with 0 and check the underflow
-         */
-        int b_register_data = 0;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x05// the opcode
-        );
-        executeDecrementTest(b_register_data, RegisterType.REGISTER_B, false);
+    @ParameterizedTest
+    @MethodSource("generateTestArgumentsFor8BitTests")
+    void testDecInstructionFor8BitRegisters(int opcode, int registerData, RegisterType register, boolean expectedSubstractFlag, boolean expectedHalfCarryFlag, boolean expctedZeroFlag) {
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(opcode);
+        executeDecrementTest(registerData, register, false);
 
         // check if the registerValues are set accordingly
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
+        assertEquals(expectedSubstractFlag, getCurrentCpu().getSubtract(), "Substract flag set incorrectly");
+        assertEquals(expectedHalfCarryFlag, getCurrentCpu().getHalfCarry(), "Half Carry flag set incorrectly");
+        assertEquals(expctedZeroFlag, getCurrentCpu().getZero(), "Carry flag set incorrectly");
     }
 
-    @Test
-    void testDecB_HalfCarrySet() {
-        /*
-         * Decrement the contents of register B by 1.
-         * Check if half carry is set accordingly
-         */
-        int b_register_data = 0x10;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x05// the opcode
-        );
-        executeDecrementTest(b_register_data, RegisterType.REGISTER_B, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecB_HalfCarryNotSet() {
-        /*
-         * Decrement the contents of register B by 1.
-         * Check if half carry is reset,accordingly
-         */
-        int b_register_data = 0x0E;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x05// the opcode
-        );
-        executeDecrementTest(b_register_data, RegisterType.REGISTER_B, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecB_ZeroFlagSet() {
-        /*
-         * Decrement the contents of register B by 1.
-         * Checks if the 0 flag set the value correctly.
-         */
-        int b_register_data = 0x01;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x05// the opcode
-        );
-        executeDecrementTest(b_register_data, RegisterType.REGISTER_B, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertTrue(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecBC() {
-        /*
-         * Decrement the contents of register pair BC by 1.
-         */
-        int register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFFFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x0B// the opcode
+    @ParameterizedTest
+    @MethodSource("generateTestArgumentsFor16BitTests")
+    void testDetestDecInstructionFor16BitRegisterscBC(int opcode, int registerData, RegisterType register) {
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+            opcode
         );
 
-        executeDecrementTest(register_data, RegisterType.REGISTER_BC, true);
+        executeDecrementTest(registerData, register, true);
     }
 
-    @Test
-    void testDecC_WithZeroVAlue() {
-        /*
-         * Decrement the contents of register C by 1.
-         * Initilizes with 0 and check the underflow
-         */
-        int c_register_data = 0;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x0D// the opcode
+    static Stream<Arguments> generateTestArgumentsFor8BitTests() {
+        return Stream.of(
+            Arguments.of(0x05, 0, RegisterType.REGISTER_B, true, true, false),
+            Arguments.of(0x05, 0x10, RegisterType.REGISTER_B, true, true, false),
+            Arguments.of(0x05, 0x0E, RegisterType.REGISTER_B, true, false, false),
+            Arguments.of(0x05, 0x01, RegisterType.REGISTER_B, true, false, true),
+            
+            Arguments.of(0x0D, 0, RegisterType.REGISTER_C, true, true, false),
+            Arguments.of(0x0D, 0x10, RegisterType.REGISTER_C, true, true, false),
+            Arguments.of(0x0D, 0x0E, RegisterType.REGISTER_C, true, false, false),
+            Arguments.of(0x0D, 0x01, RegisterType.REGISTER_C, true, false, true),
+
+            Arguments.of(0x15, 0, RegisterType.REGISTER_D, true, true, false),
+            Arguments.of(0x15, 0x10, RegisterType.REGISTER_D, true, true, false),
+            Arguments.of(0x15, 0x0E, RegisterType.REGISTER_D, true, false, false),
+            Arguments.of(0x15, 0x01, RegisterType.REGISTER_D, true, false, true),
+
+            Arguments.of(0x1D, 0, RegisterType.REGISTER_E, true, true, false),
+            Arguments.of(0x1D, 0x10, RegisterType.REGISTER_E, true, true, false),
+            Arguments.of(0x1D, 0x0E, RegisterType.REGISTER_E, true, false, false),
+            Arguments.of(0x1D, 0x01, RegisterType.REGISTER_E, true, false, true),
+
+            Arguments.of(0x25, 0, RegisterType.REGISTER_H, true, true, false),
+            Arguments.of(0x25, 0x10, RegisterType.REGISTER_H, true, true, false),
+            Arguments.of(0x25, 0x0E, RegisterType.REGISTER_H, true, false, false),
+            Arguments.of(0x25, 0x01, RegisterType.REGISTER_H, true, false, true),
+
+            Arguments.of(0x2D, 0, RegisterType.REGISTER_L, true, true, false),
+            Arguments.of(0x2D, 0x10, RegisterType.REGISTER_L, true, true, false),
+            Arguments.of(0x2D, 0x0E, RegisterType.REGISTER_L, true, false, false),
+            Arguments.of(0x2D, 0x01, RegisterType.REGISTER_L, true, false, true)
         );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_C, false);
-
-        // check if the registerValues are set accordingly
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
     }
 
-    @Test
-    void testDecC_HalfCarrySet() {
-        /*
-         * Decrement the contents of register C by 1.
-         * Check if half carry is set accordingly
-         */
-        int c_register_data = 0x10;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x0D// the opcode
+    static Stream<Arguments> generateTestArgumentsFor16BitTests() {
+        return Stream.of(
+            Arguments.of(0x0B, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.REGISTER_BC),
+            Arguments.of(0x1B, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.REGISTER_DE),
+            Arguments.of(0x2B, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.REGISTER_HL)
         );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_C, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
     }
 
-    @Test
-    void testDecC_HalfCarryNotSet() {
-        /*
-         * Decrement the contents of register C by 1.
-         * Check if half carry is reset,accordingly
-         */
-        int c_register_data = 0x0E;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x0D// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_C, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecC_ZeroFlagSet() {
-        /*
-         * Decrement the contents of register C by 1.
-         * Checks if the 0 flag set the value correctly.
-         */
-        int c_register_data = 0x01;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x0D// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_C, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertTrue(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecD_WithZeroVAlue() {
-        /*
-         * Decrement the contents of register D by 1.
-         * Initilizes with 0 and check the underflow
-         */
-        int c_register_data = 0;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x15// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_D, false);
-
-        // check if the registerValues are set accordingly
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-    }
-
-    @Test
-    void testDecD_HalfCarrySet() {
-        /*
-         * Decrement the contents of register D by 1.
-         * Check if half carry is set accordingly
-         */
-        int c_register_data = 0x10;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x15// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_D, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecD_HalfCarryNotSet() {
-        /*
-         * Decrement the contents of register D by 1.
-         * Check if half carry is reset,accordingly
-         */
-        int c_register_data = 0x0E;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x15// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_D, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecD_ZeroFlagSet() {
-        /*
-         * Decrement the contents of register D by 1.
-         * Checks if the 0 flag set the value correctly.
-         */
-        int c_register_data = 0x01;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x15// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_D, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertTrue(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecDE() {
-        /*
-         * Decrement the contents of register pair DE by 1.
-         */
-        int register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFFFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x1B// the opcode
-        );
-
-        executeDecrementTest(register_data, RegisterType.REGISTER_DE, true);
-    }
-
-    @Test
-    void testDecE_WithZeroVAlue() {
-        /*
-         * Decrement the contents of register E by 1.
-         * Initilizes with 0 and check the underflow
-         */
-        int c_register_data = 0;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x1D// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_E, false);
-
-        // check if the registerValues are set accordingly
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-    }
-
-    @Test
-    void testDecE_HalfCarrySet() {
-        /*
-         * Decrement the contents of register E by 1.
-         * Check if half carry is set accordingly
-         */
-        int c_register_data = 0x10;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x1D// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_E, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecE_HalfCarryNotSet() {
-        /*
-         * Decrement the contents of register E by 1.
-         * Check if half carry is reset,accordingly
-         */
-        int c_register_data = 0x0E;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x1D// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_E, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecE_ZeroFlagSet() {
-        /*
-         * Decrement the contents of register E by 1.
-         * Checks if the 0 flag set the value correctly.
-         */
-        int c_register_data = 0x01;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x1D// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_E, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertTrue(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecH_WithZeroVAlue() {
-        /*
-         * Decrement the contents of register H by 1.
-         * Initilizes with 0 and check the underflow
-         */
-        int c_register_data = 0;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-                0x25// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_H, false);
-
-        // check if the registerValues are set accordingly
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-    }
-
-    @Test
-    void testDecH_HalfCarrySet() {
-        /*
-         * Decrement the contents of register H by 1.
-         * Check if half carry is set accordingly
-         */
-        int c_register_data = 0x10;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x25// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_H, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecH_HalfCarryNotSet() {
-        /*
-         * Decrement the contents of register H by 1.
-         * Check if half carry is reset,accordingly
-         */
-        int c_register_data = 0x0E;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x25// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_H, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecH_ZeroFlagSet() {
-        /*
-         * Decrement the contents of register H by 1.
-         * Checks if the 0 flag set the value correctly.
-         */
-        int c_register_data = 0x01;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x25// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_H, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertTrue(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDcHL() {
-        /*
-         * Decrement the contents of register pair HL by 1.
-         */
-        int register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFFFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x2B// the opcode
-        );
-
-        executeDecrementTest(register_data, RegisterType.REGISTER_HL, true);
-    }
-
-    @Test
-    void testDecL_WithZeroVAlue() {
-        /*
-         * Decrement the contents of register H by 1.
-         * Initilizes with 0 and check the underflow
-         */
-        int c_register_data = 0;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x2D// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_L, false);
-
-        // check if the registerValues are set accordingly
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-    }
-
-    @Test
-    void testDecL_HalfCarrySet() {
-        /*
-         * Decrement the contents of register H by 1.
-         * Check if half carry is set accordingly
-         */
-        int c_register_data = 0x10;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x2D// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_L, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertTrue(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecL_HalfCarryNotSet() {
-        /*
-         * Decrement the contents of register H by 1.
-         * Check if half carry is reset,accordingly
-         */
-        int c_register_data = 0x0E;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x2D// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_L, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertFalse(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    @Test
-    void testDecL_ZeroFlagSet() {
-        /*
-         * Decrement the contents of register H by 1.
-         * Checks if the 0 flag set the value correctly.
-         */
-        int c_register_data = 0x01;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x2D// the opcode
-        );
-        executeDecrementTest(c_register_data, RegisterType.REGISTER_L, false);
-
-        assertTrue(currentCpu.getSubtract(), "N flag was not set correctly");
-        assertFalse(currentCpu.getHalfCarry(), "Half Carry flag was not set correctly");
-        assertTrue(currentCpu.getZero(), "Zero flag was not set correctly");
-
-    }
-
-    private void executeDecrementTest(int register_data, RegisterType register, boolean is16Bit) {
+    private void executeDecrementTest(int registerData, RegisterType register, boolean is16Bit) {
         int expectedValue;
         RegisterType[] filteredRegister;
         int expectedCycles;
         if (is16Bit) {
-            expectedValue = (register_data - 1) & 0xFFFF;
+            expectedValue = (registerData - 1) & 0xFFFF;
             filteredRegister = TestUtils.getPairForRegister(register);
             expectedCycles = 2;
         } else {
-            expectedValue = (register_data - 1) & 0xFF;
+            expectedValue = (registerData - 1) & 0xFF;
             filteredRegister = TestUtils.getPairForRegister(register, RegisterType.REGISTER_F);
             expectedCycles = 1;
         }
 
-        this.currentCpu.setValueInRegister(register_data, register);
+        this.getCurrentCpu().setValueInRegister(registerData, register);
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisterValues(filteredRegister);
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues(filteredRegister);
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(filteredRegister);
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(filteredRegister);
 
         // Register must be correct
-        assertEquals(expectedValue, this.currentCpu.getValueFromRegister(register));
+        assertEquals(expectedValue, this.getCurrentCpu().getValueFromRegister(register), "Register value incorrect: " + register);
         // cycles must be updated as required
         assertEquals(previousCycleCount + expectedCycles, currentCycleCount, "Cycle count not currently matching.");
         registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u + 1);
 
-        assertEquals(registerValues, newRegisterValues);
+        assertEquals(registerValues, newRegisterValues, "CPU Register values did not match the previous state.");
     }
 }

@@ -14,8 +14,8 @@ public class NoopInstruction extends Instruction{
     }
 
     @Override
-    public void run_instruction_logic(CPU currentCpu, int[] data) {
-        return;
+    public void runInstructionLogic(CPU currentCpu, int[] data) {
+      // Instruction for the NOOP does nothing, thus leaving method empty.
     }
 
     

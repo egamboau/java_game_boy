@@ -14,7 +14,7 @@ public class RotateRigthCircularInstruction  extends Instruction{
     }
 
     @Override
-    protected void run_instruction_logic(CPU currentCpu, int[] data) {
+    protected void runInstructionLogic(CPU currentCpu, int[] data) {
         int value = currentCpu.getValueFromRegister(getSourceRegister());
         int carryOut = (value & 0x01) << 7;
         int result = ((value >> 1) | carryOut) & 0xFF;

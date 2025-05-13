@@ -5,12 +5,24 @@ import java.util.Map;
 
 public enum CGBValues {
 
-    CGB_ENHANCED((byte) 0x80, "The game supports CGB enhancements, but is backwards compatible with monochrome Game Boys"),
-    CGB_ONLY((byte) 0xC0, "The game works on CGB only (the hardware ignores bit 6, so this really functions the same as $80)");
+    /**
+     * The game supports CGB enhancements, but is backwards compatible.
+     */
+    CGB_ENHANCED((byte) 0x80),
 
+    /**
+     * The game works on CGB only.
+     */
+    CGB_ONLY((byte) 0xC0);
+
+    /**
+     * The code representing the CGB support type.
+     */
     private final byte code;
-    private final String meaning;
 
+    /**
+     * A mapping of CGB support codes to their corresponding CGBValues enum.
+     */
     private static final Map<Byte, CGBValues> BY_CODE = new HashMap<>();
 
     static {
@@ -19,20 +31,27 @@ public enum CGBValues {
         }
     }
 
-    CGBValues(byte code, String meaning) {
-        this.code = code;
-        this.meaning = meaning;
+    CGBValues(final byte currentCode) {
+        this.code = currentCode;
     }
 
+    /**
+     * Gets the code representing the CGB support type.
+     *
+     * @return the CGB support type code as a byte.
+     */
     public byte getCode() {
         return code;
     }
 
-    public String getMeaning() {
-        return meaning;
-    }
-
-    public static CGBValues fromByte(byte code) {
+    /**
+     * Retrieves the CGBValues enum corresponding to the given code.
+     *
+     * @param code the byte code representing the CGB support type.
+     * @return the CGBValues enum corresponding to the given code.
+     * @throws IllegalArgumentException if the code does not match any CGBValues.
+     */
+    public static CGBValues fromByte(final byte code) {
         CGBValues support = BY_CODE.get(code);
         if (support == null) {
             throw new IllegalArgumentException("Unknown CGB support code: " + code);

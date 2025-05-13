@@ -7,14 +7,14 @@ public class Bus {
     private Cartridge cartridge;
     
     private byte[] vram = new byte[MemoryMapConstants.VRAM_END - MemoryMapConstants.VRAM_START + 1];
-    private byte[] external_ram = new byte[MemoryMapConstants.EXTERNAL_RAM_END - MemoryMapConstants.EXTERNAL_RAM_START + 1];
-    private byte[] wram_0 = new byte[MemoryMapConstants.WRAM_0_END - MemoryMapConstants.WRAM_0_START + 1];
-    private byte[] wram_1 = new byte[MemoryMapConstants.WRAM_1_END - MemoryMapConstants.WRAM_1_START + 1];
-    private byte[] echo_ram = new byte[MemoryMapConstants.ECHO_RAM_END - MemoryMapConstants.ECHO_RAM_START + 1];
+    private byte[] externalRam = new byte[MemoryMapConstants.EXTERNAL_RAM_END - MemoryMapConstants.EXTERNAL_RAM_START + 1];
+    private byte[] wram0 = new byte[MemoryMapConstants.WRAM_0_END - MemoryMapConstants.WRAM_0_START + 1];
+    private byte[] wram1 = new byte[MemoryMapConstants.WRAM_1_END - MemoryMapConstants.WRAM_1_START + 1];
+    private byte[] echoRam = new byte[MemoryMapConstants.ECHO_RAM_END - MemoryMapConstants.ECHO_RAM_START + 1];
     private byte[] oam = new byte[MemoryMapConstants.OAM_END - MemoryMapConstants.OAM_START + 1];
-    private byte[] io_register = new byte[MemoryMapConstants.IO_REGISTERS_END - MemoryMapConstants.IO_REGISTERS_START + 1];
+    private byte[] ioRegister = new byte[MemoryMapConstants.IO_REGISTERS_END - MemoryMapConstants.IO_REGISTERS_START + 1];
     private byte[] hram = new byte[MemoryMapConstants.HRAM_END - MemoryMapConstants.HRAM_START + 1];
-    private byte interrupt_enable = 0x00;
+    private int interruptEnableRegister = 0;
 
     /**
      * Construct a new Memory bus
@@ -31,99 +31,141 @@ public class Bus {
      */
     public int readByteFromAddress(int address) {
         //check what memory mapping we need, and read accordingly
-        if (address >= MemoryMapConstants.ROM_BANK_00_START && address <= MemoryMapConstants.ROM_BANK_NN_END) {
+        if (isCartridgeMemory(address)) {
             return this.cartridge.readByteFromAddress(address);
         }
         
-        if (address >= MemoryMapConstants.VRAM_START && address <= MemoryMapConstants.VRAM_END) {
+        if (isVramMemory(address)) {
             return this.vram[address - MemoryMapConstants.VRAM_START] & 0x00FF;
         }
         
-        if (address >= MemoryMapConstants.EXTERNAL_RAM_START && address <= MemoryMapConstants.EXTERNAL_RAM_END) {
-            return this.external_ram[address - MemoryMapConstants.EXTERNAL_RAM_START] & 0x00FF;
+        if (isExternalRamSection(address)) {
+            return this.externalRam[address - MemoryMapConstants.EXTERNAL_RAM_START] & 0x00FF;
         }
 
-        if (address >= MemoryMapConstants.WRAM_0_START && address <= MemoryMapConstants.WRAM_0_START) {
-            return this.wram_0[address - MemoryMapConstants.WRAM_0_START] & 0x00FF;
+        if (isWorkRam0Memory(address)) {
+            return this.wram0[address - MemoryMapConstants.WRAM_0_START] & 0x00FF;
         }
 
-        if (address >= MemoryMapConstants.WRAM_1_START && address <= MemoryMapConstants.WRAM_1_END) {
-            return this.wram_1[address - MemoryMapConstants.WRAM_1_START] & 0x00FF;
+        if (isWorkRam1Memory(address)) {
+            return this.wram1[address - MemoryMapConstants.WRAM_1_START] & 0x00FF;
         }
 
-        if (address >= MemoryMapConstants.ECHO_RAM_START && address <= MemoryMapConstants.ECHO_RAM_END) {
-            return this.echo_ram[address - MemoryMapConstants.ECHO_RAM_START] & 0x00FF;
+        if (isEchoRamMemory(address)) {
+            return this.echoRam[address - MemoryMapConstants.ECHO_RAM_START] & 0x00FF;
         }
 
-        if (address >= MemoryMapConstants.OAM_START && address <= MemoryMapConstants.OAM_END) {
+        if (isOamMemory(address)) {
             return this.oam[address - MemoryMapConstants.OAM_START] & 0x00FF;
         }
 
-        if (address >= MemoryMapConstants.IO_REGISTERS_START && address <= MemoryMapConstants.IO_REGISTERS_END) {
-            return this.io_register[address - MemoryMapConstants.IO_REGISTERS_START] & 0x00FF;
+        if (isIoRegisterMemory(address)) {
+            return this.ioRegister[address - MemoryMapConstants.IO_REGISTERS_START] & 0x00FF;
         }
 
-        if (address >= MemoryMapConstants.HRAM_START && address <= MemoryMapConstants.HRAM_END) {
+        if (isHramMemory(address)) {
             return this.hram[address - MemoryMapConstants.HRAM_START] & 0x00FF;
         }
 
-        if (address == MemoryMapConstants.INTERRUPT_ENABLE_REGISTER) {
-            return this.interrupt_enable & 0x00FF;
+        if (isInterruptEnableRegister(address)) {
+            return this.interruptEnableRegister;
         }
 
         throw new UnsupportedOperationException(String.format("Reading from address %x not implemented", address));
 
     }
 
+    private boolean isHramMemory(int address) {
+        return address >= MemoryMapConstants.HRAM_START && address <= MemoryMapConstants.HRAM_END;
+    }
+
+    private boolean isIoRegisterMemory(int address) {
+        return address >= MemoryMapConstants.IO_REGISTERS_START && address <= MemoryMapConstants.IO_REGISTERS_END;
+    }
+
+    private boolean isOamMemory(int address) {
+        return address >= MemoryMapConstants.OAM_START && address <= MemoryMapConstants.OAM_END;
+    }
+
+    private boolean isEchoRamMemory(int address) {
+        return address >= MemoryMapConstants.ECHO_RAM_START && address <= MemoryMapConstants.ECHO_RAM_END;
+    }
+
+    private boolean isWorkRam1Memory(int address) {
+        return address >= MemoryMapConstants.WRAM_1_START && address <= MemoryMapConstants.WRAM_1_END;
+    }
+
+    private boolean isWorkRam0Memory(int address) {
+        return address >= MemoryMapConstants.WRAM_0_START && address <= MemoryMapConstants.WRAM_0_START;
+    }
+
+    private boolean isExternalRamSection(int address) {
+        return address >= MemoryMapConstants.EXTERNAL_RAM_START && address <= MemoryMapConstants.EXTERNAL_RAM_END;
+    }
+
+    private boolean isVramMemory(int address) {
+        return address >= MemoryMapConstants.VRAM_START && address <= MemoryMapConstants.VRAM_END;
+    }
+
+    private boolean isCartridgeMemory(int address) {
+        return address >= MemoryMapConstants.ROM_BANK_00_START && address <= MemoryMapConstants.ROM_BANK_NN_END;
+    }
+
+    private boolean isInterruptEnableRegister(int address) {
+        return address == MemoryMapConstants.INTERRUPT_ENABLE_REGISTER;
+    }
+
+
+
     
     public void writeByteToAddress(int value, int address) {
-        if (address >= MemoryMapConstants.ROM_BANK_00_START && address <= MemoryMapConstants.ROM_BANK_NN_END) {
+        if (isCartridgeMemory(address)) {
             this.cartridge.writeByteToAddress(address, value);
             return;
         }
 
-        if (address >= MemoryMapConstants.VRAM_START && address <= MemoryMapConstants.VRAM_END) {
-            this.vram[address - MemoryMapConstants.VRAM_START] = (byte) (value & 0xFF);;
+        if (isVramMemory(address)) {
+            this.vram[address - MemoryMapConstants.VRAM_START] = (byte) (value & 0xFF);
             return;
         }
         
-        if (address >= MemoryMapConstants.EXTERNAL_RAM_START && address <= MemoryMapConstants.EXTERNAL_RAM_END) {
-            this.external_ram[address - MemoryMapConstants.EXTERNAL_RAM_START] = (byte) (value & 0xFF);;
+        if (isExternalRamSection(address)) {
+            this.externalRam[address - MemoryMapConstants.EXTERNAL_RAM_START] = (byte) (value & 0xFF);
             return;
         }
 
-        if (address >= MemoryMapConstants.WRAM_0_START && address <= MemoryMapConstants.WRAM_0_START) {
-            this.wram_0[address - MemoryMapConstants.WRAM_0_START] = (byte) (value & 0xFF);;
+        if (isWorkRam0Memory(address)) {
+            this.wram0[address - MemoryMapConstants.WRAM_0_START] = (byte) (value & 0xFF);
             return;
         }
 
-        if (address >= MemoryMapConstants.WRAM_1_START && address <= MemoryMapConstants.WRAM_1_END) {
-            this.wram_1[address - MemoryMapConstants.WRAM_1_START] = (byte) (value & 0xFF);;
+        if (isWorkRam1Memory(address)) {
+            this.wram1[address - MemoryMapConstants.WRAM_1_START] = (byte) (value & 0xFF);
             return;
         }
 
-        if (address >= MemoryMapConstants.ECHO_RAM_START && address <= MemoryMapConstants.ECHO_RAM_END) {
-            this.echo_ram[address - MemoryMapConstants.ECHO_RAM_START] = (byte) (value & 0xFF);;
+        if (isEchoRamMemory(address)) {
+            this.echoRam[address - MemoryMapConstants.ECHO_RAM_START] = (byte) (value & 0xFF);
             return;
         }
 
-        if (address >= MemoryMapConstants.OAM_START && address <= MemoryMapConstants.OAM_END) {
-            this.oam[address - MemoryMapConstants.OAM_START] = (byte) (value & 0xFF);;
+        if (isOamMemory(address)) {
+            this.oam[address - MemoryMapConstants.OAM_START] = (byte) (value & 0xFF);
             return;
         }
 
-        if (address >= MemoryMapConstants.IO_REGISTERS_START && address <= MemoryMapConstants.IO_REGISTERS_END) {
-            this.io_register[address - MemoryMapConstants.IO_REGISTERS_START] = (byte) (value & 0xFF);;
+        if (isIoRegisterMemory(address)) {
+            this.ioRegister[address - MemoryMapConstants.IO_REGISTERS_START] = (byte) (value & 0xFF);
             return;
         }
 
-        if (address >= MemoryMapConstants.HRAM_START && address <= MemoryMapConstants.HRAM_END) {
-            this.hram[address - MemoryMapConstants.HRAM_START] = (byte) (value & 0xFF);;
+        if (isHramMemory(address)) {
+            this.hram[address - MemoryMapConstants.HRAM_START] = (byte) (value & 0xFF);
             return;
         }
 
-        if (address == MemoryMapConstants.INTERRUPT_ENABLE_REGISTER) {
-            this.interrupt_enable  = (byte) (value & 0xFF);;
+        if (isInterruptEnableRegister(address)) {
+            this.interruptEnableRegister = value & 0xFF;
             return;
         }
 

@@ -14,7 +14,7 @@ public class DecimalAdjustAccumulatorInstruction extends Instruction{
     }
 
     @Override
-    protected void run_instruction_logic(CPU currentCpu, int[] data) {
+    protected void runInstructionLogic(CPU currentCpu, int[] data) {
         int adjustment = 0;
         int registerValue = currentCpu.getValueFromRegister(getDestinationRegister());
         if (currentCpu.getSubtract()) {

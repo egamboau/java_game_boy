@@ -66,7 +66,7 @@ class CartridgeTest {
     }
 
     @Test
-    void testGetRomData() throws NoSuchAlgorithmException, IOException {
+    void testGetRomData() throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(data);
         String expected = Base64.getEncoder().encodeToString(md.digest());
@@ -157,7 +157,7 @@ class CartridgeTest {
     @Test
     void testWriteByteToAddress() {
         int address = TestUtils.getRandomIntegerInRange(0, data.length);
-        int value = 0x0000;
+        int value;
         do {
             value = TestUtils.getRandomIntegerInRange(0, 0xFF);
         } while (value == data[address]);

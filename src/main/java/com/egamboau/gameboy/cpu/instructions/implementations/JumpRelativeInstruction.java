@@ -14,7 +14,7 @@ public class JumpRelativeInstruction extends Instruction{
     }
 
     @Override
-    protected void run_instruction_logic(CPU currentCpu, int[] data) {
+    protected void runInstructionLogic(CPU currentCpu, int[] data) {
         //get the data from the array. Cast to byte to get the sign correctly
         byte address = (byte)data[0];
         boolean shouldJump;
@@ -27,6 +27,9 @@ public class JumpRelativeInstruction extends Instruction{
                     break;
                 case Z_FLAG_SET:
                     shouldJump = currentCpu.getZero();
+                    break;
+                case CARRY_FLAG_NOT_SET:
+                    shouldJump = !currentCpu.getCarry();
                     break;
                 default:
                     throw new IllegalArgumentException(String.format("Condition not supported for jump: %s", getCondition()));

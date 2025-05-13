@@ -14,7 +14,7 @@ public class IncrementInstruction extends Instruction{
     }
 
     @Override
-    public void run_instruction_logic(CPU currentCpu, int[] data) {
+    public void runInstructionLogic(CPU currentCpu, int[] data) {
         switch (getAddressMode()) {
             case REGISTER_8_BIT:
                 incrementRegister(currentCpu);
@@ -23,7 +23,7 @@ public class IncrementInstruction extends Instruction{
                 incrementRegisterPair(currentCpu);
                 break;
             default:
-                throw new IllegalArgumentException(String.format("Address mode %s not supported for instruction type %s", getAddressMode()));
+                throw new IllegalArgumentException(String.format("Address mode %s not supported for Increment Instruction", getAddressMode()));
         }
     }
     private int getIncrementedRegisterData(CPU currentCpu) {

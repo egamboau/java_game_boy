@@ -9,10 +9,10 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-import com.egamboau.gameboy.cpu.CPUTest;
+import com.egamboau.gameboy.cpu.CPUTestBase;
 import com.egamboau.test.TestUtils;
 
-public class RotateValueTest extends CPUTest{
+class RotateValueTest extends CPUTestBase{
     
     @Test
     void test_RLCA_CarryFlagSet() {
@@ -30,10 +30,10 @@ public class RotateValueTest extends CPUTest{
 
         runRlcaTest(registerData, expectedValue);
         //check the flags
-        assertFalse(currentCpu.getZero());
-        assertFalse(currentCpu.getSubtract());
-        assertFalse(currentCpu.getHalfCarry());
-        assertTrue(currentCpu.getCarry());
+        assertFalse(getCurrentCpu().getZero());
+        assertFalse(getCurrentCpu().getSubtract());
+        assertFalse(getCurrentCpu().getHalfCarry());
+        assertTrue(getCurrentCpu().getCarry());
     }
 
     @Test
@@ -52,10 +52,10 @@ public class RotateValueTest extends CPUTest{
 
         runRlcaTest(registerData, expectedValue);
 
-        assertFalse(currentCpu.getZero());
-        assertFalse(currentCpu.getSubtract());
-        assertFalse(currentCpu.getHalfCarry());
-        assertFalse(currentCpu.getCarry());
+        assertFalse(getCurrentCpu().getZero());
+        assertFalse(getCurrentCpu().getSubtract());
+        assertFalse(getCurrentCpu().getHalfCarry());
+        assertFalse(getCurrentCpu().getCarry());
 
     }
 
@@ -71,12 +71,12 @@ public class RotateValueTest extends CPUTest{
          */
 
         int registerData = 0x01 & 0xFF;
-        currentCpu.setValueInRegister(registerData, RegisterType.REGISTER_A);
+        getCurrentCpu().setValueInRegister(registerData, RegisterType.REGISTER_A);
         int[] expectedValues = {0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x01};
 
         for (int expectedValue: expectedValues) {
             //use the actual register A for the test.
-            runRlcaTest(currentCpu.getValueFromRegister(RegisterType.REGISTER_A), expectedValue);
+            runRlcaTest(getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A), expectedValue);
         }
     }
 
@@ -96,10 +96,10 @@ public class RotateValueTest extends CPUTest{
 
         runRrcaTest(registerData, expectedValue);
         //check the flags
-        assertFalse(currentCpu.getZero());
-        assertFalse(currentCpu.getSubtract());
-        assertFalse(currentCpu.getHalfCarry());
-        assertTrue(currentCpu.getCarry());
+        assertFalse(getCurrentCpu().getZero());
+        assertFalse(getCurrentCpu().getSubtract());
+        assertFalse(getCurrentCpu().getHalfCarry());
+        assertTrue(getCurrentCpu().getCarry());
     }
 
     @Test
@@ -118,10 +118,10 @@ public class RotateValueTest extends CPUTest{
 
         runRrcaTest(registerData, expectedValue);
 
-        assertFalse(currentCpu.getZero());
-        assertFalse(currentCpu.getSubtract());
-        assertFalse(currentCpu.getHalfCarry());
-        assertFalse(currentCpu.getCarry());
+        assertFalse(getCurrentCpu().getZero());
+        assertFalse(getCurrentCpu().getSubtract());
+        assertFalse(getCurrentCpu().getHalfCarry());
+        assertFalse(getCurrentCpu().getCarry());
 
     }
 
@@ -137,12 +137,12 @@ public class RotateValueTest extends CPUTest{
          */
 
         int registerData = 0x01 & 0xFF;
-        currentCpu.setValueInRegister(registerData, RegisterType.REGISTER_A);
+        getCurrentCpu().setValueInRegister(registerData, RegisterType.REGISTER_A);
         int[] expectedValues = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
 
         for (int expectedValue: expectedValues) {
             //use the actual register A for the test.
-            runRrcaTest(currentCpu.getValueFromRegister(RegisterType.REGISTER_A), expectedValue);
+            runRrcaTest(getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A), expectedValue);
         }
     }
 
@@ -161,10 +161,10 @@ public class RotateValueTest extends CPUTest{
 
         runRlaTest(registerData, expectedValue);
         //check the flags
-        assertFalse(currentCpu.getZero());
-        assertFalse(currentCpu.getSubtract());
-        assertFalse(currentCpu.getHalfCarry());
-        assertTrue(currentCpu.getCarry());
+        assertFalse(getCurrentCpu().getZero());
+        assertFalse(getCurrentCpu().getSubtract());
+        assertFalse(getCurrentCpu().getHalfCarry());
+        assertTrue(getCurrentCpu().getCarry());
     }
 
     @Test
@@ -180,14 +180,14 @@ public class RotateValueTest extends CPUTest{
         int registerData = 0x40 & 0xFF;
         int expectedValue = 0x80 & 0xFF;
 
-        currentCpu.setCarry(true);
+        getCurrentCpu().setCarry(true);
 
         runRlcaTest(registerData, expectedValue);
 
-        assertFalse(currentCpu.getZero());
-        assertFalse(currentCpu.getSubtract());
-        assertFalse(currentCpu.getHalfCarry());
-        assertFalse(currentCpu.getCarry());
+        assertFalse(getCurrentCpu().getZero());
+        assertFalse(getCurrentCpu().getSubtract());
+        assertFalse(getCurrentCpu().getHalfCarry());
+        assertFalse(getCurrentCpu().getCarry());
 
     }
 
@@ -202,14 +202,14 @@ public class RotateValueTest extends CPUTest{
          */
 
         int registerData = 0x01 & 0xFF;
-        currentCpu.setValueInRegister(registerData, RegisterType.REGISTER_A);
+        getCurrentCpu().setValueInRegister(registerData, RegisterType.REGISTER_A);
         int[] expectedValues = {0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x00};
 
         for (int expectedValue: expectedValues) {
             //use the actual register A for the test.
-            runRlaTest(currentCpu.getValueFromRegister(RegisterType.REGISTER_A), expectedValue);
+            runRlaTest(getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A), expectedValue);
         }
-        assertTrue(currentCpu.getCarry());
+        assertTrue(getCurrentCpu().getCarry());
     }
     
     @Test
@@ -227,10 +227,10 @@ public class RotateValueTest extends CPUTest{
 
         runRraTest(registerData, expectedValue);
         //check the flags
-        assertFalse(currentCpu.getZero());
-        assertFalse(currentCpu.getSubtract());
-        assertFalse(currentCpu.getHalfCarry());
-        assertTrue(currentCpu.getCarry());
+        assertFalse(getCurrentCpu().getZero());
+        assertFalse(getCurrentCpu().getSubtract());
+        assertFalse(getCurrentCpu().getHalfCarry());
+        assertTrue(getCurrentCpu().getCarry());
     }
 
     @Test
@@ -246,14 +246,14 @@ public class RotateValueTest extends CPUTest{
         int registerData = 0x40 & 0xFF;
         int expectedValue = 0x20 & 0xFF;
 
-        currentCpu.setCarry(true);
+        getCurrentCpu().setCarry(true);
 
         runRraTest(registerData, expectedValue);
 
-        assertFalse(currentCpu.getZero());
-        assertFalse(currentCpu.getSubtract());
-        assertFalse(currentCpu.getHalfCarry());
-        assertFalse(currentCpu.getCarry());
+        assertFalse(getCurrentCpu().getZero());
+        assertFalse(getCurrentCpu().getSubtract());
+        assertFalse(getCurrentCpu().getHalfCarry());
+        assertFalse(getCurrentCpu().getCarry());
 
     }
 
@@ -268,85 +268,85 @@ public class RotateValueTest extends CPUTest{
          */
 
         int registerData = 0x01 & 0xFF;
-        currentCpu.setValueInRegister(registerData, RegisterType.REGISTER_A);
+        getCurrentCpu().setValueInRegister(registerData, RegisterType.REGISTER_A);
         int[] expectedValues = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
 
         for (int expectedValue: expectedValues) {
             //use the actual register A for the test.
-            runRraTest(currentCpu.getValueFromRegister(RegisterType.REGISTER_A), expectedValue);
+            runRraTest(getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A), expectedValue);
         }
-        assertFalse(currentCpu.getCarry());
+        assertFalse(getCurrentCpu().getCarry());
     }
     
 
     private void runRlcaTest(int registerData, int expectedValue) {
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
             0x07 //the opcode
             );
 
-        this.currentCpu.setValueInRegister(registerData, RegisterType.REGISTER_A);
-        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();        
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
+        this.getCurrentCpu().setValueInRegister(registerData, RegisterType.REGISTER_A);
+        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();        
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
 
         oldRegisterValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
         assertEquals(previousCycleCount+1, currentCycleCount);
         assertEquals(oldRegisterValues, newRegisterValues);
-        assertEquals(expectedValue, currentCpu.getValueFromRegister(RegisterType.REGISTER_A));
+        assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A));
         
     }
 
     private void runRrcaTest(int registerData, int expectedValue) {
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
             0x0F //the opcode
             );
 
-        this.currentCpu.setValueInRegister(registerData, RegisterType.REGISTER_A);
-        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();        
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
+        this.getCurrentCpu().setValueInRegister(registerData, RegisterType.REGISTER_A);
+        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();        
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
 
         oldRegisterValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
         assertEquals(previousCycleCount+1, currentCycleCount);
         assertEquals(oldRegisterValues, newRegisterValues);
-        assertEquals(expectedValue, currentCpu.getValueFromRegister(RegisterType.REGISTER_A));
+        assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A));
     }
 
     private void runRlaTest(int registerData, int expectedValue) {
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
             0x17 //the opcode
             );
-        this.currentCpu.setValueInRegister(registerData, RegisterType.REGISTER_A);
-        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();        
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
+        this.getCurrentCpu().setValueInRegister(registerData, RegisterType.REGISTER_A);
+        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();        
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
 
         oldRegisterValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
         assertEquals(previousCycleCount+1, currentCycleCount);
         assertEquals(oldRegisterValues, newRegisterValues);
-        assertEquals(expectedValue, currentCpu.getValueFromRegister(RegisterType.REGISTER_A));
+        assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A));
     }
 
     private void runRraTest(int registerData, int expectedValue) {
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
             0x1F //the opcode
         );
-        this.currentCpu.setValueInRegister(registerData, RegisterType.REGISTER_A);
-        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();        
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
+        this.getCurrentCpu().setValueInRegister(registerData, RegisterType.REGISTER_A);
+        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();        
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
 
         oldRegisterValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
         assertEquals(previousCycleCount+1, currentCycleCount);
         assertEquals(oldRegisterValues, newRegisterValues);
-        assertEquals(expectedValue, currentCpu.getValueFromRegister(RegisterType.REGISTER_A));
+        assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A));
     }
 }

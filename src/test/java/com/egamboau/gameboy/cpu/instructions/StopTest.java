@@ -9,9 +9,9 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import com.egamboau.gameboy.cpu.CPUTest;
+import com.egamboau.gameboy.cpu.CPUTestBase;
 
-public class StopTest extends CPUTest{
+class StopTest extends CPUTestBase{
 
     @Test
     void test_Stop(){
@@ -24,18 +24,18 @@ public class StopTest extends CPUTest{
          * - All interrupt-enable (IE) flags are reset.
          * - Input to P10-P13 is LOW for all.
          */
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(0x10);
-        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisterValues();
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();        
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues();
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(0x10);
+        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters();
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();        
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
 
         //PC should be incremented by one on the old, so it possible to verify the new one
         oldRegisterValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
         assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not matching.");
         assertEquals(oldRegisterValues, newRegisterValues);
-        assertTrue(currentCpu.isHalted());
+        assertTrue(getCurrentCpu().isHalted());
     }
 
 }

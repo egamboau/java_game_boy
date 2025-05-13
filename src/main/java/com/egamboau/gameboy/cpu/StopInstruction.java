@@ -13,7 +13,7 @@ public class StopInstruction extends Instruction{
     }
 
     @Override
-    protected void run_instruction_logic(CPU currentCpu, int[] data) {
+    protected void runInstructionLogic(CPU currentCpu, int[] data) {
         // TODO Stop behaves weird, but not all the hardware is actually implemented for that. For now, set it as stopped
         currentCpu.setHalted(true);
     }

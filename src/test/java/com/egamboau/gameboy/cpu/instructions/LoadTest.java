@@ -7,285 +7,197 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import org.junit.jupiter.api.Test;
+import java.util.stream.Stream;
 
-import com.egamboau.gameboy.cpu.CPUTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import com.egamboau.gameboy.cpu.CPUTestBase;
 import com.egamboau.test.TestUtils;
 
-public class LoadTest extends CPUTest{
+class LoadTest extends CPUTestBase{
 
-    @Test
-    void testLD_BC_d16() {
-        /*
-         * Load the 2 bytes of immediate data into register pair BC.
-         * The first byte of immediate data is the lower byte (i.e., bits 0-7), 
-         * and the second byte of immediate data is the higher byte (i.e., bits 8-15).
-         */
+    static Stream<Arguments> generateArgumentFor8BitsInmediateDataLoadTest() {
+        return Stream.of(
+            Arguments.of(0x06, RegisterType.REGISTER_B),
+            Arguments.of(0x0E, RegisterType.REGISTER_C),
+            Arguments.of(0x16, RegisterType.REGISTER_D),
+            Arguments.of(0x1E, RegisterType.REGISTER_E),
+            Arguments.of(0x26, RegisterType.REGISTER_H),
+            Arguments.of(0x2E, RegisterType.REGISTER_L)
+        );
+    }
+
+    static Stream<Arguments> generateArgumentFor16BitsInmediateDataLoadTest() {
+        return Stream.of(
+            Arguments.of(0x01, RegisterType.REGISTER_BC),
+            Arguments.of(0x11, RegisterType.REGISTER_DE),
+            Arguments.of(0x21, RegisterType.REGISTER_HL)
+        );
+    }
+
+    static Stream<Arguments> generateArgumentForRegisterToIndirectRegisterTest() {
+        return Stream.of(
+            Arguments.of(0x02, RegisterType.REGISTER_BC, RegisterType.REGISTER_A),
+            Arguments.of(0x12, RegisterType.REGISTER_DE, RegisterType.REGISTER_A)
+        );
+    }
+
+    static Stream<Arguments> generateArgumentForIndirectRegisterToRegisterTest() {
+        return Stream.of(
+            Arguments.of(0x0A, RegisterType.REGISTER_BC, RegisterType.REGISTER_A),
+            Arguments.of(0x1A, RegisterType.REGISTER_BC, RegisterType.REGISTER_A)
+        );
+    }
+
+    static Stream<Arguments> generateArgumentForRegisterToIndirectIncrementRegister() {
+        return Stream.of(
+            Arguments.of(0x22, RegisterType.REGISTER_HL, RegisterType.REGISTER_A)
+        );
+    }
+
+    static Stream<Arguments> generateArgumentForRegisterToIndirectDecrementRegister() {
+        return Stream.of(
+            Arguments.of(0x32, RegisterType.REGISTER_HL, RegisterType.REGISTER_A)
+        );
+    }
+
+    static Stream<Arguments> generateArgumentForIndirectIncrementRegisterToRegister() {
+        return Stream.of(
+            Arguments.of(0x2A, RegisterType.REGISTER_HL, RegisterType.REGISTER_A)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("generateArgumentFor16BitsInmediateDataLoadTest")
+    void run16BitInmediateDataLoad(int opcode, RegisterType register) {
         int lowerByte = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
         int upperByte = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x01, //the opcode
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+            opcode, //the opcode
             lowerByte, //lower byte of data
             upperByte //and the upper byte.
             );
 
         int expectedData = upperByte << 8 | lowerByte;
-        runLoadInmediateDataToRegister(expectedData, RegisterType.REGISTER_BC, true);
+        runLoadInmediateDataToRegister(expectedData, register, true);
     }
 
-    @Test
-    void testLD_indirect_BC_A() {
-        /*
-         * Store the contents of register A in the memory location specified by register pair BC.
-         */
+    @ParameterizedTest
+    @MethodSource("generateArgumentForRegisterToIndirectRegisterTest")
+    void runRegisterToIndirectRegisterTest(int opcode, RegisterType addressRegister, RegisterType sourceRegister) {
         int registerData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
-        int b_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        int c_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int bRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int cRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
-        int address = b_register_data << 8 | c_register_data;
+        int address = bRegisterData << 8 | cRegisterData;
 
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x02//the opcode
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+            opcode//the opcode
             );
 
-        runLoadRegisterDataIntoIndirectAddress(address, RegisterType.REGISTER_BC, registerData, RegisterType.REGISTER_A);
+        runLoadRegisterDataIntoIndirectAddress(address, addressRegister, registerData, sourceRegister);
     }
 
-    @Test
-    void testLD_B_d8() {
+    @ParameterizedTest
+    @MethodSource("generateArgumentFor8BitsInmediateDataLoadTest")
+    void run8BitsInmediateDataLoadTest(int opcode, RegisterType register) {
         /*
          * Load the 8-bit immediate operand d8 into register B.
          */
         int data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x06, //the opcode
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+            opcode, //the opcode
             data //lower byte of data
             );
-        runLoadInmediateDataToRegister(data, RegisterType.REGISTER_B, false);
+        runLoadInmediateDataToRegister(data, register, false);
 
     }
-
-    @Test
-    void testLD_A_indirectBC() {
-        /*
-         * Load the 8-bit contents of memory specified by register pair BC into register A.
-         */
+    
+    @ParameterizedTest
+    @MethodSource("generateArgumentForIndirectRegisterToRegisterTest")
+    void runIndirectRegistertRegisterTest(int opcode, RegisterType addressRegister, RegisterType destination) {
         
-        int b_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        int c_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int bRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int cRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
         int expectedData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
-        int address = (b_register_data << 8 ) | c_register_data;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+        int address = (bRegisterData << 8 ) | cRegisterData;
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
             0x0A//the opcode
             );
 
-        when(this.currentBus.readByteFromAddress(address)).thenReturn(
+        when(this.getCurrentBus().readByteFromAddress(address)).thenReturn(
             expectedData
         );
 
-        runLoadMemoryDataIntoRegister(address, RegisterType.REGISTER_BC, expectedData, RegisterType.REGISTER_A);
-    }
-
-    @Test
-    void testLD_C_d8() {
-        /*
-         * Load the 8-bit immediate operand d8 into register C.
-         */
-        int data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x0E, //the opcode
-            data //lower byte of data
-            );
-        runLoadInmediateDataToRegister(data, RegisterType.REGISTER_C, false);
-
-    }
-        
-    @Test
-    void testLD_DE_d16() {
-        /*
-         * Load the 2 bytes of immediate data into register pair DE.
-         * The first byte of immediate data is the lower byte (i.e., bits 0-7), 
-         * and the second byte of immediate data is the higher byte (i.e., bits 8-15).
-         */
-        int lowerByte = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        int upperByte = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x11, //the opcode
-            lowerByte, //lower byte of data
-            upperByte //and the upper byte.
-            );
-        
-        int expectedData = upperByte << 8 | lowerByte;
-        runLoadInmediateDataToRegister(expectedData, RegisterType.REGISTER_DE, true);
+        runLoadMemoryDataIntoRegister(address, addressRegister, expectedData, destination);
     }
  
-    @Test
-    void testLD_indirect_DE_A() {
-        /*
-         * Store the contents of register A in the memory location specified by register pair DE.
-         */
+    @ParameterizedTest
+    @MethodSource("generateArgumentForRegisterToIndirectIncrementRegister")
+    void runRegisterToIndirectIncrementRegister(int opcode, RegisterType addressRegister, RegisterType source) {
         int registerData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        int d_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        int e_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int dRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int eRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
-        int address = (d_register_data << 8) | e_register_data;
+        int address = (dRegisterData << 8) | eRegisterData;
 
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x12//the opcode
-            );
-
-        runLoadRegisterDataIntoIndirectAddress(address, RegisterType.REGISTER_DE, registerData, RegisterType.REGISTER_A);
-    }
-
-    @Test
-    void testLD_D_d8() {
-        /*
-         * Load the 8-bit immediate operand d8 into register D.
-         */
-        int data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x16, //the opcode
-            data //lower byte of data
-            );
-        runLoadInmediateDataToRegister(data, RegisterType.REGISTER_D, false);
-
-    }
-
-    @Test
-    void testLD_A_indirectDE() {
-        /*
-         * Load the 8-bit contents of memory specified by register pair DE into register A.
-         */
-        
-        int d_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        int e_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-
-        int expectedData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-
-        int address = (d_register_data << 8 ) | e_register_data;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x1A//the opcode
-            );
-
-        when(this.currentBus.readByteFromAddress(address)).thenReturn(
-            expectedData
-        );
-
-        runLoadMemoryDataIntoRegister(address, RegisterType.REGISTER_DE, expectedData, RegisterType.REGISTER_A);
-    }
-
-    @Test
-    void testLD_E_d8() {
-        /*
-         * Load the 8-bit immediate operand d8 into register E.
-         */
-        int data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x1E, //the opcode
-            data //lower byte of data
-            );
-        runLoadInmediateDataToRegister(data, RegisterType.REGISTER_E, false);
-
-    }
-
-    @Test
-    void testLD_HL_d16() {
-        /*
-         * Load the 2 bytes of immediate data into register pair HL.
-         * The first byte of immediate data is the lower byte (i.e., bits 0-7), 
-         * and the second byte of immediate data is the higher byte (i.e., bits 8-15).
-         */
-        int lowerByte = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        int upperByte = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x21, //the opcode
-            lowerByte, //lower byte of data
-            upperByte //and the upper byte.
-            );
-        
-        int expectedData = (upperByte << 8 | lowerByte);
-        runLoadInmediateDataToRegister(expectedData, RegisterType.REGISTER_HL, true);
-    }
- 
-    @Test
-    void testLD_indirect_HLI_A() {
-        /*
-         * Store the contents of register A into the memory location specified by register pair HL, and simultaneously increment the contents of HL.
-         */
-        int registerData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        int d_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        int e_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-
-        int address = (d_register_data << 8) | e_register_data;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
             0x22//the opcode
             );
 
-            runLoadRegisterDataIntoIndirectAddressWithSourceIncrement(address, RegisterType.REGISTER_HL, registerData, RegisterType.REGISTER_A);
+        runLoadRegisterDataIntoIndirectAddressWithSourceIncrement(address, addressRegister, registerData, source);
     }
 
-    @Test
-    void testLD_H_d8() {
-        /*
-         * Load the 8-bit immediate operand d8 into register H.
-         */
-        int data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x26, //the opcode
-            data //lower byte of data
-            );
-        runLoadInmediateDataToRegister(data, RegisterType.REGISTER_H, false);
-
-    }
-
-    @Test
-    void testLD_A_indirectHLI() {
-        /*
-         * Load the contents of memory specified by register pair HL into register A, and simultaneously increment the contents of HL.
-         */
-        
-        int h_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        int l_register_data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+    @ParameterizedTest
+    @MethodSource("generateArgumentForIndirectIncrementRegisterToRegister")
+    void runIndirectIncrementRegisterToRegisterTest(int opcode, RegisterType addressRegister, RegisterType destinationRegister) {        
+        int hRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int lRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
         int expectedData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
-        int address = (h_register_data << 8 ) | l_register_data;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x2A//the opcode
+        int address = (hRegisterData << 8 ) | lRegisterData;
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+            opcode
             );
 
-        when(this.currentBus.readByteFromAddress(address)).thenReturn(
+        when(this.getCurrentBus().readByteFromAddress(address)).thenReturn(
             expectedData
         );
 
-        runLoadMemoryDataIntoRegisterWithSourceIncremenet(address, RegisterType.REGISTER_HL, expectedData, RegisterType.REGISTER_A);
+        runLoadMemoryDataIntoRegisterWithSourceIncremenet(address, addressRegister, expectedData, destinationRegister);
     }
 
-    @Test
-    void testLD_L_d8() {
+    @ParameterizedTest
+    @MethodSource("generateArgumentForRegisterToIndirectDecrementRegister")
+    void runRegisterToIndirectDecrementRegisterTest(int opcode, RegisterType addressRegister, RegisterType sourceRegister) {
         /*
-         * Load the 8-bit immediate operand d8 into register E.
+         * Store the contents of register A into the memory location specified by register pair HL, and simultaneously decrement the contents of HL.
          */
-        int data = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x2E, //the opcode
-            data //lower byte of data
+        int registerData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int hRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int lRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+
+        int address = (hRegisterData << 8) | lRegisterData;
+
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+            0x32//the opcode
             );
-        runLoadInmediateDataToRegister(data, RegisterType.REGISTER_L, false);
 
+            runLoadRegisterDataIntoIndirectAddressWithSourceDecrement(address, addressRegister, registerData, sourceRegister);
     }
-
 
     private void runLoadInmediateDataToRegister(int loadedData, RegisterType register, boolean is16Bit) {
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(register));
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(register));
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(register));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(register));
 
         //update the expected values to the ones we want before the comparison
         if(is16Bit) {
@@ -296,7 +208,7 @@ public class LoadTest extends CPUTest{
             previousCycleCount += 2;
         }
         
-        assertEquals(loadedData,currentCpu.getValueFromRegister(register));
+        assertEquals(loadedData,getCurrentCpu().getValueFromRegister(register));
         assertEquals(previousCycleCount, currentCycleCount, "Cycle count not currently matching.");
 
         assertEquals(registerValues, newRegisterValues);
@@ -304,70 +216,89 @@ public class LoadTest extends CPUTest{
 
     private void runLoadRegisterDataIntoIndirectAddress(int address, RegisterType addressRegister,  int registerData, RegisterType sourceRegister) {
 
-        this.currentCpu.setValueInRegister(registerData, sourceRegister);
-        this.currentCpu.setValueInRegister(address, addressRegister);
+        this.getCurrentCpu().setValueInRegister(registerData, sourceRegister);
+        this.getCurrentCpu().setValueInRegister(address, addressRegister);
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisterValues();
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues();
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters();
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
 
         registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount+2, currentCycleCount);
-        verify(this.currentBus, times(1)).writeByteToAddress(registerData, address);
+        verify(this.getCurrentBus(), times(1)).writeByteToAddress(registerData, address);
     }
 
     private void runLoadMemoryDataIntoRegister(int address, RegisterType addressRegister,  int registerData, RegisterType destinationRegister) {
 
-        this.currentCpu.setValueInRegister(address, addressRegister);
+        this.getCurrentCpu().setValueInRegister(address, addressRegister);
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(destinationRegister));
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(destinationRegister));
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister));
 
         registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount+2, currentCycleCount);
-        assertEquals(registerData, currentCpu.getValueFromRegister(destinationRegister));
+        assertEquals(registerData, getCurrentCpu().getValueFromRegister(destinationRegister));
     }
 
     private void runLoadRegisterDataIntoIndirectAddressWithSourceIncrement(int address, RegisterType addressRegister,  int registerData, RegisterType sourceRegister) {
 
-        this.currentCpu.setValueInRegister(registerData, sourceRegister);
-        this.currentCpu.setValueInRegister(address, addressRegister);
+        this.getCurrentCpu().setValueInRegister(registerData, sourceRegister);
+        this.getCurrentCpu().setValueInRegister(address, addressRegister);
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(addressRegister));
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(addressRegister));
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
 
         registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
         registerValues.computeIfPresent(addressRegister, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount+2, currentCycleCount);
-        assertEquals(address+1, currentCpu.getValueFromRegister(addressRegister));
-        verify(this.currentBus, times(1)).writeByteToAddress(registerData, address);
+        assertEquals(address+1, getCurrentCpu().getValueFromRegister(addressRegister));
+        verify(this.getCurrentBus(), times(1)).writeByteToAddress(registerData, address);
+    }
+
+    private void runLoadRegisterDataIntoIndirectAddressWithSourceDecrement(int address, RegisterType addressRegister,  int registerData, RegisterType sourceRegister) {
+
+        this.getCurrentCpu().setValueInRegister(registerData, sourceRegister);
+        this.getCurrentCpu().setValueInRegister(address, addressRegister);
+
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
+
+        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(addressRegister, (t, u) -> u+1);
+        assertEquals(registerValues, newRegisterValues);
+        assertEquals(previousCycleCount+2, currentCycleCount);
+        assertEquals(address-1, getCurrentCpu().getValueFromRegister(addressRegister));
+        verify(this.getCurrentBus(), times(1)).writeByteToAddress(registerData, address);
     }
 
     private void runLoadMemoryDataIntoRegisterWithSourceIncremenet(int address, RegisterType addressRegister, int expectedData, RegisterType destinationRegister) {
-        this.currentCpu.setValueInRegister(address, addressRegister);
+        this.getCurrentCpu().setValueInRegister(address, addressRegister);
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(destinationRegister, addressRegister));
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(destinationRegister, addressRegister));
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister, addressRegister));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister, addressRegister));
 
         registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount+2, currentCycleCount);
-        assertEquals(address+1, currentCpu.getValueFromRegister(addressRegister));
-        assertEquals(expectedData, currentCpu.getValueFromRegister(destinationRegister));
-        verify(this.currentBus, times(1)).readByteFromAddress(address);
+        assertEquals(address+1, getCurrentCpu().getValueFromRegister(addressRegister));
+        assertEquals(expectedData, getCurrentCpu().getValueFromRegister(destinationRegister));
+        verify(this.getCurrentBus(), times(1)).readByteFromAddress(address);
     }
 }

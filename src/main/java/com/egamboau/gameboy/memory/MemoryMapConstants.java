@@ -1,6 +1,10 @@
 package com.egamboau.gameboy.memory;
 
 public final class MemoryMapConstants {
+
+    private MemoryMapConstants() {
+        
+    }
     public static final int ROM_BANK_00_START = 0x0000;
     public static final int ROM_BANK_00_END = 0x3FFF;
     

@@ -14,7 +14,7 @@ public class RotateLeftInstruction extends Instruction{
     }
 
     @Override
-    protected void run_instruction_logic(CPU currentCpu, int[] data) {
+    protected void runInstructionLogic(CPU currentCpu, int[] data) {
         int value = currentCpu.getValueFromRegister(getSourceRegister());
         int currentCarry = currentCpu.getCarry()?1:0;
 

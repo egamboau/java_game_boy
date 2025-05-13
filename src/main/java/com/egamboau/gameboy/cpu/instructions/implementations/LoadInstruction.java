@@ -14,21 +14,24 @@ public class LoadInstruction extends Instruction{
     }
 
     @Override
-    public void run_instruction_logic(CPU currentCpu, int[] data) {
+    public void runInstructionLogic(CPU currentCpu, int[] data) {
         switch (getAddressMode()) {
             case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
                 storeMemoryDataintoRegister(currentCpu);
                 break;
             case INCREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER:
                 storeMemoryDataintoRegister(currentCpu);
-                currentCpu.incrementRegisterPair(getSourceRegister());;
+                currentCpu.incrementRegisterPair(getSourceRegister());
                 break;
             case REGISTER_TO_INCREMENT_16_BIT_MEMORY_ADDRESS:
                 storeRegisterDataInMemory(currentCpu);
-                currentCpu.incrementRegisterPair(getDestinationRegister());;
+                currentCpu.incrementRegisterPair(getDestinationRegister());
                 break;
-            case DATA_16_BITS_TO_REGISTER:
-            case DATA_8_BIT_TO_REGISTER:
+            case REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS:
+                storeRegisterDataInMemory(currentCpu);
+                currentCpu.decrementRegisterPair(getDestinationRegister());
+                break;
+            case DATA_16_BITS_TO_REGISTER,DATA_8_BIT_TO_REGISTER:
                 storeDataInRegister(currentCpu, data);
                 break;
             case REGISTER_TO_MEMORY_ADDRESS_DATA:
@@ -53,16 +56,14 @@ public class LoadInstruction extends Instruction{
     }
 
     private void storeRegistertoInmediateMemoryAddress(CPU currentCpu, int[] data) {
-        switch (getSourceRegister()) {
-            case REGISTER_SP:
-                //need to read to bytes from the data, and build an address from it
-                int address = (data[1] << 8 ) | data[0];
-                int registerValue =currentCpu.getValueFromRegister(getSourceRegister());
-                currentCpu.writeByteToAddress(address, registerValue & 0xFF);
-                currentCpu.writeByteToAddress(address+1, registerValue >> 8);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown Source register: " + getSourceRegister());
+        if (getSourceRegister() == RegisterType.REGISTER_SP) {
+            //need to read to bytes from the data, and build an address from it
+            int address = (data[1] << 8 ) | data[0];
+            int registerValue =currentCpu.getValueFromRegister(getSourceRegister());
+            currentCpu.writeByteToAddress(address, registerValue & 0xFF);
+            currentCpu.writeByteToAddress(address+1, registerValue >> 8);
+        } else {
+            throw new IllegalArgumentException("Unknown Source register: " + getSourceRegister());
         }
     }
 

@@ -35,6 +35,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
+    <checkstyle.config.location>checkstyle.xml</checkstyle.config.location>
   </properties>
 
   <dependencies>
@@ -109,4 +110,17 @@
     </pluginManagement>
 
   </build>
+
+  <reporting>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <configuration>
+              <configLocation>checkstyle.xml</configLocation>
+            </configuration>
+            <version>3.6.0</version>
+        </plugin>
+    </plugins>
+</reporting>
 </project>

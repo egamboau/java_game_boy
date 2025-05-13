@@ -1,292 +1,124 @@
 package com.egamboau.gameboy.cpu.instructions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import org.junit.jupiter.api.Test;
+import java.util.stream.Stream;
 
-import com.egamboau.gameboy.cpu.CPUTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import com.egamboau.gameboy.cpu.CPUTestBase;
 import com.egamboau.test.TestUtils;
 
-public class AddTest extends CPUTest{
+class AddTest extends CPUTestBase {
 
-    @Test
-    void testADD_HL_BC() {
+    @ParameterizedTest
+    @MethodSource("generateArgumentsForAdd")
+    void testAddInstruction(int opcode, RegisterType sourceRegister, RegisterType destinationRegister) {
         /*
-         * Add the contents of register pair BC to the contents of register pair HL, and store the results in register pair HL.
+         * Add the contents of register pair BC to the contents of register pair HL, and
+         * store the results in register pair HL.
          */
-        int lowerByteHL = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
-        int upperByteHL = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
+        int sourceValue = TestUtils.getRandomIntegerInRange(0, 0xFFFF) & 0xFFFF;
+        int destinationValue;
+        if (sourceRegister == destinationRegister) {
+            destinationValue = sourceValue;
+        } else {
+            destinationValue = TestUtils.getRandomIntegerInRange(0, 0xFFFF) & 0xFFFF;
+        }
+        
 
-        int lowerByteBC = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
-        int upperByteBC = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x09 //the opcode
-        );
-        executeAddTest(lowerByteBC, upperByteBC, lowerByteHL, upperByteHL, RegisterType.REGISTER_BC, RegisterType.REGISTER_HL);
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+                opcode);
+        executeAddTest(sourceValue, destinationValue, sourceRegister, destinationRegister);
     }
 
-    @Test
-    void testADD_HL_BC_setCarryFlagCorrectly() {
-        /*
-         * Add the contents of register pair BC to the contents of register pair HL, and store the results in register pair HL.
-         * Checks if the carry flag is set correctly
-         */
-        int lowerByteHL = 0xFF;
-        int upperByteHL = 0xFF;
-
-        int lowerByteBC = 1;
-        int upperByteBC = 0;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x09 //the opcode
+    @ParameterizedTest
+    @MethodSource("generateArgumentsForAddWithFlags")
+    void testAddInstructionWithFlagsCheck(
+            int opcode,
+            RegisterType sourcRegister,
+            int sourceValue,
+            RegisterType destinationRegister,
+            int destinationValue,
+            boolean expectedSubstractFlag,
+            boolean expectedHalfCarryFlag,
+            boolean expectedCarryFlag) {
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+                opcode // the opcode
         );
 
-        executeAddTest(lowerByteBC, upperByteBC, lowerByteHL, upperByteHL,  RegisterType.REGISTER_BC, RegisterType.REGISTER_HL);
+        executeAddTest(sourceValue, destinationValue, sourcRegister, destinationRegister);
 
-        assertFalse(this.currentCpu.getSubtract());
-        assertTrue(this.currentCpu.getHalfCarry());
-        assertTrue(this.currentCpu.getCarry());
+        assertEquals(expectedSubstractFlag, this.getCurrentCpu().getSubtract(), "Substract flag set incorrectly");
+        assertEquals(expectedHalfCarryFlag, this.getCurrentCpu().getHalfCarry(), "Half Carry flag set incorrectly");
+        assertEquals(expectedCarryFlag, this.getCurrentCpu().getCarry(), "Carry flag set incorrectly");
     }
 
-    @Test
-    void testADD_HL_BC_setHalfCarryFlagCorrectly() {
-        /*
-         * Add the contents of register pair BC to the contents of register pair HL, and store the results in register pair HL.
-         * 
-         * Checks if the half carry is set correctly
-         */
-        int lowerByteHL = 0xFF;
-        int upperByteHL = 0x0F;
+    private void executeAddTest(final int sourceValue, int destinationValue, final RegisterType sourceRegister,
+        final RegisterType destinationRegister) {
+        int expectedValue = sourceValue + destinationValue;
 
-        int lowerByteBC = 1;
-        int upperByteBC = 0;
+        this.getCurrentCpu().setValueInRegister(sourceValue, sourceRegister);
+        this.getCurrentCpu().setValueInRegister(destinationValue, destinationRegister);
 
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x09 //the opcode
-        );
-        executeAddTest(lowerByteBC, upperByteBC, lowerByteHL, upperByteHL,  RegisterType.REGISTER_BC, RegisterType.REGISTER_HL);
-
-        assertFalse(this.currentCpu.getSubtract());
-        assertTrue(this.currentCpu.getHalfCarry());
-        assertFalse(this.currentCpu.getCarry());
-    }
-
-    @Test
-    void testADD_HL_BC_unsetFlagsCorrectly() {
-        /*
-         * Add the contents of register pair BC to the contents of register pair HL, and store the results in register pair HL.
-         * 
-         * Checks if the flags are unset correctly
-         */
-        int lowerByteHL = 0;
-        int upperByteHL = 0;
-
-        int lowerByteBC = 1;
-        int upperByteBC = 0;
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x09 //the opcode
-        );
-        executeAddTest(lowerByteBC, upperByteBC, lowerByteHL, upperByteHL, RegisterType.REGISTER_BC, RegisterType.REGISTER_HL);
-
-        assertFalse(this.currentCpu.getSubtract());
-        assertFalse(this.currentCpu.getHalfCarry());
-        assertFalse(this.currentCpu.getCarry());
-    }
-
-    @Test
-    void testADD_HL_DE() {
-        /*
-         * Add the contents of register pair DE to the contents of register pair HL, and store the results in register pair HL.
-         */
-        int lowerByteHL = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
-        int upperByteHL = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
-
-        int lowerByteDE = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
-        int upperByteDE = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x19 //the opcode
-        );
-
-        executeAddTest(lowerByteDE, upperByteDE, lowerByteHL, upperByteHL,  RegisterType.REGISTER_DE, RegisterType.REGISTER_HL);
-    }
-
-    @Test
-    void testADD_HL_DE_setCarryFlagCorrectly() {
-        /*
-         * Add the contents of register pair DE to the contents of register pair HL, and store the results in register pair HL.
-         * Checks if the carry flag is set correctly
-         */
-        int lowerByteHL = 0xFF;
-        int upperByteHL = 0xFF;
-
-        int lowerByteDE = 1;
-        int upperByteDE = 0;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x19 //the opcode
-        );
-
-        executeAddTest(lowerByteDE, upperByteDE, lowerByteHL, upperByteHL,  RegisterType.REGISTER_DE, RegisterType.REGISTER_HL);
-
-        assertFalse(this.currentCpu.getSubtract());
-        assertTrue(this.currentCpu.getHalfCarry());
-        assertTrue(this.currentCpu.getCarry());
-    }
-
-    @Test
-    void testADD_HL_DE_setHalfCarryFlagCorrectly() {
-        /*
-         * Add the contents of register pair DE to the contents of register pair HL, and store the results in register pair HL.
-         * 
-         * Checks if the half carry is set correctly
-         */
-        int lowerByteHL = 0xFF;
-        int upperByteHL = 0x0F;
-
-        int lowerByteDE = 1;
-        int upperByteDE = 0;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x19 //the opcode
-        );
-
-        executeAddTest(lowerByteDE, upperByteDE, lowerByteHL, upperByteHL,  RegisterType.REGISTER_DE, RegisterType.REGISTER_HL);
-
-        assertFalse(this.currentCpu.getSubtract());
-        assertTrue(this.currentCpu.getHalfCarry());
-        assertFalse(this.currentCpu.getCarry());
-    }
-
-    @Test
-    void testADD_HL_DE_unsetFlagsCorrectly() {
-        /*
-         * Add the contents of register pair DE to the contents of register pair HL, and store the results in register pair HL.
-         * 
-         * Checks if the flags are unset correctly
-         */
-        int lowerByteHL = 0;
-        int upperByteHL = 0;
-
-        int lowerByteDE = 1;
-        int upperByteDE = 0;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x19 //the opcode
-        );
-
-        executeAddTest(lowerByteDE, upperByteDE, lowerByteHL, upperByteHL,  RegisterType.REGISTER_DE, RegisterType.REGISTER_HL);
-
-        assertFalse(this.currentCpu.getSubtract());
-        assertFalse(this.currentCpu.getHalfCarry());
-        assertFalse(this.currentCpu.getCarry());
-    }
-
-    @Test
-    void testADD_HL_HL() {
-        /*
-         * * Add the contents of register pair HL to the contents of register pair HL, and store the results in register pair HL.
-         */
-        int lowerByteHL = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
-        int upperByteHL = TestUtils.getRandomIntegerInRange(0, 0xFF) & 0xFF;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x29 //the opcode
-        );
-
-        executeAddTest(lowerByteHL, upperByteHL, lowerByteHL, upperByteHL,  RegisterType.REGISTER_HL, RegisterType.REGISTER_HL);
-    }
-
-    @Test
-    void testADD_HL_HL_setCarryFlagCorrectly() {
-        /*
-         * Add the contents of register pair HL to the contents of register pair HL, and store the results in register pair HL.
-         * Checks if the carry flag is set correctly
-         */
-        int lowerByteHL = 0xFF;
-        int upperByteHL = 0xFF;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x29 //the opcode
-        );
-
-        executeAddTest(lowerByteHL, upperByteHL, lowerByteHL, upperByteHL,  RegisterType.REGISTER_HL, RegisterType.REGISTER_HL);
-
-        assertFalse(this.currentCpu.getSubtract());
-        assertTrue(this.currentCpu.getHalfCarry());
-        assertTrue(this.currentCpu.getCarry());
-    }
-
-    @Test
-    void estADD_HL_HL_setHalfCarryFlagCorrectly() {
-        /*
-         * Add the contents of register pair HL to the contents of register pair HL, and store the results in register pair HL.
-         * Checks if the half carry is set correctly
-         */
-        int lowerByteHL = 0xFF;
-        int upperByteHL = 0x0F;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x29 //the opcode
-        );
-
-        executeAddTest(lowerByteHL, upperByteHL, lowerByteHL, upperByteHL,  RegisterType.REGISTER_HL, RegisterType.REGISTER_HL);
-
-        assertFalse(this.currentCpu.getSubtract());
-        assertTrue(this.currentCpu.getHalfCarry());
-        assertFalse(this.currentCpu.getCarry());
-    }
-
-    @Test
-    void estADD_HL_HL_unsetFlagsCorrectly() {
-        /*
-         * Add the contents of register pair HL to the contents of register pair HL, and store the results in register pair HL.
-         * Checks if the flags are unset correctly
-         */
-        int lowerByteHL = 0;
-        int upperByteHL = 0;
-
-        when(this.currentBus.readByteFromAddress(anyInt())).thenReturn(
-            0x29 //the opcode
-        );
-
-        executeAddTest(lowerByteHL, upperByteHL, lowerByteHL, upperByteHL,  RegisterType.REGISTER_HL, RegisterType.REGISTER_HL);
-
-        assertFalse(this.currentCpu.getSubtract());
-        assertFalse(this.currentCpu.getHalfCarry());
-        assertFalse(this.currentCpu.getCarry());
-    }
-
-
-
-    private void executeAddTest(int firstRegisterLowerByte, int firstRegisterUpperByte, int secondRegisterLowerByte, int secondRegisterUpperByte, RegisterType firstRegister, RegisterType secondRegister) {
-        int firstRegisterValue = (firstRegisterUpperByte << 8 | firstRegisterLowerByte);
-        int secondRegisterValue = (secondRegisterUpperByte << 8 | secondRegisterLowerByte);
-
-        int expected_value =  firstRegisterValue + secondRegisterValue;
-
-        this.currentCpu.setValueInRegister(firstRegisterValue, firstRegister);
-        this.currentCpu.setValueInRegister(secondRegisterValue, secondRegister);
-
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(RegisterType.REGISTER_HL, RegisterType.REGISTER_F));
-        long previousCycleCount = currentCpu.getCycles();
-        this.currentCpu.cpu_step();
-        long currentCycleCount = currentCpu.getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisterValues(TestUtils.getPairForRegister(RegisterType.REGISTER_HL, RegisterType.REGISTER_F));
+        Map<RegisterType, Integer> registerValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_HL, RegisterType.REGISTER_F));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_HL, RegisterType.REGISTER_F));
 
         // HL Value must be updated with the new value.
-        assertEquals(expected_value & 0xFFFF, this.currentCpu.getValueFromRegister(secondRegister));
-        //Cycle count must match
+        assertEquals(expectedValue & MASK_INT_16_BIT, this.getCurrentCpu().getValueFromRegister(destinationRegister), "Register value not matching the expected value: " + destinationRegister);
+        // Cycle count must match
         assertEquals(previousCycleCount + 2, currentCycleCount, "Cycle count not currently matching.");
 
-        //other flags must be the same, and update the PC to be 1 byte more
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
-        assertEquals(registerValues, newRegisterValues);
+        // other flags must be the same, and update the PC to be 1 byte more
+        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u + 1);
+        assertEquals(registerValues, newRegisterValues, "CPU Register values did not match the previous state.");
+    }
+
+    static Stream<Arguments> generateArgumentsForAdd() {
+        // parameters for this methods are the following:
+        // int opcode, RegisterType sourceRegister, RegisterType destinationRegister
+        return Stream.of(
+                Arguments.of(0x09, RegisterType.REGISTER_BC, RegisterType.REGISTER_HL),
+                Arguments.of(0x19, RegisterType.REGISTER_DE, RegisterType.REGISTER_HL),
+                Arguments.of(0x29, RegisterType.REGISTER_HL, RegisterType.REGISTER_HL));
+    }
+
+    static Stream<Arguments> generateArgumentsForAddWithFlags() {
+
+        // parameters for this methods are the following:
+        // int opcode, RegisterType sourcRegister, int sourceValue, RegisterType destinationRegister,int destinationValue,boolean expectedSubstractFlag, boolean expectedHalfCarryFlag, boolean expectedCarryFlag
+        return Stream.of(
+                Arguments.of(0x09, RegisterType.REGISTER_BC, 0xFFFF, RegisterType.REGISTER_HL, 0x0001, false, true,
+                        true),
+                Arguments.of(0x09, RegisterType.REGISTER_BC, 0x0001, RegisterType.REGISTER_HL, 0x0FFF, false, true,
+                        false),
+                Arguments.of(0x09, RegisterType.REGISTER_BC, 0x0001, RegisterType.REGISTER_HL, 0x0001, false, false,
+                        false),
+                Arguments.of(0x09, RegisterType.REGISTER_BC, 0x0001, RegisterType.REGISTER_HL, 0x0001, false, false,
+                        false),
+
+                Arguments.of(0x19, RegisterType.REGISTER_DE, 0xFFFF, RegisterType.REGISTER_HL, 0x0001, false, true,
+                        true),
+                Arguments.of(0x19, RegisterType.REGISTER_DE, 0x0001, RegisterType.REGISTER_HL, 0x0FFF, false, true,
+                        false),
+                Arguments.of(0x19, RegisterType.REGISTER_DE, 0x0001, RegisterType.REGISTER_HL, 0x0001, false, false,
+                        false),
+                Arguments.of(0x19, RegisterType.REGISTER_DE, 0x0001, RegisterType.REGISTER_HL, 0x0001, false, false,
+                        false),
+
+                Arguments.of(0x29, RegisterType.REGISTER_HL, 0xFFFF, RegisterType.REGISTER_HL, 0xFFFF, false, true,
+                        true),
+                Arguments.of(0x29, RegisterType.REGISTER_HL, 0x0001, RegisterType.REGISTER_HL, 0x0001, false, false,
+                        false));
     }
 }

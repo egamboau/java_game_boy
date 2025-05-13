@@ -14,20 +14,20 @@ public class AddInstruction extends Instruction{
     }
 
     @Override
-    public void run_instruction_logic(CPU currentCpu, int[] data) {
+    public void runInstructionLogic(CPU currentCpu, int[] data) {
         switch (getAddressMode()) {
             case REGISTER_TO_REGISTER:
-                this.add_registers(currentCpu);
+                this.addRegisters(currentCpu);
                 break;
             case REGISTER_16_BIT_TO_REGISTER_16_BIT:
-                this.add_registers_pairs(currentCpu);
+                this.addRegisterPairs(currentCpu);
                 break;
             default:
                 throw new IllegalArgumentException("Address mode not supported for ADD instruction: " + getAddressMode());
         }
     }
 
-    private void add_registers_pairs(CPU currentCpu) {
+    private void addRegisterPairs(CPU currentCpu) {
         int result = currentCpu.getValueFromRegister(getSourceRegister()) + currentCpu.getValueFromRegister(getDestinationRegister());
         currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setSubtract(false);
@@ -35,7 +35,7 @@ public class AddInstruction extends Instruction{
         currentCpu.setCarry(result > 0xFFFF);
     }
 
-    private void add_registers(CPU currentCpu) {
+    private void addRegisters(CPU currentCpu) {
         int result = currentCpu.getValueFromRegister(getSourceRegister()) + currentCpu.getValueFromRegister(getDestinationRegister());
         currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setSubtract(false);
