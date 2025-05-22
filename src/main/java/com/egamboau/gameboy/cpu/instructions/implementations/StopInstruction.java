@@ -1,6 +1,10 @@
-package com.egamboau.gameboy.cpu.instructions;
+package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import com.egamboau.gameboy.cpu.CPU;
+import com.egamboau.gameboy.cpu.instructions.AddressMode;
+import com.egamboau.gameboy.cpu.instructions.Instruction;
+import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
+import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
 public class StopInstruction extends Instruction {
 

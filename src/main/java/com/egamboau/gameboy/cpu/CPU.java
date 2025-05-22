@@ -7,7 +7,6 @@ import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
-import com.egamboau.gameboy.cpu.instructions.StopInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.AddInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecimalAdjustAccumulatorInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecrementInstruction;
@@ -20,6 +19,7 @@ import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftCircularI
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateRightInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateRigthCircularInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.StopInstruction;
 import com.egamboau.gameboy.memory.BitMasks;
 import com.egamboau.gameboy.memory.Bus;
 
