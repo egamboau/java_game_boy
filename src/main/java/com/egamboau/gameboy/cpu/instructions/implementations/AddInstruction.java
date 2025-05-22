@@ -5,16 +5,27 @@ import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
+import com.egamboau.gameboy.memory.BitMasks;
 
-public class AddInstruction extends Instruction{
+public class AddInstruction extends Instruction {
 
-    public AddInstruction(AddressMode addressMode, RegisterType sourceRegister, RegisterType destinationRegister,
-            InstructionCondition condition, Byte parameter) {
+    /**
+     * Constructs an AddInstruction with the specified parameters.
+     *
+     * @param addressMode The addressing mode of the instruction.
+     * @param sourceRegister The source register for the operation.
+     * @param destinationRegister The destination register for the operation.
+     * @param condition The condition under which the instruction is executed.
+     * @param parameter An additional parameter for the instruction.
+     */
+    public AddInstruction(final AddressMode addressMode, final RegisterType sourceRegister,
+            final RegisterType destinationRegister,
+            final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
 
     @Override
-    public void runInstructionLogic(CPU currentCpu, int[] data) {
+    public final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         switch (getAddressMode()) {
             case REGISTER_TO_REGISTER:
                 this.addRegisters(currentCpu);
@@ -23,24 +34,27 @@ public class AddInstruction extends Instruction{
                 this.addRegisterPairs(currentCpu);
                 break;
             default:
-                throw new IllegalArgumentException("Address mode not supported for ADD instruction: " + getAddressMode());
+                throw new IllegalArgumentException(
+                        "Address mode not supported for ADD instruction: " + getAddressMode());
         }
     }
 
-    private void addRegisterPairs(CPU currentCpu) {
-        int result = currentCpu.getValueFromRegister(getSourceRegister()) + currentCpu.getValueFromRegister(getDestinationRegister());
+    private void addRegisterPairs(final CPU currentCpu) {
+        int result = currentCpu.getValueFromRegister(getSourceRegister())
+                + currentCpu.getValueFromRegister(getDestinationRegister());
         currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry((result & 0xFFFFF000) != 0);
-        currentCpu.setCarry(result > 0xFFFF);
+        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_16_BIT_RESULT) != 0);
+        currentCpu.setCarry(result > BitMasks.CARRY_16_BIT_RESULTS);
     }
 
-    private void addRegisters(CPU currentCpu) {
-        int result = currentCpu.getValueFromRegister(getSourceRegister()) + currentCpu.getValueFromRegister(getDestinationRegister());
+    private void addRegisters(final CPU currentCpu) {
+        int result = currentCpu.getValueFromRegister(getSourceRegister())
+                + currentCpu.getValueFromRegister(getDestinationRegister());
         currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry((result & 0xFFFFFFF0) != 0);
-        currentCpu.setCarry(result > 0xFF);
+        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT) != 0);
+        currentCpu.setCarry(result > BitMasks.CARRY_8_BIT_RESULTS);
     }
 
 }

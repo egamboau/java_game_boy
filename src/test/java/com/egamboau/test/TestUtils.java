@@ -25,37 +25,37 @@ public final class TestUtils {
         for(RegisterType element:elements) {
             result.add(element);
             switch ( element) {
-                case REGISTER_A:
-                case REGISTER_F:
-                    result.add(RegisterType.REGISTER_AF);
+                case A:
+                case F:
+                    result.add(RegisterType.AF);
                     break;
-                case REGISTER_AF:
-                    result.add(RegisterType.REGISTER_A);
-                    result.add(RegisterType.REGISTER_F);
+                case AF:
+                    result.add(RegisterType.A);
+                    result.add(RegisterType.F);
                     break;
 
-                case REGISTER_B:
-                case REGISTER_C:
-                    result.add(RegisterType.REGISTER_BC);
+                case B:
+                case C:
+                    result.add(RegisterType.BC);
                     break;
-                case REGISTER_BC:
-                    result.add(RegisterType.REGISTER_B);
-                    result.add(RegisterType.REGISTER_C);
+                case BC:
+                    result.add(RegisterType.B);
+                    result.add(RegisterType.C);
             
-                case REGISTER_D:
-                case REGISTER_E:
-                    result.add(RegisterType.REGISTER_DE);
-                case REGISTER_DE:
-                    result.add(RegisterType.REGISTER_D);
-                    result.add(RegisterType.REGISTER_E);
+                case D:
+                case E:
+                    result.add(RegisterType.DE);
+                case DE:
+                    result.add(RegisterType.D);
+                    result.add(RegisterType.E);
                 
                     break;
-                case REGISTER_H:
-                case REGISTER_L:
-                    result.add(RegisterType.REGISTER_HL);
-                case REGISTER_HL:
-                    result.add(RegisterType.REGISTER_H);
-                    result.add(RegisterType.REGISTER_L);
+                case H:
+                case L:
+                    result.add(RegisterType.HL);
+                case HL:
+                    result.add(RegisterType.H);
+                    result.add(RegisterType.L);
 
                 default:
                     break;

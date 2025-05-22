@@ -67,12 +67,12 @@ class AddTest extends CPUTestBase {
         this.getCurrentCpu().setValueInRegister(destinationValue, destinationRegister);
 
         Map<RegisterType, Integer> registerValues = this
-                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_HL, RegisterType.REGISTER_F));
+                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.HL, RegisterType.F));
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this
-                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_HL, RegisterType.REGISTER_F));
+                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.HL, RegisterType.F));
 
         // HL Value must be updated with the new value.
         assertEquals(expectedValue & MASK_INT_16_BIT, this.getCurrentCpu().getValueFromRegister(destinationRegister), "Register value not matching the expected value: " + destinationRegister);
@@ -80,7 +80,7 @@ class AddTest extends CPUTestBase {
         assertEquals(previousCycleCount + 2, currentCycleCount, "Cycle count not currently matching.");
 
         // other flags must be the same, and update the PC to be 1 byte more
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u + 1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
         assertEquals(registerValues, newRegisterValues, "CPU Register values did not match the previous state.");
     }
 
@@ -88,9 +88,9 @@ class AddTest extends CPUTestBase {
         // parameters for this methods are the following:
         // int opcode, RegisterType sourceRegister, RegisterType destinationRegister
         return Stream.of(
-                Arguments.of(0x09, RegisterType.REGISTER_BC, RegisterType.REGISTER_HL),
-                Arguments.of(0x19, RegisterType.REGISTER_DE, RegisterType.REGISTER_HL),
-                Arguments.of(0x29, RegisterType.REGISTER_HL, RegisterType.REGISTER_HL));
+                Arguments.of(0x09, RegisterType.BC, RegisterType.HL),
+                Arguments.of(0x19, RegisterType.DE, RegisterType.HL),
+                Arguments.of(0x29, RegisterType.HL, RegisterType.HL));
     }
 
     static Stream<Arguments> generateArgumentsForAddWithFlags() {
@@ -98,27 +98,27 @@ class AddTest extends CPUTestBase {
         // parameters for this methods are the following:
         // int opcode, RegisterType sourcRegister, int sourceValue, RegisterType destinationRegister,int destinationValue,boolean expectedSubstractFlag, boolean expectedHalfCarryFlag, boolean expectedCarryFlag
         return Stream.of(
-                Arguments.of(0x09, RegisterType.REGISTER_BC, 0xFFFF, RegisterType.REGISTER_HL, 0x0001, false, true,
+                Arguments.of(0x09, RegisterType.BC, 0xFFFF, RegisterType.HL, 0x0001, false, true,
                         true),
-                Arguments.of(0x09, RegisterType.REGISTER_BC, 0x0001, RegisterType.REGISTER_HL, 0x0FFF, false, true,
+                Arguments.of(0x09, RegisterType.BC, 0x0001, RegisterType.HL, 0x0FFF, false, true,
                         false),
-                Arguments.of(0x09, RegisterType.REGISTER_BC, 0x0001, RegisterType.REGISTER_HL, 0x0001, false, false,
+                Arguments.of(0x09, RegisterType.BC, 0x0001, RegisterType.HL, 0x0001, false, false,
                         false),
-                Arguments.of(0x09, RegisterType.REGISTER_BC, 0x0001, RegisterType.REGISTER_HL, 0x0001, false, false,
+                Arguments.of(0x09, RegisterType.BC, 0x0001, RegisterType.HL, 0x0001, false, false,
                         false),
 
-                Arguments.of(0x19, RegisterType.REGISTER_DE, 0xFFFF, RegisterType.REGISTER_HL, 0x0001, false, true,
+                Arguments.of(0x19, RegisterType.DE, 0xFFFF, RegisterType.HL, 0x0001, false, true,
                         true),
-                Arguments.of(0x19, RegisterType.REGISTER_DE, 0x0001, RegisterType.REGISTER_HL, 0x0FFF, false, true,
+                Arguments.of(0x19, RegisterType.DE, 0x0001, RegisterType.HL, 0x0FFF, false, true,
                         false),
-                Arguments.of(0x19, RegisterType.REGISTER_DE, 0x0001, RegisterType.REGISTER_HL, 0x0001, false, false,
+                Arguments.of(0x19, RegisterType.DE, 0x0001, RegisterType.HL, 0x0001, false, false,
                         false),
-                Arguments.of(0x19, RegisterType.REGISTER_DE, 0x0001, RegisterType.REGISTER_HL, 0x0001, false, false,
+                Arguments.of(0x19, RegisterType.DE, 0x0001, RegisterType.HL, 0x0001, false, false,
                         false),
 
-                Arguments.of(0x29, RegisterType.REGISTER_HL, 0xFFFF, RegisterType.REGISTER_HL, 0xFFFF, false, true,
+                Arguments.of(0x29, RegisterType.HL, 0xFFFF, RegisterType.HL, 0xFFFF, false, true,
                         true),
-                Arguments.of(0x29, RegisterType.REGISTER_HL, 0x0001, RegisterType.REGISTER_HL, 0x0001, false, false,
+                Arguments.of(0x29, RegisterType.HL, 0x0001, RegisterType.HL, 0x0001, false, false,
                         false));
     }
 }

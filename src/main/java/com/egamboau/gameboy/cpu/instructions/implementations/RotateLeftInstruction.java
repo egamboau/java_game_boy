@@ -5,21 +5,32 @@ import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
+import com.egamboau.gameboy.memory.BitMasks;
 
-public class RotateLeftInstruction extends Instruction{
+public class RotateLeftInstruction extends Instruction {
 
-    public RotateLeftInstruction(AddressMode addressMode, RegisterType sourceRegister, RegisterType destinationRegister,
-            InstructionCondition condition, Byte parameter) {
+    /**
+     * Constructs a RotateLeftInstruction.
+     *
+     * @param addressMode        The addressing mode of the instruction.
+     * @param sourceRegister     The source register for the operation.
+     * @param destinationRegister The destination register for the result.
+     * @param condition          The condition under which the instruction executes.
+     * @param parameter          An additional parameter for the instruction.
+     */
+    public RotateLeftInstruction(final AddressMode addressMode, final RegisterType sourceRegister,
+            final RegisterType destinationRegister,
+            final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
 
     @Override
-    protected void runInstructionLogic(CPU currentCpu, int[] data) {
+    protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         int value = currentCpu.getValueFromRegister(getSourceRegister());
-        int currentCarry = currentCpu.getCarry()?1:0;
+        int currentCarry = currentCpu.getCarry() ? 1 : 0;
 
         int result = ((value << 1) | currentCarry);
-        int carryResult = (result & 0x100);
+        int carryResult = (result & BitMasks.CARRY_RESULT_ROTATE_LEFT);
 
         currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setCarry(carryResult != 0);

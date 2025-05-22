@@ -24,14 +24,14 @@ class StackManipulationTest extends CPUTestBase{
             0x12 //higher byte of data
             );
 
-        this.getCurrentCpu().setValueInRegister(0xC001 & 0xFFFF, RegisterType.REGISTER_SP);
+        this.getCurrentCpu().setValueInRegister(0xC001 & 0xFFFF, RegisterType.SP);
 
         Map<RegisterType, Integer> registerValues = this.getCpuRegisters();
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+3);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+3);
         assertEquals(registerValues, newRegisterValues);
         //verify that the memory address is correct
 
@@ -53,17 +53,17 @@ class StackManipulationTest extends CPUTestBase{
             0x12 //higher byte of data
             );
 
-        this.getCurrentCpu().setValueInRegister(0xC001 , RegisterType.REGISTER_SP);
+        this.getCurrentCpu().setValueInRegister(0xC001 , RegisterType.SP);
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(RegisterType.REGISTER_SP);
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(RegisterType.SP);
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(RegisterType.REGISTER_SP);
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(RegisterType.SP);
         
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+3);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+3);
         assertEquals(registerValues, newRegisterValues);
-        assertEquals(0x1234, getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_SP));
+        assertEquals(0x1234, getCurrentCpu().getValueFromRegister(RegisterType.SP));
         assertEquals(previousCycleCount+3, currentCycleCount);
     }
 

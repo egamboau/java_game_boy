@@ -40,35 +40,35 @@ class IncrementTest  extends CPUTestBase{
     
     static Stream<Arguments> generateTestArgumentsFor8BitTests() {
         return Stream.of(
-            Arguments.of(0x04, 0, RegisterType.REGISTER_B, false, false, false),
-            Arguments.of(0x04, 0x10, RegisterType.REGISTER_B, false, false, false),
-            Arguments.of(0x04, 0x0E, RegisterType.REGISTER_B, false, false, false),
-            Arguments.of(0x04, 0xFF, RegisterType.REGISTER_B, false, true, true),
+            Arguments.of(0x04, 0, RegisterType.B, false, false, false),
+            Arguments.of(0x04, 0x10, RegisterType.B, false, false, false),
+            Arguments.of(0x04, 0x0E, RegisterType.B, false, false, false),
+            Arguments.of(0x04, 0xFF, RegisterType.B, false, true, true),
 
-            Arguments.of(0x0C, 0, RegisterType.REGISTER_C, false, false, false),
-            Arguments.of(0x0C, 0x10, RegisterType.REGISTER_C, false, false, false),
-            Arguments.of(0x0C, 0x0E, RegisterType.REGISTER_C, false, false, false),
-            Arguments.of(0x0C, 0xFF, RegisterType.REGISTER_C, false, true, true),
+            Arguments.of(0x0C, 0, RegisterType.C, false, false, false),
+            Arguments.of(0x0C, 0x10, RegisterType.C, false, false, false),
+            Arguments.of(0x0C, 0x0E, RegisterType.C, false, false, false),
+            Arguments.of(0x0C, 0xFF, RegisterType.C, false, true, true),
 
-            Arguments.of(0x14, 0, RegisterType.REGISTER_D, false, false, false),
-            Arguments.of(0x14, 0x10, RegisterType.REGISTER_D, false, false, false),
-            Arguments.of(0x14, 0x0E, RegisterType.REGISTER_D, false, false, false),
-            Arguments.of(0x14, 0xFF, RegisterType.REGISTER_D, false, true, true),
+            Arguments.of(0x14, 0, RegisterType.D, false, false, false),
+            Arguments.of(0x14, 0x10, RegisterType.D, false, false, false),
+            Arguments.of(0x14, 0x0E, RegisterType.D, false, false, false),
+            Arguments.of(0x14, 0xFF, RegisterType.D, false, true, true),
 
-            Arguments.of(0x1C, 0, RegisterType.REGISTER_E, false, false, false),
-            Arguments.of(0x1C, 0x10, RegisterType.REGISTER_E, false, false, false),
-            Arguments.of(0x1C, 0x0E, RegisterType.REGISTER_E, false, false, false),
-            Arguments.of(0x1C, 0xFF, RegisterType.REGISTER_E, false, true, true),
+            Arguments.of(0x1C, 0, RegisterType.E, false, false, false),
+            Arguments.of(0x1C, 0x10, RegisterType.E, false, false, false),
+            Arguments.of(0x1C, 0x0E, RegisterType.E, false, false, false),
+            Arguments.of(0x1C, 0xFF, RegisterType.E, false, true, true),
 
-            Arguments.of(0x24, 0, RegisterType.REGISTER_H, false, false, false),
-            Arguments.of(0x24, 0x10, RegisterType.REGISTER_H, false, false, false),
-            Arguments.of(0x24, 0x0E, RegisterType.REGISTER_H, false, false, false),
-            Arguments.of(0x24, 0xFF, RegisterType.REGISTER_H, false, true, true),
+            Arguments.of(0x24, 0, RegisterType.H, false, false, false),
+            Arguments.of(0x24, 0x10, RegisterType.H, false, false, false),
+            Arguments.of(0x24, 0x0E, RegisterType.H, false, false, false),
+            Arguments.of(0x24, 0xFF, RegisterType.H, false, true, true),
 
-            Arguments.of(0x2C, 0, RegisterType.REGISTER_L, false, false, false),
-            Arguments.of(0x2C, 0x10, RegisterType.REGISTER_L, false, false, false),
-            Arguments.of(0x2C, 0x0E, RegisterType.REGISTER_L, false, false, false),
-            Arguments.of(0x2C, 0xFF, RegisterType.REGISTER_L, false, true, true)
+            Arguments.of(0x2C, 0, RegisterType.L, false, false, false),
+            Arguments.of(0x2C, 0x10, RegisterType.L, false, false, false),
+            Arguments.of(0x2C, 0x0E, RegisterType.L, false, false, false),
+            Arguments.of(0x2C, 0xFF, RegisterType.L, false, true, true)
             
             
         );
@@ -76,9 +76,9 @@ class IncrementTest  extends CPUTestBase{
 
     static Stream<Arguments> generateTestArgumentsFor16BitTests() {
         return Stream.of(
-            Arguments.of(0x03, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.REGISTER_BC),
-            Arguments.of(0x13, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.REGISTER_DE),
-            Arguments.of(0x23, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.REGISTER_HL)
+            Arguments.of(0x03, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.BC),
+            Arguments.of(0x13, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.DE),
+            Arguments.of(0x23, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.HL)
         );
     }
 
@@ -87,7 +87,7 @@ class IncrementTest  extends CPUTestBase{
         int expected = (registerData + 1) & 0xFFFF;
         this.getCurrentCpu().setValueInRegister(registerData, register);
 
-        RegisterType[] filter = TestUtils.getPairForRegister(register, RegisterType.REGISTER_F);
+        RegisterType[] filter = TestUtils.getPairForRegister(register, RegisterType.F);
         Map<RegisterType, Integer> registerValues = this.getCpuRegisters(filter);
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
@@ -99,19 +99,19 @@ class IncrementTest  extends CPUTestBase{
         
         assertEquals(previousCycleCount+2, currentCycleCount, "Register value incorrect: " + register);
         assertEquals(expected, result, "Cycle count not currently matching.");
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
 
         assertEquals(registerValues, newRegisterValues,"CPU Register values did not match the previous state.");
     }
 
     private void executeIncTestWithSingleRegister(int registerData, RegisterType registerType) {
         this.getCurrentCpu().setValueInRegister(registerData, registerType);
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(registerType, RegisterType.REGISTER_F));
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(registerType, RegisterType.F));
         this.getCurrentCpu().cpuStep();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(registerType, RegisterType.REGISTER_F));
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(registerType, RegisterType.F));
         int expectedValue=(registerData + 1) & 0xFF;
         assertEquals(expectedValue, this.getCurrentCpu().getValueFromRegister(registerType));
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
 
         assertEquals(registerValues, newRegisterValues);
     }

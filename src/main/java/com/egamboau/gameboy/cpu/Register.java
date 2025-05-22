@@ -1,5 +1,7 @@
 package com.egamboau.gameboy.cpu;
 
+import com.egamboau.gameboy.memory.BitMasks;
+
 /**
  * The {@code Register} class represents an 8-bit register for the gameboy CPU.
  * It provides methods to get, set, and manipulate the value of the register, as well as
@@ -22,10 +24,10 @@ public class Register {
     /**
      * Creates a new register initialized to the specified value.
      *
-     * @param value The initial value of the register (0-255).
+     * @param newValue The initial value of the register (0-255).
      */
-    public Register(int value) {
-        set(value);
+    public Register(final int newValue) {
+        set(newValue);
     }
 
     /**
@@ -34,16 +36,16 @@ public class Register {
      * @return The value of the register (0-255).
      */
     public int get() {
-        return value & 0xFF;
+        return value & BitMasks.MASK_8_BIT_DATA;
     }
 
     /**
      * Sets the value of the register to the specified unsigned 8-bit integer.
      *
-     * @param value The value to set (0-255).
+     * @param newValue The value to set (0-255).
      */
-    public void set(int value) {
-        this.value = (byte) (value & 0xFF);
+    public void set(final int newValue) {
+        this.value = (byte) (newValue & BitMasks.MASK_8_BIT_DATA);
     }
 
     /**
@@ -62,27 +64,36 @@ public class Register {
      * @param low  The low byte register.
      * @return A 16-bit integer combining the high and low register values.
      */
-    public static int combine(Register high, Register low) {
+    @SuppressWarnings("checkstyle:magicnumber")
+    public static int combine(final Register high, final Register low) {
         return (high.get() << 8) | low.get();
     }
 
     /**
-     * Splits a 16-bit integer into two 8-bit values and stores them in the specified registers.
+     * Splits a 16-bit integer into two 8-bit values and stores them in the
+     * specified registers.
      *
      * @param value The 16-bit integer to split.
      * @param high  The register to store the high byte.
      * @param low   The register to store the low byte.
      */
-    public static void split(int value, Register high, Register low) {
-        high.set((value >> 8) & 0xFF);
-        low.set(value & 0xFF);
+    @SuppressWarnings("checkstyle:magicnumber")
+    public static void split(final int value, final Register high, final Register low) {
+        high.set((value >> 8) & BitMasks.MASK_8_BIT_DATA);
+        low.set(value & BitMasks.MASK_8_BIT_DATA);
     }
 
-    public void incrementValue() {
+    /**
+     * Increments the value of the register by 1.
+     */
+    public final void incrementValue() {
         set(get() + 1);
     }
 
-    public void decrementValue() {
+    /**
+     * Decrements the value of the register by 1.
+     */
+    public final void decrementValue() {
         set(get() - 1);
     }
 }

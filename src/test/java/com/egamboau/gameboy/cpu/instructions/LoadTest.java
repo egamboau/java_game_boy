@@ -20,52 +20,52 @@ class LoadTest extends CPUTestBase{
 
     static Stream<Arguments> generateArgumentFor8BitsInmediateDataLoadTest() {
         return Stream.of(
-            Arguments.of(0x06, RegisterType.REGISTER_B),
-            Arguments.of(0x0E, RegisterType.REGISTER_C),
-            Arguments.of(0x16, RegisterType.REGISTER_D),
-            Arguments.of(0x1E, RegisterType.REGISTER_E),
-            Arguments.of(0x26, RegisterType.REGISTER_H),
-            Arguments.of(0x2E, RegisterType.REGISTER_L)
+            Arguments.of(0x06, RegisterType.B),
+            Arguments.of(0x0E, RegisterType.C),
+            Arguments.of(0x16, RegisterType.D),
+            Arguments.of(0x1E, RegisterType.E),
+            Arguments.of(0x26, RegisterType.H),
+            Arguments.of(0x2E, RegisterType.L)
         );
     }
 
     static Stream<Arguments> generateArgumentFor16BitsInmediateDataLoadTest() {
         return Stream.of(
-            Arguments.of(0x01, RegisterType.REGISTER_BC),
-            Arguments.of(0x11, RegisterType.REGISTER_DE),
-            Arguments.of(0x21, RegisterType.REGISTER_HL)
+            Arguments.of(0x01, RegisterType.BC),
+            Arguments.of(0x11, RegisterType.DE),
+            Arguments.of(0x21, RegisterType.HL)
         );
     }
 
     static Stream<Arguments> generateArgumentForRegisterToIndirectRegisterTest() {
         return Stream.of(
-            Arguments.of(0x02, RegisterType.REGISTER_BC, RegisterType.REGISTER_A),
-            Arguments.of(0x12, RegisterType.REGISTER_DE, RegisterType.REGISTER_A)
+            Arguments.of(0x02, RegisterType.BC, RegisterType.A),
+            Arguments.of(0x12, RegisterType.DE, RegisterType.A)
         );
     }
 
     static Stream<Arguments> generateArgumentForIndirectRegisterToRegisterTest() {
         return Stream.of(
-            Arguments.of(0x0A, RegisterType.REGISTER_BC, RegisterType.REGISTER_A),
-            Arguments.of(0x1A, RegisterType.REGISTER_BC, RegisterType.REGISTER_A)
+            Arguments.of(0x0A, RegisterType.BC, RegisterType.A),
+            Arguments.of(0x1A, RegisterType.BC, RegisterType.A)
         );
     }
 
     static Stream<Arguments> generateArgumentForRegisterToIndirectIncrementRegister() {
         return Stream.of(
-            Arguments.of(0x22, RegisterType.REGISTER_HL, RegisterType.REGISTER_A)
+            Arguments.of(0x22, RegisterType.HL, RegisterType.A)
         );
     }
 
     static Stream<Arguments> generateArgumentForRegisterToIndirectDecrementRegister() {
         return Stream.of(
-            Arguments.of(0x32, RegisterType.REGISTER_HL, RegisterType.REGISTER_A)
+            Arguments.of(0x32, RegisterType.HL, RegisterType.A)
         );
     }
 
     static Stream<Arguments> generateArgumentForIndirectIncrementRegisterToRegister() {
         return Stream.of(
-            Arguments.of(0x2A, RegisterType.REGISTER_HL, RegisterType.REGISTER_A)
+            Arguments.of(0x2A, RegisterType.HL, RegisterType.A)
         );
     }
 
@@ -201,10 +201,10 @@ class LoadTest extends CPUTestBase{
 
         //update the expected values to the ones we want before the comparison
         if(is16Bit) {
-            registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+3);
+            registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+3);
             previousCycleCount += 3;
         } else {
-            registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+2);
+            registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+2);
             previousCycleCount += 2;
         }
         
@@ -225,7 +225,7 @@ class LoadTest extends CPUTestBase{
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
 
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount+2, currentCycleCount);
         verify(this.getCurrentBus(), times(1)).writeByteToAddress(registerData, address);
@@ -241,7 +241,7 @@ class LoadTest extends CPUTestBase{
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister));
 
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount+2, currentCycleCount);
         assertEquals(registerData, getCurrentCpu().getValueFromRegister(destinationRegister));
@@ -258,7 +258,7 @@ class LoadTest extends CPUTestBase{
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
 
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
         registerValues.computeIfPresent(addressRegister, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount+2, currentCycleCount);
@@ -277,7 +277,7 @@ class LoadTest extends CPUTestBase{
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
 
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
         registerValues.computeIfPresent(addressRegister, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount+2, currentCycleCount);
@@ -294,7 +294,7 @@ class LoadTest extends CPUTestBase{
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister, addressRegister));
 
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount+2, currentCycleCount);
         assertEquals(address+1, getCurrentCpu().getValueFromRegister(addressRegister));

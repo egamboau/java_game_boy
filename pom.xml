@@ -12,6 +12,13 @@
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>https://opensource.org/license/MIT</url>
+    </license>
+  </licenses>
+
   <dependencyManagement>
     <dependencies>
         <dependency>

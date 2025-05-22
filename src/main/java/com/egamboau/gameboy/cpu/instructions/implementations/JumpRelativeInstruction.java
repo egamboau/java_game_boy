@@ -6,19 +6,28 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
-public class JumpRelativeInstruction extends Instruction{
+public class JumpRelativeInstruction extends Instruction {
 
-    public JumpRelativeInstruction(AddressMode addressMode, RegisterType sourceRegister,
-            RegisterType destinationRegister, InstructionCondition condition, Byte parameter) {
+    /**
+     * Constructs a JumpRelativeInstruction.
+     *
+     * @param addressMode The addressing mode of the instruction.
+     * @param sourceRegister The source register for the instruction.
+     * @param destinationRegister The destination register for the instruction.
+     * @param condition The condition under which the jump occurs.
+     * @param parameter The parameter for the instruction.
+     */
+    public JumpRelativeInstruction(final AddressMode addressMode, final RegisterType sourceRegister,
+            final RegisterType destinationRegister, final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
 
     @Override
-    protected void runInstructionLogic(CPU currentCpu, int[] data) {
+    protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         //get the data from the array. Cast to byte to get the sign correctly
-        byte address = (byte)data[0];
+        byte address = (byte) data[0];
         boolean shouldJump;
-        if(this.getCondition() == null){
+        if (this.getCondition() == null) {
             shouldJump = true;
         } else {
             switch (getCondition()) {
@@ -39,6 +48,4 @@ public class JumpRelativeInstruction extends Instruction{
             currentCpu.incrementPCRegister(address);
         }
     }
-    
-
 }

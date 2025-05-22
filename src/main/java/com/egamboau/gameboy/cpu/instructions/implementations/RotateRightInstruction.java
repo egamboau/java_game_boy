@@ -6,18 +6,28 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
-public class RotateRightInstruction extends Instruction{
+public class RotateRightInstruction extends Instruction {
 
-    public RotateRightInstruction(AddressMode addressMode, RegisterType sourceRegister,
-            RegisterType destinationRegister, InstructionCondition condition, Byte parameter) {
+    /**
+     * Constructs a RotateRightInstruction.
+     *
+     * @param addressMode The addressing mode of the instruction.
+     * @param sourceRegister The source register for the operation.
+     * @param destinationRegister The destination register for the result.
+     * @param condition The condition under which the instruction executes.
+     * @param parameter Additional parameter for the instruction.
+     */
+    public RotateRightInstruction(final AddressMode addressMode, final RegisterType sourceRegister,
+            final RegisterType destinationRegister, final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
 
     @Override
-    protected void runInstructionLogic(CPU currentCpu, int[] data) {
+    @SuppressWarnings("checkstyle:magicnumber")
+    protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         int value = currentCpu.getValueFromRegister(getSourceRegister());
         int futureCarry = value & 0x01;
-        
+
         int result = ((value | (futureCarry << 8)) >> 1);
 
         currentCpu.setValueInRegister(result, getDestinationRegister());

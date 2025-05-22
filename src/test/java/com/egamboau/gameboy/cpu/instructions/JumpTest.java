@@ -65,7 +65,7 @@ class JumpTest extends CPUTestBase{
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
 
         //pc should increment by 2 (the size of the instruction) + the encoded offset
-        oldRegisterValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> (u + 2 + (byte) offset)&0xFFFF);
+        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> (u + 2 + (byte) offset)&0xFFFF);
         assertEquals(previousCycleCount+3, currentCycleCount);
         assertEquals(oldRegisterValues, newRegisterValues);
 
@@ -136,9 +136,9 @@ class JumpTest extends CPUTestBase{
             Map<RegisterType, Integer> newRegisterValues) {
         //pc should increment by 2 (the size of the instruction) + the encoded offset
         if (condition) {
-            oldRegisterValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> (u + 2  + (byte)offset)&0xFFFF);
+            oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> (u + 2  + (byte)offset)&0xFFFF);
         } else {
-            oldRegisterValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u + 2 );
+            oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 2 );
         }
         assertEquals(previousCycleCount+cycleCountOffset, currentCycleCount);
         assertEquals(oldRegisterValues, newRegisterValues);

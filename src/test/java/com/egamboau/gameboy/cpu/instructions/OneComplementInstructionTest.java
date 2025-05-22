@@ -21,22 +21,22 @@ class OneComplementInstructionTest extends CPUTestBase{
             0x2F //the opcode
         );
 
-        this.getCurrentCpu().setValueInRegister(registerValue, RegisterType.REGISTER_A);
+        this.getCurrentCpu().setValueInRegister(registerValue, RegisterType.A);
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_A));
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.A));
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_A));
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.A));
 
         //Cycle count must match
         assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not currently matching.");
 
         //other flags must be the same, and update the PC to be 1 byte more
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
 
-        assertEquals(255, getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A));
+        assertEquals(255, getCurrentCpu().getValueFromRegister(RegisterType.A));
     }
 
     @Test
@@ -46,22 +46,22 @@ class OneComplementInstructionTest extends CPUTestBase{
             0x2F //the opcode
         );
 
-        this.getCurrentCpu().setValueInRegister(registerValue, RegisterType.REGISTER_A);
+        this.getCurrentCpu().setValueInRegister(registerValue, RegisterType.A);
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_A));
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.A));
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_A));
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.A));
 
         //Cycle count must match
         assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not currently matching.");
 
         //other flags must be the same, and update the PC to be 1 byte more
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
 
-        assertEquals(0, getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A));
+        assertEquals(0, getCurrentCpu().getValueFromRegister(RegisterType.A));
     }
 
 
@@ -72,22 +72,22 @@ class OneComplementInstructionTest extends CPUTestBase{
             0x2F //the opcode
         );
 
-        this.getCurrentCpu().setValueInRegister(registerValue, RegisterType.REGISTER_A);
+        this.getCurrentCpu().setValueInRegister(registerValue, RegisterType.A);
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_A));
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.A));
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_A));
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.A));
 
         //Cycle count must match
         assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not currently matching.");
 
         //other flags must be the same, and update the PC to be 1 byte more
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues);
 
-        assertEquals((~registerValue & 0xFF), getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A));
+        assertEquals((~registerValue & 0xFF), getCurrentCpu().getValueFromRegister(RegisterType.A));
     }
 
 }

@@ -22,23 +22,23 @@ class DecimalAdjustAccumulatorTest extends CPUTestBase{
         this.getCurrentCpu().setSubtract(originalSubstract);
         this.getCurrentCpu().setHalfCarry(originalHalfCarry);
         this.getCurrentCpu().setCarry(orignalCarry);
-        this.getCurrentCpu().setValueInRegister(registerValue, RegisterType.REGISTER_A);
+        this.getCurrentCpu().setValueInRegister(registerValue, RegisterType.A);
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
             0x27 //the opcode
         );
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.REGISTER_AF));
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
 
         assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not currently matching.");
 
         //other flags must be the same, and update the PC to be 1 byte more
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
         assertEquals(registerValues, newRegisterValues, "CPU Register values did not match the previous state.");
-        assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.REGISTER_A), "Value on Register A did not match the expeced value.");
+        assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.A), "Value on Register A did not match the expeced value.");
 
         assertEquals(expectedZeroValue, getCurrentCpu().getZero(), "Zero flag set incorrectly");
         assertEquals(expectedHalfCarryValue, getCurrentCpu().getHalfCarry(), "Half carry flag set incorrectly");

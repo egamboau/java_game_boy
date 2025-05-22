@@ -6,15 +6,24 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
-public class OneComplementInstruction extends Instruction{
+public class OneComplementInstruction extends Instruction {
 
-    public OneComplementInstruction(AddressMode addressMode, RegisterType sourceRegister,
-            RegisterType destinationRegister, InstructionCondition condition, Byte parameter) {
+    /**
+     * Constructs a OneComplementInstruction.
+     *
+     * @param addressMode        The addressing mode of the instruction.
+     * @param sourceRegister     The source register for the instruction.
+     * @param destinationRegister The destination register for the instruction.
+     * @param condition          The condition under which the instruction executes.
+     * @param parameter          An additional parameter for the instruction.
+     */
+    public OneComplementInstruction(final AddressMode addressMode, final RegisterType sourceRegister,
+            final RegisterType destinationRegister, final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
 
     @Override
-    protected void runInstructionLogic(CPU currentCpu, int[] data) {
+    protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         int value = currentCpu.getValueFromRegister(getSourceRegister());
         int result = (~value);
         currentCpu.setValueInRegister(result, getDestinationRegister());

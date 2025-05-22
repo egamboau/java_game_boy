@@ -40,43 +40,43 @@ class DecrementTest extends CPUTestBase {
 
     static Stream<Arguments> generateTestArgumentsFor8BitTests() {
         return Stream.of(
-            Arguments.of(0x05, 0, RegisterType.REGISTER_B, true, true, false),
-            Arguments.of(0x05, 0x10, RegisterType.REGISTER_B, true, true, false),
-            Arguments.of(0x05, 0x0E, RegisterType.REGISTER_B, true, false, false),
-            Arguments.of(0x05, 0x01, RegisterType.REGISTER_B, true, false, true),
+            Arguments.of(0x05, 0, RegisterType.B, true, true, false),
+            Arguments.of(0x05, 0x10, RegisterType.B, true, true, false),
+            Arguments.of(0x05, 0x0E, RegisterType.B, true, false, false),
+            Arguments.of(0x05, 0x01, RegisterType.B, true, false, true),
             
-            Arguments.of(0x0D, 0, RegisterType.REGISTER_C, true, true, false),
-            Arguments.of(0x0D, 0x10, RegisterType.REGISTER_C, true, true, false),
-            Arguments.of(0x0D, 0x0E, RegisterType.REGISTER_C, true, false, false),
-            Arguments.of(0x0D, 0x01, RegisterType.REGISTER_C, true, false, true),
+            Arguments.of(0x0D, 0, RegisterType.C, true, true, false),
+            Arguments.of(0x0D, 0x10, RegisterType.C, true, true, false),
+            Arguments.of(0x0D, 0x0E, RegisterType.C, true, false, false),
+            Arguments.of(0x0D, 0x01, RegisterType.C, true, false, true),
 
-            Arguments.of(0x15, 0, RegisterType.REGISTER_D, true, true, false),
-            Arguments.of(0x15, 0x10, RegisterType.REGISTER_D, true, true, false),
-            Arguments.of(0x15, 0x0E, RegisterType.REGISTER_D, true, false, false),
-            Arguments.of(0x15, 0x01, RegisterType.REGISTER_D, true, false, true),
+            Arguments.of(0x15, 0, RegisterType.D, true, true, false),
+            Arguments.of(0x15, 0x10, RegisterType.D, true, true, false),
+            Arguments.of(0x15, 0x0E, RegisterType.D, true, false, false),
+            Arguments.of(0x15, 0x01, RegisterType.D, true, false, true),
 
-            Arguments.of(0x1D, 0, RegisterType.REGISTER_E, true, true, false),
-            Arguments.of(0x1D, 0x10, RegisterType.REGISTER_E, true, true, false),
-            Arguments.of(0x1D, 0x0E, RegisterType.REGISTER_E, true, false, false),
-            Arguments.of(0x1D, 0x01, RegisterType.REGISTER_E, true, false, true),
+            Arguments.of(0x1D, 0, RegisterType.E, true, true, false),
+            Arguments.of(0x1D, 0x10, RegisterType.E, true, true, false),
+            Arguments.of(0x1D, 0x0E, RegisterType.E, true, false, false),
+            Arguments.of(0x1D, 0x01, RegisterType.E, true, false, true),
 
-            Arguments.of(0x25, 0, RegisterType.REGISTER_H, true, true, false),
-            Arguments.of(0x25, 0x10, RegisterType.REGISTER_H, true, true, false),
-            Arguments.of(0x25, 0x0E, RegisterType.REGISTER_H, true, false, false),
-            Arguments.of(0x25, 0x01, RegisterType.REGISTER_H, true, false, true),
+            Arguments.of(0x25, 0, RegisterType.H, true, true, false),
+            Arguments.of(0x25, 0x10, RegisterType.H, true, true, false),
+            Arguments.of(0x25, 0x0E, RegisterType.H, true, false, false),
+            Arguments.of(0x25, 0x01, RegisterType.H, true, false, true),
 
-            Arguments.of(0x2D, 0, RegisterType.REGISTER_L, true, true, false),
-            Arguments.of(0x2D, 0x10, RegisterType.REGISTER_L, true, true, false),
-            Arguments.of(0x2D, 0x0E, RegisterType.REGISTER_L, true, false, false),
-            Arguments.of(0x2D, 0x01, RegisterType.REGISTER_L, true, false, true)
+            Arguments.of(0x2D, 0, RegisterType.L, true, true, false),
+            Arguments.of(0x2D, 0x10, RegisterType.L, true, true, false),
+            Arguments.of(0x2D, 0x0E, RegisterType.L, true, false, false),
+            Arguments.of(0x2D, 0x01, RegisterType.L, true, false, true)
         );
     }
 
     static Stream<Arguments> generateTestArgumentsFor16BitTests() {
         return Stream.of(
-            Arguments.of(0x0B, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.REGISTER_BC),
-            Arguments.of(0x1B, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.REGISTER_DE),
-            Arguments.of(0x2B, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.REGISTER_HL)
+            Arguments.of(0x0B, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.BC),
+            Arguments.of(0x1B, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.DE),
+            Arguments.of(0x2B, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.HL)
         );
     }
 
@@ -90,7 +90,7 @@ class DecrementTest extends CPUTestBase {
             expectedCycles = 2;
         } else {
             expectedValue = (registerData - 1) & 0xFF;
-            filteredRegister = TestUtils.getPairForRegister(register, RegisterType.REGISTER_F);
+            filteredRegister = TestUtils.getPairForRegister(register, RegisterType.F);
             expectedCycles = 1;
         }
 
@@ -106,7 +106,7 @@ class DecrementTest extends CPUTestBase {
         assertEquals(expectedValue, this.getCurrentCpu().getValueFromRegister(register), "Register value incorrect: " + register);
         // cycles must be updated as required
         assertEquals(previousCycleCount + expectedCycles, currentCycleCount, "Cycle count not currently matching.");
-        registerValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u + 1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
 
         assertEquals(registerValues, newRegisterValues, "CPU Register values did not match the previous state.");
     }

@@ -25,7 +25,7 @@ class NoopTest extends CPUTestBase {
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
 
         //PC should be incremented by one on the old, so it possible to verify the new one
-        oldRegisterValues.computeIfPresent(RegisterType.REGISTER_PC, (t, u) -> u+1);
+        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
         assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not matching.");
         assertEquals(oldRegisterValues, newRegisterValues);
 
