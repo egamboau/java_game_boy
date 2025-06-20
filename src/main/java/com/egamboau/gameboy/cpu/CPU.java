@@ -330,6 +330,7 @@ public class CPU {
                 break;
             case SP:
                 spRegister = data & BitMasks.MASK_16_BIT_DATA;
+                incrementCpuCycles(1L);
                 break;
             case HL:
                 Register.split(data, h, l);

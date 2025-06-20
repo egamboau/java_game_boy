@@ -51,6 +51,9 @@ public class LoadInstruction extends Instruction {
             case REGISTER_TO_INDIRECT_REGISTER:
                 storeRegisterDataInMemory(currentCpu);
                 break;
+            case DATA_8_BIT_TO_MEMORY_ADDRESS_REGISTER:
+                storeDataInMemory(currentCpu, data);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown address mode: " + getAddressMode());
         }
@@ -86,4 +89,9 @@ public class LoadInstruction extends Instruction {
         currentCpu.writeByteToAddress(address, data);
     }
 
+    private void storeDataInMemory(final CPU currentCpu, final int[] data) {
+        int address = currentCpu.getValueFromRegister(getDestinationRegister());
+        int dataToStore = data[0];
+        currentCpu.writeByteToAddress(address, dataToStore);
+    }
 }

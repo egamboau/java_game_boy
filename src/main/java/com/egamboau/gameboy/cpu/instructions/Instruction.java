@@ -16,6 +16,7 @@ import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftCircularI
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateRightInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateRigthCircularInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.SetCarryFlagInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.StopInstruction;
 
 /**
@@ -137,14 +138,14 @@ public abstract class Instruction {
                     int firstByte = currentCpu.getDataFromPCAndIncrement();
                     int secondByte = currentCpu.getDataFromPCAndIncrement();
                     return new int[] {firstByte, secondByte };
-                case DATA_8_BIT_TO_REGISTER:
+                case DATA_8_BIT_TO_REGISTER, DATA_8_BIT_TO_MEMORY_ADDRESS_REGISTER:
                     int data = currentCpu.getDataFromPCAndIncrement();
                     return new int[] {data };
                 case REGISTER_8_BIT, REGISTER_TO_REGISTER, REGISTER_16_BIT, REGISTER_16_BIT_TO_REGISTER_16_BIT,
                         REGISTER_TO_INDIRECT_REGISTER,
                         MEMORY_ADDRESS_REGISTER_TO_REGISTER, REGISTER_TO_INCREMENT_16_BIT_MEMORY_ADDRESS,
                         INCREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER,
-                        REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS:
+                        REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS, MEMORY_ADDRESS_REGISTER:
                     // Data is on the register itself, so no data to fetch.
                     return new int[0];
                 default:
@@ -187,7 +188,7 @@ public abstract class Instruction {
          int p = (opcode & 60) >> 4;
          int q = (opcode & 10) >> 3;
 
-         switch (x) {
+          switch (x) {
             case 0:
                 switch (z) {
                     case 0:
@@ -201,14 +202,26 @@ public abstract class Instruction {
                     case 4:
                         // 8-bit INC
                         RegisterType incrementRegister = RegisterType.getRegister(y);
+                        if (incrementRegister == RegisterType.HL) {
+                            //special case, this is an indirect register
+                            return new IncrementInstruction(AddressMode.MEMORY_ADDRESS_REGISTER, incrementRegister, incrementRegister, null, null);
+                        }
                         return new IncrementInstruction(AddressMode.REGISTER_8_BIT, incrementRegister, incrementRegister, null, null);
                     case 5:
                         // 8-bit DEC
                         RegisterType decrementRegister = RegisterType.getRegister(y);
+                        if (decrementRegister == RegisterType.HL) {
+                            //special case, this is an indirect register
+                            return new DecrementInstruction(AddressMode.MEMORY_ADDRESS_REGISTER, decrementRegister, decrementRegister, null, null);
+                        }
                         return new DecrementInstruction(AddressMode.REGISTER_8_BIT, decrementRegister, decrementRegister, null, null);
                     case 6:
                         // 8-bit load immediate
                         RegisterType loadRegister = RegisterType.getRegister(y);
+                        if (loadRegister == RegisterType.HL) {
+                            //special case, this is an indirect register
+                            return new LoadInstruction(AddressMode.DATA_8_BIT_TO_MEMORY_ADDRESS_REGISTER, null, loadRegister, null, null);
+                        }
                         return new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, loadRegister, null, null);
                     case 7:
                         return generateFlagAndAccumulatorOperations(y);
@@ -247,6 +260,8 @@ public abstract class Instruction {
                 return new DecimalAdjustAccumulatorInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
             case 5:
                 return new OneComplementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
+            case 6:
+                return new SetCarryFlagInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
             default:
                 return new StopInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
         }

@@ -39,6 +39,7 @@ class LoadTest extends CPUTestBase {
             Arguments.of(0x21, RegisterType.HL)
         );
     }
+
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateArgumentForRegisterToIndirectRegisterTest() {
         return Stream.of(
@@ -54,18 +55,29 @@ class LoadTest extends CPUTestBase {
             Arguments.of(0x1A, RegisterType.DE, RegisterType.A)
         );
     }
+
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateArgumentForRegisterToIndirectIncrementRegister() {
         return Stream.of(
             Arguments.of(0x22, RegisterType.HL, RegisterType.A)
         );
     }
+
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateArgumentForRegisterToIndirectDecrementRegister() {
         return Stream.of(
             Arguments.of(0x32, RegisterType.HL, RegisterType.A)
         );
     }
+
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    static Stream<Arguments> generateArgumentsInmediateToIndirectRegister() {
+        return Stream.of(
+            Arguments.of(0x36, RegisterType.HL)
+        );
+    }
+
+
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateArgumentForIndirectIncrementRegisterToRegister() {
         return Stream.of(
@@ -208,6 +220,25 @@ class LoadTest extends CPUTestBase {
                 sourceRegister);
     }
 
+@ParameterizedTest
+    @MethodSource("generateArgumentsInmediateToIndirectRegister")
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void runInmediateToIndirectRegisterTest(final int opcode, final RegisterType addressRegister) {
+
+        int inmediateValue = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int hRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        int lRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+
+        int address = (hRegisterData << 8) | lRegisterData;
+
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+                0x36, // the opcode
+                inmediateValue
+        );
+
+        runLoadInmediateDataIntoIndirectAddressWithSourceDecrement(address, addressRegister, inmediateValue);
+    }
+
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     private void runLoadInmediateDataToRegister(final int loadedData, final RegisterType register,
             final boolean is16Bit) {
@@ -310,6 +341,26 @@ class LoadTest extends CPUTestBase {
         assertEquals(address - 1, getCurrentCpu().getValueFromRegister(addressRegister));
         verify(this.getCurrentBus(), times(1)).writeByteToAddress(registerData, address);
     }
+
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    private void runLoadInmediateDataIntoIndirectAddressWithSourceDecrement(final int address,
+            final RegisterType addressRegister, final int inmediateValue) {
+
+        this.getCurrentCpu().setValueInRegister(address, addressRegister);
+
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
+
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 2);
+        assertEquals(registerValues, newRegisterValues);
+        assertEquals(previousCycleCount + 3, currentCycleCount);
+        verify(this.getCurrentBus(), times(1)).writeByteToAddress(inmediateValue, address);
+    }
+
 
     private void runLoadMemoryDataIntoRegisterWithSourceIncremenet(final int address,
             final RegisterType addressRegister, final int expectedData, final RegisterType destinationRegister) {

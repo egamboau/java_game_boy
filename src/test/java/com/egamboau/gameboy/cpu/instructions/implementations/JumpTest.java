@@ -53,6 +53,16 @@ class JumpTest extends CPUTestBase {
         );
     }
 
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    static Stream<Arguments> generateJrcTestArguments() {
+        return Stream.of(
+            Arguments.of(0x38, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, 2),
+            Arguments.of(0x38, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, 3),
+            Arguments.of(0x38, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, 2),
+            Arguments.of(0x38, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, 3)
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("generateJrTestArguments")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
@@ -103,6 +113,17 @@ class JumpTest extends CPUTestBase {
                 offset);
 
         runCarryFlagJumpTest(carryFlagStatus, true, cycleCountOffset, offset);
+
+    }
+
+    @ParameterizedTest
+    @MethodSource("generateJrcTestArguments")
+    void testJRC(final int opcode, final int offset, final boolean carryFlagStatus, final int cycleCountOffset) {
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+                opcode, // the opcode
+                offset);
+
+        runCarryFlagJumpTest(carryFlagStatus, false, cycleCountOffset, offset);
 
     }
 

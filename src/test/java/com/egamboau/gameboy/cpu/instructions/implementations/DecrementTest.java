@@ -2,6 +2,8 @@ package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -20,14 +22,14 @@ class DecrementTest extends CPUTestBase {
     @ParameterizedTest
     @MethodSource("generateTestArgumentsFor8BitTests")
     void testDecInstructionFor8BitRegisters(final int opcode, final int registerData, final RegisterType register,
-            final boolean expectedSubstractFlag, final boolean expectedHalfCarryFlag, final boolean expctedZeroFlag) {
+            final boolean expectedSubstractFlag, final boolean expectedHalfCarryFlag, final boolean expectedZeroFlag) {
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(opcode);
         executeDecrementTest(registerData, register, false);
 
         // check if the registerValues are set accordingly
         assertEquals(expectedSubstractFlag, getCurrentCpu().getSubtract(), "Substract flag set incorrectly");
         assertEquals(expectedHalfCarryFlag, getCurrentCpu().getHalfCarry(), "Half Carry flag set incorrectly");
-        assertEquals(expctedZeroFlag, getCurrentCpu().getZero(), "Carry flag set incorrectly");
+        assertEquals(expectedZeroFlag, getCurrentCpu().getZero(), "Carry flag set incorrectly");
     }
 
     @ParameterizedTest
@@ -39,6 +41,31 @@ class DecrementTest extends CPUTestBase {
 
         executeDecrementTest(registerData, register, true);
     }
+
+    @ParameterizedTest
+    @SuppressWarnings("checkstyle:magicnumber")
+    @MethodSource("generateTestArgumentsForIndirectDec")
+    void testIndirectDecInstructionFor16BitRegisters(final int opcode, final int memoryData,
+    final RegisterType register, final boolean expectedSubstractFlag, final boolean expectedHalfCarryFlag, final boolean expectedZeroFlag) {
+        int registerData = TestUtils.getRandomIntegerInRange(0, 0xFFFF) & 0xFFFF;
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+                opcode);
+
+        when(this.getCurrentBus().readByteFromAddress(registerData)).thenReturn(memoryData);
+
+        executeIndirectDecTest(registerData, register, memoryData, expectedZeroFlag, expectedSubstractFlag, expectedHalfCarryFlag);
+    }
+
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    static Stream<Arguments> generateTestArgumentsForIndirectDec() {
+        return Stream.of(
+                Arguments.of(0x35, 0, RegisterType.HL, true, true, false),
+                Arguments.of(0x35, 0x10, RegisterType.HL, true, true, false),
+                Arguments.of(0x35, 0x0E, RegisterType.HL, true, false, false),
+                Arguments.of(0x35, 0x01, RegisterType.HL, true, false, true)
+        );
+    }
+
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateTestArgumentsFor8BitTests() {
         return Stream.of(
@@ -72,6 +99,7 @@ class DecrementTest extends CPUTestBase {
                 Arguments.of(0x2D, 0x0E, RegisterType.L, true, false, false),
                 Arguments.of(0x2D, 0x01, RegisterType.L, true, false, true));
     }
+
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateTestArgumentsFor16BitTests() {
         return Stream.of(
@@ -79,6 +107,7 @@ class DecrementTest extends CPUTestBase {
                 Arguments.of(0x1B, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.DE),
                 Arguments.of(0x2B, TestUtils.getRandomIntegerInRange(0x00, 0xFFFF), RegisterType.HL));
     }
+
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     private void executeDecrementTest(final int registerData, final RegisterType register, final boolean is16Bit) {
         int expectedValue;
@@ -110,4 +139,31 @@ class DecrementTest extends CPUTestBase {
 
         assertEquals(registerValues, newRegisterValues, "CPU Register values did not match the previous state.");
     }
+
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    private void executeIndirectDecTest(final int registerData, final RegisterType registerType,
+    final int memoryData, final boolean expectedZeroFlag, final boolean expectedSubstractFlag, final boolean expectedHalfCarryFlag) {
+
+        this.getCurrentBus().writeByteToAddress(registerData, memoryData);
+        this.getCurrentCpu().setValueInRegister(registerData, registerType);
+
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(registerType, RegisterType.F));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(registerType, RegisterType.F));
+
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
+        assertEquals(registerValues, newRegisterValues);
+
+        assertEquals(previousCycleCount + 3, currentCycleCount);
+
+         // check if the registerValues are set accordingly
+        assertEquals(expectedSubstractFlag, getCurrentCpu().getSubtract(), "Substract flag set incorrectly");
+        assertEquals(expectedHalfCarryFlag, getCurrentCpu().getHalfCarry(), "Half Carry flag set incorrectly");
+        assertEquals(expectedZeroFlag, getCurrentCpu().getZero(), "Carry flag set incorrectly");
+
+        verify(this.getCurrentBus(), times(1)).writeByteToAddress(memoryData - 1, registerData);
+    }
 }
+

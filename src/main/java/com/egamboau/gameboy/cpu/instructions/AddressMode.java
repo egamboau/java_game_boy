@@ -79,4 +79,9 @@ public enum AddressMode {
      * Addressing mode where 8-bit data is loaded into a memory address pointed to by a register.
      */
     DATA_8_BIT_TO_MEMORY_ADDRESS_REGISTER,
+
+    /**
+     * Addressing mode where a memory address is specified by a register.
+     */
+    MEMORY_ADDRESS_REGISTER,
 }

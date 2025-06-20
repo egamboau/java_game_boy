@@ -40,6 +40,9 @@ public class JumpRelativeInstruction extends Instruction {
                 case CARRY_FLAG_NOT_SET:
                     shouldJump = !currentCpu.getCarry();
                     break;
+                case CARRY_FLAG_SET:
+                    shouldJump = currentCpu.getCarry();
+                    break;
                 default:
                     throw new IllegalArgumentException(String.format("Condition not supported for jump: %s", getCondition()));
             }

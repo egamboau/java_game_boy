@@ -33,6 +33,9 @@ public class IncrementInstruction extends Instruction {
             case REGISTER_16_BIT:
                 incrementRegisterPair(currentCpu);
                 break;
+            case MEMORY_ADDRESS_REGISTER:
+                incrementIndirectAddres(currentCpu);
+                break;
             default:
                 throw new IllegalArgumentException(
                         String.format("Address mode %s not supported for Increment Instruction", getAddressMode()));
@@ -58,5 +61,18 @@ public class IncrementInstruction extends Instruction {
     private void incrementRegisterPair(final CPU currentCpu) {
         int result = getIncrementedRegisterData(currentCpu) & BitMasks.MASK_16_BIT_DATA;
         currentCpu.setValueInRegister(result, getDestinationRegister());
+    }
+
+    private void incrementIndirectAddres(final CPU currentCpu) {
+        int memoryAddress = currentCpu.getValueFromRegister(getSourceRegister());
+        int data = currentCpu.readByteFromAddress(memoryAddress);
+        int result = data + 1;
+
+        // based on the result, set the needed flags on the F register.
+        currentCpu.setZero(result == 0);
+        currentCpu.setSubtract(false);
+        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT) == 0);
+
+        currentCpu.writeByteToAddress(memoryAddress, result);
     }
 }
