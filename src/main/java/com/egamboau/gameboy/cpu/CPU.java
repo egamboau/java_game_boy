@@ -3,23 +3,8 @@ package com.egamboau.gameboy.cpu;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.Instruction;
-import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
-import com.egamboau.gameboy.cpu.instructions.implementations.AddInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.DecimalAdjustAccumulatorInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.DecrementInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.IncrementInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.JumpRelativeInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.LoadInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.NoopInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.OneComplementInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftCircularInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.RotateRightInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.RotateRigthCircularInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.StopInstruction;
 import com.egamboau.gameboy.memory.BitMasks;
 import com.egamboau.gameboy.memory.Bus;
 
@@ -82,16 +67,6 @@ public class CPU {
     private boolean halted;
 
     /**
-     * The size of the instruction set for the CPU, representing the total number of opcodes.
-     */
-    private static final int INSTRUCTION_SET_SIZE = 0x100;
-
-    /**
-     * Array to store the CPU instructions, indexed by their opcode values.
-     */
-    private Instruction[] instructions = new Instruction[INSTRUCTION_SET_SIZE];
-
-    /**
      * Memory bus used for communication between the CPU and memory.
      */
     private Bus memoryBus;
@@ -110,7 +85,6 @@ public class CPU {
     public CPU(final Bus bus) {
         this.memoryBus = bus;
         this.initializeCPU();
-        this.initializeInstructions();
     }
 
     /**
@@ -160,7 +134,7 @@ public class CPU {
         LOGGER.info("Fetching OPCODE instruction from memory");
         int opcode = this.memoryBus.readByteFromAddress(this.pcRegister++);
         incrementCpuCycles(1L);
-        return this.instructions[opcode];
+        return Instruction.geInstructionFromOpcode(opcode);
     }
 
     /**
@@ -199,130 +173,6 @@ public class CPU {
                     String.format(
                         "Register %s not supported for 16 bit increment instruction", register));
         }
-    }
-
-    @SuppressWarnings("checkstyle:magicnumber")
-    private void initializeMiscellaneousInstructions() {
-        LOGGER.info("Initializing Miscelaneous CPU instructions");
-        instructions[0x00] = new NoopInstruction(null, null, null, null, null);
-        instructions[0x10] = new StopInstruction(null, null, null, null, null);
-        instructions[0x27] = new DecimalAdjustAccumulatorInstruction(AddressMode.REGISTER_8_BIT, null, RegisterType.A, null, null);
-    }
-
-    @SuppressWarnings("checkstyle:magicnumber")
-    private void initializeLoadInstructions() {
-        instructions[0x01] = new LoadInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.BC, null, null);
-        instructions[0x02] = new LoadInstruction(AddressMode.REGISTER_TO_INDIRECT_REGISTER, RegisterType.A, RegisterType.BC, null, null);
-        instructions[0x06] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.B, null, null);
-        instructions[0x08] = new LoadInstruction(AddressMode.REGISTER_TO_MEMORY_ADDRESS_DATA, RegisterType.SP, null, null, null);
-        instructions[0x09] = new AddInstruction(AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT, RegisterType.BC, RegisterType.HL, null, null);
-        instructions[0x0A] = new LoadInstruction(AddressMode.MEMORY_ADDRESS_REGISTER_TO_REGISTER, RegisterType.BC, RegisterType.A, null, null);
-        instructions[0x0E] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.C, null, null);
-        instructions[0x11] = new LoadInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.DE, null, null);
-        instructions[0x12] = new LoadInstruction(AddressMode.REGISTER_TO_INDIRECT_REGISTER,
-                RegisterType.A, RegisterType.DE, null, null);
-                instructions[0x16] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.D,
-                null, null);
-                instructions[0x1A] = new LoadInstruction(AddressMode.MEMORY_ADDRESS_REGISTER_TO_REGISTER,
-                RegisterType.DE, RegisterType.A, null, null);
-                instructions[0x1E] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.E,
-                null, null);
-                instructions[0x21] = new LoadInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.HL,
-                null, null);
-        instructions[0x22] = new LoadInstruction(AddressMode.REGISTER_TO_INCREMENT_16_BIT_MEMORY_ADDRESS,
-                RegisterType.A, RegisterType.HL, null, null);
-                instructions[0x26] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.H,
-                null, null);
-                instructions[0x2A] = new LoadInstruction(AddressMode.INCREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER,
-                RegisterType.HL, RegisterType.A, null, null);
-                instructions[0x2E] = new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.L,
-                null, null);
-
-                instructions[0x31] = new LoadInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.SP,
-                null, null);
-        instructions[0x32] = new LoadInstruction(AddressMode.REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS,
-                RegisterType.A, RegisterType.HL, null, null);
-    }
-
-    @SuppressWarnings("checkstyle:magicnumber")
-    private void initializeArithmeticInstructions() {
-        instructions[0x03] = new IncrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.BC,
-                RegisterType.BC, null, null);
-        instructions[0x04] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.B,
-                RegisterType.B, null, null);
-        instructions[0x05] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.B,
-                RegisterType.B, null, null);
-        instructions[0x0B] = new DecrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.BC,
-                RegisterType.BC, null, null);
-        instructions[0x0C] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.C,
-                RegisterType.C, null, null);
-        instructions[0x0D] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.C,
-                RegisterType.C, null, null);
-        instructions[0x13] = new IncrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.DE,
-                RegisterType.DE, null, null);
-        instructions[0x14] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.D,
-                RegisterType.D, null, null);
-        instructions[0x15] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.D,
-                RegisterType.D, null, null);
-                instructions[0x19] = new AddInstruction(AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT,
-                RegisterType.DE, RegisterType.HL, null, null);
-                instructions[0x1B] = new DecrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.DE,
-                RegisterType.DE, null, null);
-        instructions[0x1C] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.E,
-                RegisterType.E, null, null);
-        instructions[0x1D] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.E,
-                RegisterType.E, null, null);
-                instructions[0x23] = new IncrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.HL,
-                RegisterType.HL, null, null);
-        instructions[0x24] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.H,
-                RegisterType.H, null, null);
-        instructions[0x25] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.H,
-                RegisterType.H, null, null);
-                instructions[0x29] = new AddInstruction(AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT,
-                RegisterType.HL, RegisterType.HL, null, null);
-                instructions[0x2B] = new DecrementInstruction(AddressMode.REGISTER_16_BIT, RegisterType.HL,
-                RegisterType.HL, null, null);
-        instructions[0x2C] = new IncrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.L,
-                RegisterType.L, null, null);
-        instructions[0x2D] = new DecrementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.L,
-                RegisterType.L, null, null);
-    }
-    @SuppressWarnings("checkstyle:magicnumber")
-    private void initializeBitShiftInstructions() {
-        instructions[0x07] = new RotateLeftCircularInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
-        instructions[0x0F] = new RotateRigthCircularInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
-        instructions[0x17] = new RotateLeftInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
-        instructions[0x1F] = new RotateRightInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
-    }
-    @SuppressWarnings("checkstyle:magicnumber")
-    private void initializeJumpAndSubrutinesInstructions() {
-        instructions[0x18] = new JumpRelativeInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null,
-                RegisterType.PC, null, null);
-                instructions[0x20] = new JumpRelativeInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null,
-                RegisterType.PC, InstructionCondition.Z_FLAG_NOT_SET, null);
-                instructions[0x28] = new JumpRelativeInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null,
-                RegisterType.PC, InstructionCondition.Z_FLAG_SET, null);
-                instructions[0x30] = new JumpRelativeInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null,
-                RegisterType.PC, InstructionCondition.CARRY_FLAG_NOT_SET, null);
-    }
-
-    @SuppressWarnings("checkstyle:magicnumber")
-    private void initializeBitwiseInstructions() {
-        instructions[0x2F] = new OneComplementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A,
-                RegisterType.A, null, null);
-    }
-
-    /**
-     * Initlaizes all the opcodes and store them in array format. This is used to
-     * refer to the opcodes and know what is needed for the CPU to run.
-     */
-    private void initializeInstructions() {
-        initializeMiscellaneousInstructions();
-        initializeLoadInstructions();
-        initializeArithmeticInstructions();
-        initializeBitShiftInstructions();
-        initializeJumpAndSubrutinesInstructions();
-        initializeBitwiseInstructions();
     }
 
     private void initializeCPU() {

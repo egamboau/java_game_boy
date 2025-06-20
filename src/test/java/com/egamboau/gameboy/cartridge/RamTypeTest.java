@@ -1,11 +1,14 @@
 package com.egamboau.gameboy.cartridge;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RamTypeTest {
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testFromByteWithValidValues() {
         // Test valid byte values for each RAM type
         assertEquals(RamType.NO_RAM, RamType.fromByte((byte) 0x00));
@@ -17,6 +20,7 @@ class RamTypeTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testFromByteWithInvalidValue() {
         // Test invalid byte value to ensure exception is thrown
         byte invalidValue = (byte) 0x10;

@@ -52,7 +52,7 @@ public class IncrementInstruction extends Instruction {
         // based on the result, set the needed flags on the F register.
         currentCpu.setZero(result == 0);
         currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT) != 0);
+        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT) == 0);
     }
 
     private void incrementRegisterPair(final CPU currentCpu) {

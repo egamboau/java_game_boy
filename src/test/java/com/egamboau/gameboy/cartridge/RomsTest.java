@@ -1,13 +1,15 @@
 package com.egamboau.gameboy.cartridge;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RomsTest {
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testFromByteWithValidValues() {
-        /**
+        /*
          * Test valid byte values for each cartridge type
          */
         assertEquals(Roms.ROM_ONLY, Roms.fromByte((byte) 0x00));
@@ -41,8 +43,9 @@ class RomsTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testFromByteWithInvalidValue() {
-        /**
+        /*
          * Test if an invalid byte return an Unknown Value
          */
         byte invalidValue = (byte) 0x04;

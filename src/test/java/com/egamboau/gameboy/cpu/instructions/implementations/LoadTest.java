@@ -1,4 +1,4 @@
-package com.egamboau.gameboy.cpu.instructions;
+package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -14,10 +14,12 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.egamboau.gameboy.cpu.CPUTestBase;
+import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.test.TestUtils;
 
-class LoadTest extends CPUTestBase{
+class LoadTest extends CPUTestBase {
 
+    @SuppressWarnings({"checkstyle:magicnumber"})
     static Stream<Arguments> generateArgumentFor8BitsInmediateDataLoadTest() {
         return Stream.of(
             Arguments.of(0x06, RegisterType.B),
@@ -29,6 +31,7 @@ class LoadTest extends CPUTestBase{
         );
     }
 
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateArgumentFor16BitsInmediateDataLoadTest() {
         return Stream.of(
             Arguments.of(0x01, RegisterType.BC),
@@ -36,7 +39,7 @@ class LoadTest extends CPUTestBase{
             Arguments.of(0x21, RegisterType.HL)
         );
     }
-
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateArgumentForRegisterToIndirectRegisterTest() {
         return Stream.of(
             Arguments.of(0x02, RegisterType.BC, RegisterType.A),
@@ -44,25 +47,26 @@ class LoadTest extends CPUTestBase{
         );
     }
 
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateArgumentForIndirectRegisterToRegisterTest() {
         return Stream.of(
             Arguments.of(0x0A, RegisterType.BC, RegisterType.A),
-            Arguments.of(0x1A, RegisterType.BC, RegisterType.A)
+            Arguments.of(0x1A, RegisterType.DE, RegisterType.A)
         );
     }
-
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateArgumentForRegisterToIndirectIncrementRegister() {
         return Stream.of(
             Arguments.of(0x22, RegisterType.HL, RegisterType.A)
         );
     }
-
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateArgumentForRegisterToIndirectDecrementRegister() {
         return Stream.of(
             Arguments.of(0x32, RegisterType.HL, RegisterType.A)
         );
     }
-
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateArgumentForIndirectIncrementRegisterToRegister() {
         return Stream.of(
             Arguments.of(0x2A, RegisterType.HL, RegisterType.A)
@@ -71,7 +75,8 @@ class LoadTest extends CPUTestBase{
 
     @ParameterizedTest
     @MethodSource("generateArgumentFor16BitsInmediateDataLoadTest")
-    void run16BitInmediateDataLoad(int opcode, RegisterType register) {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void run16BitInmediateDataLoad(final int opcode, final RegisterType register) {
         int lowerByte = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
         int upperByte = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
@@ -86,7 +91,9 @@ class LoadTest extends CPUTestBase{
 
     @ParameterizedTest
     @MethodSource("generateArgumentForRegisterToIndirectRegisterTest")
-    void runRegisterToIndirectRegisterTest(int opcode, RegisterType addressRegister, RegisterType sourceRegister) {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void runRegisterToIndirectRegisterTest(final int opcode, final RegisterType addressRegister,
+            final RegisterType sourceRegister) {
         int registerData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
         int bRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
@@ -103,7 +110,8 @@ class LoadTest extends CPUTestBase{
 
     @ParameterizedTest
     @MethodSource("generateArgumentFor8BitsInmediateDataLoadTest")
-    void run8BitsInmediateDataLoadTest(int opcode, RegisterType register) {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void run8BitsInmediateDataLoadTest(final int opcode, final RegisterType register) {
         /*
          * Load the 8-bit immediate operand d8 into register B.
          */
@@ -115,19 +123,21 @@ class LoadTest extends CPUTestBase{
         runLoadInmediateDataToRegister(data, register, false);
 
     }
-    
+
     @ParameterizedTest
     @MethodSource("generateArgumentForIndirectRegisterToRegisterTest")
-    void runIndirectRegistertRegisterTest(int opcode, RegisterType addressRegister, RegisterType destination) {
-        
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void runIndirectRegistertRegisterTest(final int opcode, final RegisterType addressRegister,
+            final RegisterType destination) {
+
         int bRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
         int cRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
         int expectedData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
-        int address = (bRegisterData << 8 ) | cRegisterData;
+        int address = (bRegisterData << 8) | cRegisterData;
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-            0x0A//the opcode
+            opcode
             );
 
         when(this.getCurrentBus().readByteFromAddress(address)).thenReturn(
@@ -136,10 +146,12 @@ class LoadTest extends CPUTestBase{
 
         runLoadMemoryDataIntoRegister(address, addressRegister, expectedData, destination);
     }
- 
+
     @ParameterizedTest
     @MethodSource("generateArgumentForRegisterToIndirectIncrementRegister")
-    void runRegisterToIndirectIncrementRegister(int opcode, RegisterType addressRegister, RegisterType source) {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void runRegisterToIndirectIncrementRegister(final int opcode, final RegisterType addressRegister,
+            final RegisterType source) {
         int registerData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
         int dRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
         int eRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
@@ -155,29 +167,32 @@ class LoadTest extends CPUTestBase{
 
     @ParameterizedTest
     @MethodSource("generateArgumentForIndirectIncrementRegisterToRegister")
-    void runIndirectIncrementRegisterToRegisterTest(int opcode, RegisterType addressRegister, RegisterType destinationRegister) {        
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void runIndirectIncrementRegisterToRegisterTest(final int opcode, final RegisterType addressRegister,
+            final RegisterType destinationRegister) {
         int hRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
         int lRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
         int expectedData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
 
-        int address = (hRegisterData << 8 ) | lRegisterData;
+        int address = (hRegisterData << 8) | lRegisterData;
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-            opcode
-            );
+                opcode);
 
         when(this.getCurrentBus().readByteFromAddress(address)).thenReturn(
-            expectedData
-        );
+                expectedData);
 
         runLoadMemoryDataIntoRegisterWithSourceIncremenet(address, addressRegister, expectedData, destinationRegister);
     }
 
     @ParameterizedTest
     @MethodSource("generateArgumentForRegisterToIndirectDecrementRegister")
-    void runRegisterToIndirectDecrementRegisterTest(int opcode, RegisterType addressRegister, RegisterType sourceRegister) {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void runRegisterToIndirectDecrementRegisterTest(final int opcode, final RegisterType addressRegister,
+            final RegisterType sourceRegister) {
         /*
-         * Store the contents of register A into the memory location specified by register pair HL, and simultaneously decrement the contents of HL.
+         * Store the contents of register A into the memory location specified by
+         * register pair HL, and simultaneously decrement the contents of HL.
          */
         int registerData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
         int hRegisterData = TestUtils.getRandomIntegerInRange(0x00, 0xFF);
@@ -186,35 +201,39 @@ class LoadTest extends CPUTestBase{
         int address = (hRegisterData << 8) | lRegisterData;
 
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-            0x32//the opcode
-            );
+                0x32// the opcode
+        );
 
-            runLoadRegisterDataIntoIndirectAddressWithSourceDecrement(address, addressRegister, registerData, sourceRegister);
+        runLoadRegisterDataIntoIndirectAddressWithSourceDecrement(address, addressRegister, registerData,
+                sourceRegister);
     }
 
-    private void runLoadInmediateDataToRegister(int loadedData, RegisterType register, boolean is16Bit) {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    private void runLoadInmediateDataToRegister(final int loadedData, final RegisterType register,
+            final boolean is16Bit) {
         Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(register));
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(register));
 
-        //update the expected values to the ones we want before the comparison
-        if(is16Bit) {
-            registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+3);
+        // update the expected values to the ones we want before the comparison
+        if (is16Bit) {
+            registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 3);
             previousCycleCount += 3;
         } else {
-            registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+2);
+            registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 2);
             previousCycleCount += 2;
         }
-        
-        assertEquals(loadedData,getCurrentCpu().getValueFromRegister(register));
+
+        assertEquals(loadedData, getCurrentCpu().getValueFromRegister(register));
         assertEquals(previousCycleCount, currentCycleCount, "Cycle count not currently matching.");
 
         assertEquals(registerValues, newRegisterValues);
     }
 
-    private void runLoadRegisterDataIntoIndirectAddress(int address, RegisterType addressRegister,  int registerData, RegisterType sourceRegister) {
+    private void runLoadRegisterDataIntoIndirectAddress(final int address, final RegisterType addressRegister,
+            final int registerData, final RegisterType sourceRegister) {
 
         this.getCurrentCpu().setValueInRegister(registerData, sourceRegister);
         this.getCurrentCpu().setValueInRegister(address, addressRegister);
@@ -225,29 +244,33 @@ class LoadTest extends CPUTestBase{
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
 
-        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
         assertEquals(registerValues, newRegisterValues);
-        assertEquals(previousCycleCount+2, currentCycleCount);
+        assertEquals(previousCycleCount + 2, currentCycleCount);
         verify(this.getCurrentBus(), times(1)).writeByteToAddress(registerData, address);
     }
 
-    private void runLoadMemoryDataIntoRegister(int address, RegisterType addressRegister,  int registerData, RegisterType destinationRegister) {
+    private void runLoadMemoryDataIntoRegister(final int address, final RegisterType addressRegister,
+            final int registerData, final RegisterType destinationRegister) {
 
         this.getCurrentCpu().setValueInRegister(address, addressRegister);
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister));
+        Map<RegisterType, Integer> registerValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(destinationRegister));
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister));
+        Map<RegisterType, Integer> newRegisterValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(destinationRegister));
 
-        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
         assertEquals(registerValues, newRegisterValues);
-        assertEquals(previousCycleCount+2, currentCycleCount);
+        assertEquals(previousCycleCount + 2, currentCycleCount);
         assertEquals(registerData, getCurrentCpu().getValueFromRegister(destinationRegister));
     }
 
-    private void runLoadRegisterDataIntoIndirectAddressWithSourceIncrement(int address, RegisterType addressRegister,  int registerData, RegisterType sourceRegister) {
+    private void runLoadRegisterDataIntoIndirectAddressWithSourceIncrement(final int address,
+            final RegisterType addressRegister, final int registerData, final RegisterType sourceRegister) {
 
         this.getCurrentCpu().setValueInRegister(registerData, sourceRegister);
         this.getCurrentCpu().setValueInRegister(address, addressRegister);
@@ -256,17 +279,19 @@ class LoadTest extends CPUTestBase{
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
+        Map<RegisterType, Integer> newRegisterValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
 
-        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
-        registerValues.computeIfPresent(addressRegister, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
+        registerValues.computeIfPresent(addressRegister, (t, u) -> u + 1);
         assertEquals(registerValues, newRegisterValues);
-        assertEquals(previousCycleCount+2, currentCycleCount);
-        assertEquals(address+1, getCurrentCpu().getValueFromRegister(addressRegister));
+        assertEquals(previousCycleCount + 2, currentCycleCount);
+        assertEquals(address + 1, getCurrentCpu().getValueFromRegister(addressRegister));
         verify(this.getCurrentBus(), times(1)).writeByteToAddress(registerData, address);
     }
 
-    private void runLoadRegisterDataIntoIndirectAddressWithSourceDecrement(int address, RegisterType addressRegister,  int registerData, RegisterType sourceRegister) {
+    private void runLoadRegisterDataIntoIndirectAddressWithSourceDecrement(final int address,
+            final RegisterType addressRegister, final int registerData, final RegisterType sourceRegister) {
 
         this.getCurrentCpu().setValueInRegister(registerData, sourceRegister);
         this.getCurrentCpu().setValueInRegister(address, addressRegister);
@@ -275,17 +300,19 @@ class LoadTest extends CPUTestBase{
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
+        Map<RegisterType, Integer> newRegisterValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(addressRegister));
 
-        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
-        registerValues.computeIfPresent(addressRegister, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
+        registerValues.computeIfPresent(addressRegister, (t, u) -> u + 1);
         assertEquals(registerValues, newRegisterValues);
-        assertEquals(previousCycleCount+2, currentCycleCount);
-        assertEquals(address-1, getCurrentCpu().getValueFromRegister(addressRegister));
+        assertEquals(previousCycleCount + 2, currentCycleCount);
+        assertEquals(address - 1, getCurrentCpu().getValueFromRegister(addressRegister));
         verify(this.getCurrentBus(), times(1)).writeByteToAddress(registerData, address);
     }
 
-    private void runLoadMemoryDataIntoRegisterWithSourceIncremenet(int address, RegisterType addressRegister, int expectedData, RegisterType destinationRegister) {
+    private void runLoadMemoryDataIntoRegisterWithSourceIncremenet(final int address,
+            final RegisterType addressRegister, final int expectedData, final RegisterType destinationRegister) {
         this.getCurrentCpu().setValueInRegister(address, addressRegister);
 
         Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister, addressRegister));
@@ -294,10 +321,10 @@ class LoadTest extends CPUTestBase{
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister, addressRegister));
 
-        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
         assertEquals(registerValues, newRegisterValues);
-        assertEquals(previousCycleCount+2, currentCycleCount);
-        assertEquals(address+1, getCurrentCpu().getValueFromRegister(addressRegister));
+        assertEquals(previousCycleCount + 2, currentCycleCount);
+        assertEquals(address + 1, getCurrentCpu().getValueFromRegister(addressRegister));
         assertEquals(expectedData, getCurrentCpu().getValueFromRegister(destinationRegister));
         verify(this.getCurrentBus(), times(1)).readByteFromAddress(address);
     }

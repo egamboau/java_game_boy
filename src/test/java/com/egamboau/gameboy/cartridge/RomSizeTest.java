@@ -1,12 +1,16 @@
 package com.egamboau.gameboy.cartridge;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+
 
 
 class RomSizeTest {
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testFromByteWithValidValues() {
         // Test valid byte values for each ROM size
         assertEquals(RomSize.SIZE_32KB, RomSize.fromByte((byte) 0x00));
@@ -24,6 +28,7 @@ class RomSizeTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testFromByteWithInvalidValue() {
         // Test invalid byte value to ensure exception is thrown
         byte invalidValue = (byte) 0x10;
@@ -48,6 +53,7 @@ class RomSizeTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testGetNumberOfBanks() {
         // Test getNumberOfBanks() method
         assertEquals(2, RomSize.SIZE_32KB.getNumberOfBanks());

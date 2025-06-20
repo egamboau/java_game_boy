@@ -82,5 +82,36 @@ public enum RegisterType {
      * The 16-bit stack pointer (SP).
      * Points to the top of the stack in memory.
      */
-    SP
+    SP;
+
+    /**
+     * Array of 16-bit register pairs including the stack pointer (SP).
+     */
+    private static RegisterType[] registerPairs = {BC, DE, HL, SP};
+
+    /**
+     * Array of 8-bit and 16-bit registers used for single register operations.
+     */
+    private static RegisterType[] singleRegisters = {B, C, D, E, H, L, HL, A};
+
+
+    /**
+     * Returns the 16-bit register pair (including SP) at the specified index.
+     *
+     * @param index the index of the register pair to retrieve
+     * @return the RegisterType corresponding to the given index
+     */
+    public static RegisterType getRegisterPairFeaturingSP(final int index) {
+        return registerPairs[index];
+    }
+
+    /**
+     * Returns the register (8-bit or HL) at the specified index.
+     *
+     * @param index the index of the register to retrieve
+     * @return the RegisterType corresponding to the given index
+     */
+    public static RegisterType getRegister(final int index) {
+        return singleRegisters[index];
+    }
 }

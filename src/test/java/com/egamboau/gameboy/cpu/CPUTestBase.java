@@ -31,8 +31,6 @@ public class CPUTestBase {
      */
     private Bus currentBus = null;
 
-    
-
     /**
      * Sets up the test environment before each test execution.
      * Initializes a mock Bus instance and a CPU instance connected to the Bus.

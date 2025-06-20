@@ -14,7 +14,7 @@ public final class BitMasks {
     /**
      * A mask for 8-bit data, representing the maximum value of an 8-bit number (255).
      */
-    public static final int MASK_16_BIT_DATA = 0XFF;
+    public static final int MASK_16_BIT_DATA = 0XFFFF;
 
     /**
      * A mask used to identify the half-carry condition in a 16-bit operation.
@@ -29,7 +29,7 @@ public final class BitMasks {
     /**
      * A mask used to identify the half-carry condition in an 8-bit operation.
      */
-    public static final int HALF_CARRY_8_BIT_RESULT = 0xFFFFFFF0;
+    public static final int HALF_CARRY_8_BIT_RESULT = 0xF;
 
     /**
      * A mask used to identify the carry condition in an 8-bit operation.
@@ -60,4 +60,9 @@ public final class BitMasks {
      * A mask used to identify the carry flag in an 8-bit number to be set on a rotate right application.
      */
     public static final int CARRY_FLAG_FOR_ROTATE_RIGHT = 0x80;
+
+    /**
+     * A mask used to extract the instruction type bits from an opcode.
+     */
+    public static final int OPCODE_INSTRUCTION_TYPE_BITS = 0xC0;
 }

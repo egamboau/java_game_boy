@@ -1,4 +1,4 @@
-package com.egamboau.gameboy.cpu.instructions;
+package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -12,13 +12,16 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.egamboau.gameboy.cpu.CPUTestBase;
+import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.test.TestUtils;
 
 class AddTest extends CPUTestBase {
 
     @ParameterizedTest
+    @SuppressWarnings("checkstyle:magicnumber")
     @MethodSource("generateArgumentsForAdd")
-    void testAddInstruction(int opcode, RegisterType sourceRegister, RegisterType destinationRegister) {
+    void testAddInstruction(final int opcode, final RegisterType sourceRegister,
+                    final RegisterType destinationRegister) {
         /*
          * Add the contents of register pair BC to the contents of register pair HL, and
          * store the results in register pair HL.
@@ -30,24 +33,23 @@ class AddTest extends CPUTestBase {
         } else {
             destinationValue = TestUtils.getRandomIntegerInRange(0, 0xFFFF) & 0xFFFF;
         }
-        
-
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
                 opcode);
         executeAddTest(sourceValue, destinationValue, sourceRegister, destinationRegister);
     }
 
     @ParameterizedTest
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     @MethodSource("generateArgumentsForAddWithFlags")
     void testAddInstructionWithFlagsCheck(
-            int opcode,
-            RegisterType sourcRegister,
-            int sourceValue,
-            RegisterType destinationRegister,
-            int destinationValue,
-            boolean expectedSubstractFlag,
-            boolean expectedHalfCarryFlag,
-            boolean expectedCarryFlag) {
+            final int opcode,
+            final RegisterType sourcRegister,
+            final int sourceValue,
+            final RegisterType destinationRegister,
+            final int destinationValue,
+            final boolean expectedSubstractFlag,
+            final boolean expectedHalfCarryFlag,
+            final boolean expectedCarryFlag) {
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
                 opcode // the opcode
         );
@@ -59,7 +61,8 @@ class AddTest extends CPUTestBase {
         assertEquals(expectedCarryFlag, this.getCurrentCpu().getCarry(), "Carry flag set incorrectly");
     }
 
-    private void executeAddTest(final int sourceValue, int destinationValue, final RegisterType sourceRegister,
+    @SuppressWarnings("checkstyle:magicnumber")
+    private void executeAddTest(final int sourceValue, final int destinationValue, final RegisterType sourceRegister,
         final RegisterType destinationRegister) {
         int expectedValue = sourceValue + destinationValue;
 
@@ -75,7 +78,9 @@ class AddTest extends CPUTestBase {
                 .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.HL, RegisterType.F));
 
         // HL Value must be updated with the new value.
-        assertEquals(expectedValue & MASK_INT_16_BIT, this.getCurrentCpu().getValueFromRegister(destinationRegister), "Register value not matching the expected value: " + destinationRegister);
+        assertEquals(expectedValue & MASK_INT_16_BIT,
+                this.getCurrentCpu().getValueFromRegister(destinationRegister),
+                "Register value not matching the expected value: " + destinationRegister);
         // Cycle count must match
         assertEquals(previousCycleCount + 2, currentCycleCount, "Cycle count not currently matching.");
 
@@ -84,6 +89,7 @@ class AddTest extends CPUTestBase {
         assertEquals(registerValues, newRegisterValues, "CPU Register values did not match the previous state.");
     }
 
+    @SuppressWarnings("checkstyle:magicnumber")
     static Stream<Arguments> generateArgumentsForAdd() {
         // parameters for this methods are the following:
         // int opcode, RegisterType sourceRegister, RegisterType destinationRegister
@@ -93,10 +99,8 @@ class AddTest extends CPUTestBase {
                 Arguments.of(0x29, RegisterType.HL, RegisterType.HL));
     }
 
+    @SuppressWarnings("checkstyle:magicnumber")
     static Stream<Arguments> generateArgumentsForAddWithFlags() {
-
-        // parameters for this methods are the following:
-        // int opcode, RegisterType sourcRegister, int sourceValue, RegisterType destinationRegister,int destinationValue,boolean expectedSubstractFlag, boolean expectedHalfCarryFlag, boolean expectedCarryFlag
         return Stream.of(
                 Arguments.of(0x09, RegisterType.BC, 0xFFFF, RegisterType.HL, 0x0001, false, true,
                         true),

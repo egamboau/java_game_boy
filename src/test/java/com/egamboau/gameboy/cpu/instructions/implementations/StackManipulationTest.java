@@ -1,4 +1,4 @@
-package com.egamboau.gameboy.cpu.instructions;
+package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -10,13 +10,16 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.egamboau.gameboy.cpu.CPUTestBase;
+import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
-class StackManipulationTest extends CPUTestBase{
+class StackManipulationTest extends CPUTestBase {
 
     @Test
-    void testLD_n16_SP() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testLDn16SP() {
         /*
-         * Store the lower byte of stack pointer SP at the address specified by the 16-bit immediate operand a16, and store the upper byte of SP at address a16 + 1.
+         * Store the lower byte of stack pointer SP at the address specified by
+         * the 16-bit immediate operand a16, and store the upper byte of SP at address a16 + 1.
          */
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
             0x08, //the opcode
@@ -31,21 +34,23 @@ class StackManipulationTest extends CPUTestBase{
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
-        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+3);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 3);
         assertEquals(registerValues, newRegisterValues);
         //verify that the memory address is correct
 
-        assertEquals(previousCycleCount+5, currentCycleCount);
+        assertEquals(previousCycleCount + 5, currentCycleCount);
         verify(this.getCurrentBus(), times(1)).writeByteToAddress(0x01, 0x1234);
         verify(this.getCurrentBus(), times(1)).writeByteToAddress(0xC0, 0x1235);
     }
 
 
     @Test
-    void testLD_SP_n16() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testLDSPn16() {
         /*
          * Load the 2 bytes of immediate data into register pair SP.
-         * The first byte of immediate data is the lower byte (i.e., bits 0-7), and the second byte of immediate data is the higher byte (i.e., bits 8-15).
+         * The first byte of immediate data is the lower byte (i.e., bits 0-7),
+         * and the second byte of immediate data is the higher byte (i.e., bits 8-15).
          */
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
             0x31, //the opcode
@@ -53,18 +58,18 @@ class StackManipulationTest extends CPUTestBase{
             0x12 //higher byte of data
             );
 
-        this.getCurrentCpu().setValueInRegister(0xC001 , RegisterType.SP);
+        this.getCurrentCpu().setValueInRegister(0xC001, RegisterType.SP);
 
         Map<RegisterType, Integer> registerValues = this.getCpuRegisters(RegisterType.SP);
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(RegisterType.SP);
-        
-        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+3);
+
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 3);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(0x1234, getCurrentCpu().getValueFromRegister(RegisterType.SP));
-        assertEquals(previousCycleCount+3, currentCycleCount);
+        assertEquals(previousCycleCount + 3, currentCycleCount);
     }
 
 }

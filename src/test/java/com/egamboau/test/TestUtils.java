@@ -8,23 +8,35 @@ import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
 public final class TestUtils {
 
+    private TestUtils() {
+
+    }
+
+    /**
+     * Random instance used for generating random numbers in utility methods.
+     */
     private static Random random = new Random();
 
     /**
-     * Get a new random integer, bound to the actual min and max values
+     * Get a new random integer, bound to the actual min and max values.
      * @param min the minimum value to be generated
      * @param max the maximum value to be generated
      * @return the random integer, between min and max.
      */
-    public static int getRandomIntegerInRange(int min, int max) {
+    public static int getRandomIntegerInRange(final int min, final int max) {
         return random.nextInt(max - min) + min;
     }
 
-    public static RegisterType[] getPairForRegister(RegisterType ... elements) {
+    /**
+     * Returns an array of RegisterType containing the given elements and their corresponding register pairs.
+     * @param elements the register types to process
+     * @return an array of RegisterType including the input elements and their pairs
+     */
+    public static RegisterType[] getPairForRegister(final RegisterType... elements) {
         Set<RegisterType> result = new HashSet<>();
-        for(RegisterType element:elements) {
+        for (RegisterType element:elements) {
             result.add(element);
-            switch ( element) {
+            switch (element) {
                 case A:
                 case F:
                     result.add(RegisterType.AF);
@@ -41,14 +53,12 @@ public final class TestUtils {
                 case BC:
                     result.add(RegisterType.B);
                     result.add(RegisterType.C);
-            
                 case D:
                 case E:
                     result.add(RegisterType.DE);
                 case DE:
                     result.add(RegisterType.D);
                     result.add(RegisterType.E);
-                
                     break;
                 case H:
                 case L:
@@ -63,6 +73,5 @@ public final class TestUtils {
             }
         }
         return result.toArray(new RegisterType[0]);
-        
     }
 }

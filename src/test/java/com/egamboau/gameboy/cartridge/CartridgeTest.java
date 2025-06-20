@@ -27,21 +27,38 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CartridgeTest {
 
-    private static final Logger LOGGER = LogManager.getLogger(); 
+    /**
+     * Logger instance for logging test information.
+     */
+    private static final Logger LOGGER = LogManager.getLogger();
 
+    /**
+     * The Cartridge instance used for testing.
+     */
     private static Cartridge cartridge;
+
+    /**
+     * Temporary file to store the test ROM.
+     */
     private static File tempFile;
 
+    /**
+     * Byte array to hold the ROM data for testing.
+     */
     private static byte[] data;
 
     @BeforeAll
     static void setUp() throws IOException {
-        //download a test rom for this. 
-        BufferedInputStream in = new BufferedInputStream(URI.create("https://github.com/retrio/gb-test-roms/raw/refs/heads/master/halt_bug.gb").toURL().openStream());
+        //download a test rom for this.
+        BufferedInputStream in = new BufferedInputStream(
+            URI.create("https://github.com/retrio/gb-test-roms/raw/refs/heads/master/halt_bug.gb").toURL().openStream());
         FileAttribute<Set<PosixFilePermission>> attrs = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
         tempFile = Files.createTempFile("tmpDirPrefix", null, attrs).toFile();
         LOGGER.info("Writting test rom to {}", tempFile.getAbsolutePath());
@@ -50,7 +67,6 @@ class CartridgeTest {
         outStream.write(data);
         outStream.close();
         LOGGER.info("File Written");
-        
     }
 
     @BeforeEach
@@ -66,15 +82,16 @@ class CartridgeTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testGetRomData() throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(data);
         String expected = Base64.getEncoder().encodeToString(md.digest());
-        LOGGER.info("Expected MD5: {}",expected);
+        LOGGER.info("Expected MD5: {}", expected);
         md.reset();
         md.update(cartridge.getRomData());
-        String loaded =Base64.getEncoder().encodeToString(md.digest());
-        LOGGER.info("Lodaded MD5: {}",loaded);
+        String loaded = Base64.getEncoder().encodeToString(md.digest());
+        LOGGER.info("Lodaded MD5: {}", loaded);
         assertEquals(expected, loaded);
     }
 
@@ -82,19 +99,22 @@ class CartridgeTest {
     void testGetFileName() {
         assertEquals(tempFile.getAbsolutePath(), cartridge.getFileName());
     }
-    
+
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testGetEntryPoint() {
         assertArrayEquals(Arrays.copyOfRange(data, 0x100, 0x104), cartridge.getEntryPoint());
     }
-    
+
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testGetLogo() {
         byte[] expectedLogo = Arrays.copyOfRange(data, 0x104, 0x134);
         assertArrayEquals(expectedLogo, cartridge.getLogo());
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testGetTitle() {
         String expectedTitle = new String(Arrays.copyOfRange(data, 0x0134, 0x0143), StandardCharsets.US_ASCII);
         assertEquals(expectedTitle, cartridge.getTitle());
@@ -131,11 +151,13 @@ class CartridgeTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testGetChecksum() {
         assertEquals(data[0x14d], cartridge.getChecksum());
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testGetGlobalChecksum() {
         long expectedChecksum = new BigInteger(Arrays.copyOfRange(data, 0x014e, 0x0150)).longValue();
         assertEquals(expectedChecksum, cartridge.getGlobalChecksum());
@@ -155,13 +177,14 @@ class CartridgeTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
     void testWriteByteToAddress() {
         int address = TestUtils.getRandomIntegerInRange(0, data.length);
         int value;
         do {
             value = TestUtils.getRandomIntegerInRange(0, 0xFF);
         } while (value == data[address]);
-        
+
         cartridge.writeByteToAddress(address, value);
         int readValue = cartridge.readByteFromAddress(address);
         assertEquals(value, readValue);

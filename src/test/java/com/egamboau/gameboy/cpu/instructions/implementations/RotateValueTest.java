@@ -1,4 +1,4 @@
-package com.egamboau.gameboy.cpu.instructions;
+package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,21 +10,23 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.egamboau.gameboy.cpu.CPUTestBase;
+import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.test.TestUtils;
 
-class RotateValueTest extends CPUTestBase{
-    
+class RotateValueTest extends CPUTestBase {
+
     @Test
-    void test_RLCA_CarryFlagSet() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRLCACarryFlagSet() {
         /*
-         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1, 
-         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2. 
-         * The same operation is repeated in sequence for the rest of the register. 
+         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1,
+         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2.
+         * The same operation is repeated in sequence for the rest of the register.
          * The contents of bit 7 are placed in both the CY flag and bit 0 of register A.
-         * 
+         *
          * This test that the carry flag is set when needed
          */
-        
+
         int registerData = 0xC9 & 0xFF;
         int expectedValue = 0x93 & 0xFF;
 
@@ -37,13 +39,14 @@ class RotateValueTest extends CPUTestBase{
     }
 
     @Test
-    void test_RLCA_CarryFlagUnset() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRLCACarryFlagUnset() {
         /*
-         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1, 
-         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2. 
-         * The same operation is repeated in sequence for the rest of the register. 
+         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1,
+         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2.
+         * The same operation is repeated in sequence for the rest of the register.
          * The contents of bit 7 are placed in both the CY flag and bit 0 of register A.
-         * 
+         *
          * This test that the carry flag is reset when needed
          */
 
@@ -60,13 +63,14 @@ class RotateValueTest extends CPUTestBase{
     }
 
     @Test
-    void test_RLCA_Loop() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRLCALoop() {
         /*
-         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1, 
-         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2. 
-         * The same operation is repeated in sequence for the rest of the register. 
+         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1,
+         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2.
+         * The same operation is repeated in sequence for the rest of the register.
          * The contents of bit 7 are placed in both the CY flag and bit 0 of register A.
-         * 
+         *
          * This test 8 values in a loop and check results
          */
 
@@ -81,16 +85,17 @@ class RotateValueTest extends CPUTestBase{
     }
 
     @Test
-    void test_RRCA_CarryFlagSet() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRRCACarryFlagSet() {
         /*
-         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1, 
-         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2. 
-         * The same operation is repeated in sequence for the rest of the register. 
+         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1,
+         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2.
+         * The same operation is repeated in sequence for the rest of the register.
          * The contents of bit 7 are placed in both the CY flag and bit 0 of register A.
-         * 
+         *
          * This test that the carry flag is set when needed
          */
-        
+
         int registerData = 0xF1 & 0xFF;
         int expectedValue = 0xF8 & 0xFF;
 
@@ -103,13 +108,14 @@ class RotateValueTest extends CPUTestBase{
     }
 
     @Test
-    void test_RRCA_CarryFlagUnset() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRRCACarryFlagUnset() {
         /*
-         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1, 
-         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2. 
-         * The same operation is repeated in sequence for the rest of the register. 
+         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1,
+         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2.
+         * The same operation is repeated in sequence for the rest of the register.
          * The contents of bit 7 are placed in both the CY flag and bit 0 of register A.
-         * 
+         *
          * This test that the carry flag is reset when needed
          */
 
@@ -126,13 +132,14 @@ class RotateValueTest extends CPUTestBase{
     }
 
     @Test
-    void test_RRCA_Loop() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRRCALoop() {
         /*
-         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1, 
-         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2. 
-         * The same operation is repeated in sequence for the rest of the register. 
+         * Rotate the contents of register A to the left. That is, the contents of bit 0 are copied to bit 1,
+         * and the previous contents of bit 1 (before the copy operation) are copied to bit 2.
+         * The same operation is repeated in sequence for the rest of the register.
          * The contents of bit 7 are placed in both the CY flag and bit 0 of register A.
-         * 
+         *
          * This test 8 values in a loop and check results
          */
 
@@ -147,15 +154,16 @@ class RotateValueTest extends CPUTestBase{
     }
 
     @Test
-    void test_RLA_CarryFlagSet() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRLACarryFlagSet() {
         /*
-         * Rotate the contents of register A to the left, through the carry (CY) flag. 
-         * That is, the contents of bit 0 are copied to bit 1, and the previous contents of bit 1 (before the copy operation) are copied to bit 2. 
+         * Rotate the contents of register A to the left, through the carry (CY) flag.
+         * That is, the contents of bit 0 are copied to bit 1, and the previous contents of bit 1 (before the copy operation) are copied to bit 2.
          * The same operation is repeated in sequence for the rest of the register. The previous contents of the carry flag are copied to bit 0.
-         * 
+         *
          * This test that the carry flag is set when needed
          */
-        
+
         int registerData = 0x80 & 0xFF;
         int expectedValue = 0x00 & 0xFF;
 
@@ -168,12 +176,13 @@ class RotateValueTest extends CPUTestBase{
     }
 
     @Test
-    void test_RLA_CarryFlagUnset() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRLACarryFlagUnset() {
         /*
-         * Rotate the contents of register A to the left, through the carry (CY) flag. 
-         * That is, the contents of bit 0 are copied to bit 1, and the previous contents of bit 1 (before the copy operation) are copied to bit 2. 
+         * Rotate the contents of register A to the left, through the carry (CY) flag.
+         * That is, the contents of bit 0 are copied to bit 1, and the previous contents of bit 1 (before the copy operation) are copied to bit 2.
          * The same operation is repeated in sequence for the rest of the register. The previous contents of the carry flag are copied to bit 0.
-         * 
+         *
          * This test that the carry flag is reset when needed
          */
 
@@ -192,12 +201,13 @@ class RotateValueTest extends CPUTestBase{
     }
 
     @Test
-    void test_RLA_Loop() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRLALoop() {
         /*
-         * Rotate the contents of register A to the left, through the carry (CY) flag. 
-         * That is, the contents of bit 0 are copied to bit 1, and the previous contents of bit 1 (before the copy operation) are copied to bit 2. 
+         * Rotate the contents of register A to the left, through the carry (CY) flag.
+         * That is, the contents of bit 0 are copied to bit 1, and the previous contents of bit 1 (before the copy operation) are copied to bit 2.
          * The same operation is repeated in sequence for the rest of the register. The previous contents of the carry flag are copied to bit 0.
-         * 
+         *
          * This test 8 values in a loop and check results
          */
 
@@ -211,17 +221,18 @@ class RotateValueTest extends CPUTestBase{
         }
         assertTrue(getCurrentCpu().getCarry());
     }
-    
+
     @Test
-    void test_RRA_CarryFlagSet() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRRACarryFlagSet() {
         /*
-         * Rotate the contents of register A to the right, through the carry (CY) flag. 
-         * That is, the contents of bit 7 are copied to bit 6, and the previous contents of bit 6 (before the copy) are copied to bit 5. 
+         * Rotate the contents of register A to the right, through the carry (CY) flag.
+         * That is, the contents of bit 7 are copied to bit 6, and the previous contents of bit 6 (before the copy) are copied to bit 5.
          * The same operation is repeated in sequence for the rest of the register. The previous contents of the carry flag are copied to bit 7.
-         * 
+         *
          * This test that the carry flag is set when needed
          */
-        
+
         int registerData = 0x01 & 0xFF;
         int expectedValue = 0x80 & 0xFF;
 
@@ -234,12 +245,13 @@ class RotateValueTest extends CPUTestBase{
     }
 
     @Test
-    void test_RRA_CarryFlagUnset() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRRACarryFlagUnset() {
         /*
-         * Rotate the contents of register A to the right, through the carry (CY) flag. 
-         * That is, the contents of bit 7 are copied to bit 6, and the previous contents of bit 6 (before the copy) are copied to bit 5. 
+         * Rotate the contents of register A to the right, through the carry (CY) flag.
+         * That is, the contents of bit 7 are copied to bit 6, and the previous contents of bit 6 (before the copy) are copied to bit 5.
          * The same operation is repeated in sequence for the rest of the register. The previous contents of the carry flag are copied to bit 7.
-         * 
+         *
          * This test that the carry flag is reset when needed
          */
 
@@ -258,12 +270,13 @@ class RotateValueTest extends CPUTestBase{
     }
 
     @Test
-    void test_RRA_Loop() {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testRRALoop() {
         /*
-         * Rotate the contents of register A to the right, through the carry (CY) flag. 
-         * That is, the contents of bit 7 are copied to bit 6, and the previous contents of bit 6 (before the copy) are copied to bit 5. 
+         * Rotate the contents of register A to the right, through the carry (CY) flag.
+         * That is, the contents of bit 7 are copied to bit 6, and the previous contents of bit 6 (before the copy) are copied to bit 5.
          * The same operation is repeated in sequence for the rest of the register. The previous contents of the carry flag are copied to bit 7.
-         * 
+         *
          * This test 8 values in a loop and check results
          */
 
@@ -277,63 +290,71 @@ class RotateValueTest extends CPUTestBase{
         }
         assertFalse(getCurrentCpu().getCarry());
     }
-    
 
-    private void runRlcaTest(int registerData, int expectedValue) {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    private void runRlcaTest(final int registerData, final int expectedValue) {
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-            0x07 //the opcode
-            );
+                0x07 // the opcode
+        );
 
         this.getCurrentCpu().setValueInRegister(registerData, RegisterType.A);
-        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
+        Map<RegisterType, Integer> oldRegisterValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
-        long currentCycleCount = getCurrentCpu().getCycles();        
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
 
-        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
-        assertEquals(previousCycleCount+1, currentCycleCount);
+        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
+        assertEquals(previousCycleCount + 1, currentCycleCount);
         assertEquals(oldRegisterValues, newRegisterValues);
         assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.A));
-        
-    }
 
-    private void runRrcaTest(int registerData, int expectedValue) {
+    }
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    private void runRrcaTest(final int registerData, final int expectedValue) {
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-            0x0F //the opcode
-            );
+                0x0F // the opcode
+        );
 
         this.getCurrentCpu().setValueInRegister(registerData, RegisterType.A);
-        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
+        Map<RegisterType, Integer> oldRegisterValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
-        long currentCycleCount = getCurrentCpu().getCycles();        
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
 
-        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
-        assertEquals(previousCycleCount+1, currentCycleCount);
-        assertEquals(oldRegisterValues, newRegisterValues);
-        assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.A));
-    }
-
-    private void runRlaTest(int registerData, int expectedValue) {
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-            0x17 //the opcode
-            );
-        this.getCurrentCpu().setValueInRegister(registerData, RegisterType.A);
-        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
-        long previousCycleCount = getCurrentCpu().getCycles();
-        this.getCurrentCpu().cpuStep();
-        long currentCycleCount = getCurrentCpu().getCycles();        
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
-
-        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
-        assertEquals(previousCycleCount+1, currentCycleCount);
+        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
+        assertEquals(previousCycleCount + 1, currentCycleCount);
         assertEquals(oldRegisterValues, newRegisterValues);
         assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.A));
     }
 
-    private void runRraTest(int registerData, int expectedValue) {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    private void runRlaTest(final int registerData, final int expectedValue) {
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+                0x17 // the opcode
+        );
+        this.getCurrentCpu().setValueInRegister(registerData, RegisterType.A);
+        Map<RegisterType, Integer> oldRegisterValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this
+                .getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
+
+        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
+        assertEquals(previousCycleCount + 1, currentCycleCount);
+        assertEquals(oldRegisterValues, newRegisterValues);
+        assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.A));
+    }
+
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    private void runRraTest(final int registerData, final int expectedValue) {
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
             0x1F //the opcode
         );
@@ -341,11 +362,11 @@ class RotateValueTest extends CPUTestBase{
         Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
         long previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
-        long currentCycleCount = getCurrentCpu().getCycles();        
+        long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.AF));
 
-        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
-        assertEquals(previousCycleCount+1, currentCycleCount);
+        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
+        assertEquals(previousCycleCount + 1, currentCycleCount);
         assertEquals(oldRegisterValues, newRegisterValues);
         assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.A));
     }

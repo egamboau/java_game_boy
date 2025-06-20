@@ -1,4 +1,4 @@
-package com.egamboau.gameboy.cpu.instructions;
+package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -12,13 +12,18 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.egamboau.gameboy.cpu.CPUTestBase;
+import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.test.TestUtils;
 
-class DecimalAdjustAccumulatorTest extends CPUTestBase{
+class DecimalAdjustAccumulatorTest extends CPUTestBase {
 
     @ParameterizedTest
     @MethodSource("generateArgumentsForTests")
-    void testDInstruction(int registerValue, int expectedValue, boolean originalSubstract, boolean originalHalfCarry, boolean orignalCarry, boolean expectedZeroValue, boolean expectedHalfCarryValue, boolean expectedCarryValue) {
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testDInstruction(final int registerValue, final int expectedValue, final boolean originalSubstract,
+            final boolean originalHalfCarry, final boolean orignalCarry, final boolean expectedZeroValue,
+            final boolean expectedHalfCarryValue,
+            final boolean expectedCarryValue) {
         this.getCurrentCpu().setSubtract(originalSubstract);
         this.getCurrentCpu().setHalfCarry(originalHalfCarry);
         this.getCurrentCpu().setCarry(orignalCarry);
@@ -36,7 +41,7 @@ class DecimalAdjustAccumulatorTest extends CPUTestBase{
         assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not currently matching.");
 
         //other flags must be the same, and update the PC to be 1 byte more
-        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u+1);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
         assertEquals(registerValues, newRegisterValues, "CPU Register values did not match the previous state.");
         assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(RegisterType.A), "Value on Register A did not match the expeced value.");
 
@@ -45,7 +50,8 @@ class DecimalAdjustAccumulatorTest extends CPUTestBase{
         assertEquals(expectedCarryValue, getCurrentCpu().getCarry(), "Carry flag set incorrectly");
     }
 
-    static Stream<Arguments> generateArgumentsForTests(){
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    static Stream<Arguments> generateArgumentsForTests() {
         return Stream.of(
             Arguments.of(0x0A, 0x10, false, false, false,  false, false, false),
             Arguments.of(0x9A, 0x00, false, false, false,  true, false, true),

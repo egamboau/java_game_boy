@@ -64,8 +64,19 @@ public enum AddressMode {
     INCREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER,
 
     /**
+     * Addressing mode where data is transferred from a memory address pointed to by a register,
+     * and the address is decremented after the operation.
+     */
+    DECREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER,
+
+    /**
      * Addressing mode where data is transferred from a register to a memory address pointed to by another register,
      * and the address is decremented after the operation.
      */
     REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS,
+
+    /**
+     * Addressing mode where 8-bit data is loaded into a memory address pointed to by a register.
+     */
+    DATA_8_BIT_TO_MEMORY_ADDRESS_REGISTER,
 }
