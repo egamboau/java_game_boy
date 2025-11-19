@@ -65,15 +65,15 @@ public abstract class Instruction {
      * @param currentSourceRegister The source register involved in the instruction.
      * @param currentDestinationRegister The destination register involved in the instruction.
      * @param currentCondition The condition under which the instruction is executed.
-     * @param currentParamter The parameter associated with the instruction.
+     * @param currentParameter The parameter associated with the instruction.
      */
     protected Instruction(final AddressMode currentAddressMode, final RegisterType currentSourceRegister,
-            final RegisterType currentDestinationRegister, final InstructionCondition currentCondition, final Byte currentParamter) {
+            final RegisterType currentDestinationRegister, final InstructionCondition currentCondition, final Byte currentParameter) {
         this.addressMode = currentAddressMode;
         this.sourceRegister = currentSourceRegister;
         this.destinationRegister = currentDestinationRegister;
         this.condition = currentCondition;
-        this.parameter = currentParamter;
+        this.parameter = currentParameter;
     }
 
     /**

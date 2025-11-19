@@ -91,7 +91,7 @@ class StackManipulationTest extends CPUTestBase {
         registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount + 2, currentCycleCount);
-        assertEquals(currentSpValue + 1, getCurrentCpu().getValueFromRegister(RegisterType.SP));
+        assertEquals((currentSpValue + 1) & 0xFFFF, getCurrentCpu().getValueFromRegister(RegisterType.SP));
     }
 
     @Test
@@ -114,6 +114,26 @@ class StackManipulationTest extends CPUTestBase {
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount + 2, currentCycleCount);
         assertEquals((currentSpValue - 1) & 0xFFFF, getCurrentCpu().getValueFromRegister(RegisterType.SP));
+    }
+
+    @Test
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testIncSPOverflow() {
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(0x33);
+        // Set SP to maximum value to test overflow
+        this.getCurrentCpu().setValueInRegister(0xFFFF, RegisterType.SP);
+        this.getCurrentCpu().cpuStep();
+        assertEquals(0x0000, getCurrentCpu().getValueFromRegister(RegisterType.SP));
+    }
+
+    @Test
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testDecSPUnderflow() {
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(0x3B);
+        // Set SP to minimum value to test underflow
+        this.getCurrentCpu().setValueInRegister(0x0000, RegisterType.SP);
+        this.getCurrentCpu().cpuStep();
+        assertEquals(0xFFFF, getCurrentCpu().getValueFromRegister(RegisterType.SP));
     }
 
 }

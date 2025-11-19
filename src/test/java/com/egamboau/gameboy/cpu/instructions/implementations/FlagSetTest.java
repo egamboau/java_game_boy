@@ -34,6 +34,8 @@ public class FlagSetTest extends CPUTestBase {
         assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not matching.");
         assertEquals(oldRegisterValues, newRegisterValues);
         assertTrue(this.getCurrentCpu().getCarry());
+        assertFalse(this.getCurrentCpu().getSubtract());
+        assertFalse(this.getCurrentCpu().getHalfCarry());
     }
 
 
@@ -44,9 +46,9 @@ public class FlagSetTest extends CPUTestBase {
          * Flip the carry flag CY.
          */
         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(0x3F);
+        this.getCurrentCpu().setCarry(false);
         Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.F));
         long previousCycleCount = getCurrentCpu().getCycles();
-        this.getCurrentCpu().setCarry(false);
         this.getCurrentCpu().cpuStep();
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(RegisterType.F));
@@ -56,6 +58,8 @@ public class FlagSetTest extends CPUTestBase {
         assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not matching.");
         assertEquals(oldRegisterValues, newRegisterValues);
         assertTrue(this.getCurrentCpu().getCarry());
+        assertFalse(this.getCurrentCpu().getSubtract());
+        assertFalse(this.getCurrentCpu().getHalfCarry());
     }
 
     @Test
@@ -77,6 +81,8 @@ public class FlagSetTest extends CPUTestBase {
         assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not matching.");
         assertEquals(oldRegisterValues, newRegisterValues);
         assertFalse(this.getCurrentCpu().getCarry());
+        assertFalse(this.getCurrentCpu().getSubtract());
+        assertFalse(this.getCurrentCpu().getHalfCarry());
     }
 
 }

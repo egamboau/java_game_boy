@@ -21,17 +21,19 @@ public class FlipCarryFlagInstruction extends Instruction {
      * @param currentSourceRegister the source register for this instruction (may be null if not applicable)
      * @param currentDestinationRegister the destination register for this instruction (may be null if not applicable)
      * @param currentCondition the execution condition for this instruction (may be null for unconditional execution)
-     * @param currentParamter an optional byte parameter (for example an immediate value or offset); may be null if unused
+     * @param currentParameter an optional byte parameter (for example an immediate value or offset); may be null if unused
      */
     public FlipCarryFlagInstruction(final AddressMode currentAddressMode, final RegisterType currentSourceRegister,
             final RegisterType currentDestinationRegister, final InstructionCondition currentCondition,
-            final Byte currentParamter) {
-        super(currentAddressMode, currentSourceRegister, currentDestinationRegister, currentCondition, currentParamter);
+            final Byte currentParameter) {
+        super(currentAddressMode, currentSourceRegister, currentDestinationRegister, currentCondition, currentParameter);
     }
 
     @Override
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         currentCpu.setCarry(!currentCpu.getCarry());
+        currentCpu.setSubtract(false);
+        currentCpu.setHalfCarry(false);
     }
 
 }
