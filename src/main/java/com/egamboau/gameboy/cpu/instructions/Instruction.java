@@ -7,6 +7,7 @@ import com.egamboau.gameboy.cpu.CPU;
 import com.egamboau.gameboy.cpu.instructions.implementations.AddInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecimalAdjustAccumulatorInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecrementInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.FlipCarryFlagInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.IncrementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.JumpRelativeInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.LoadInstruction;
@@ -145,7 +146,7 @@ public abstract class Instruction {
                         REGISTER_TO_INDIRECT_REGISTER,
                         MEMORY_ADDRESS_REGISTER_TO_REGISTER, REGISTER_TO_INCREMENT_16_BIT_MEMORY_ADDRESS,
                         INCREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER,
-                        REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS, MEMORY_ADDRESS_REGISTER:
+                        REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS, MEMORY_ADDRESS_REGISTER, DECREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER:
                     // Data is on the register itself, so no data to fetch.
                     return new int[0];
                 default:
@@ -262,6 +263,8 @@ public abstract class Instruction {
                 return new OneComplementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
             case 6:
                 return new SetCarryFlagInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
+            case 7:
+                return new FlipCarryFlagInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
             default:
                 return new StopInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A, null, null);
         }

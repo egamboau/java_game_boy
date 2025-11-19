@@ -94,4 +94,26 @@ class StackManipulationTest extends CPUTestBase {
         assertEquals(currentSpValue + 1, getCurrentCpu().getValueFromRegister(RegisterType.SP));
     }
 
+    @Test
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    void testDecSP() {
+        /*
+         * Decrement the contents of register pair SP by 1.
+         */
+         when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+            0x3B
+            );
+
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(RegisterType.SP);
+        int currentSpValue = getCurrentCpu().getValueFromRegister(RegisterType.SP);
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(RegisterType.SP);
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
+        assertEquals(registerValues, newRegisterValues);
+        assertEquals(previousCycleCount + 2, currentCycleCount);
+        assertEquals((currentSpValue - 1) & 0xFFFF, getCurrentCpu().getValueFromRegister(RegisterType.SP));
+    }
+
 }

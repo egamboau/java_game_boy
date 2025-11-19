@@ -108,8 +108,6 @@ class AddTest extends CPUTestBase {
                         false),
                 Arguments.of(0x09, RegisterType.BC, 0x0001, RegisterType.HL, 0x0001, false, false,
                         false),
-                Arguments.of(0x09, RegisterType.BC, 0x0001, RegisterType.HL, 0x0001, false, false,
-                        false),
 
                 Arguments.of(0x19, RegisterType.DE, 0xFFFF, RegisterType.HL, 0x0001, false, true,
                         true),
@@ -117,12 +115,19 @@ class AddTest extends CPUTestBase {
                         false),
                 Arguments.of(0x19, RegisterType.DE, 0x0001, RegisterType.HL, 0x0001, false, false,
                         false),
-                Arguments.of(0x19, RegisterType.DE, 0x0001, RegisterType.HL, 0x0001, false, false,
-                        false),
 
                 Arguments.of(0x29, RegisterType.HL, 0xFFFF, RegisterType.HL, 0xFFFF, false, true,
                         true),
                 Arguments.of(0x29, RegisterType.HL, 0x0001, RegisterType.HL, 0x0001, false, false,
-                        false));
+                        false),
+
+                Arguments.of(0x39, RegisterType.SP, 0xFFFF, RegisterType.HL, 0x0001, false, true,
+                        true),
+                Arguments.of(0x39, RegisterType.SP, 0x0001, RegisterType.HL, 0x0FFF, false, true,
+                        false),
+                Arguments.of(0x39, RegisterType.SP, 0x0001, RegisterType.HL, 0x0001, false, false,
+                        false)
+
+                        );
     }
 }

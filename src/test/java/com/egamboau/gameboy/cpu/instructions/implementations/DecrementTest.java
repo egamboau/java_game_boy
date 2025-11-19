@@ -97,7 +97,13 @@ class DecrementTest extends CPUTestBase {
                 Arguments.of(0x2D, 0, RegisterType.L, true, true, false),
                 Arguments.of(0x2D, 0x10, RegisterType.L, true, true, false),
                 Arguments.of(0x2D, 0x0E, RegisterType.L, true, false, false),
-                Arguments.of(0x2D, 0x01, RegisterType.L, true, false, true));
+                Arguments.of(0x2D, 0x01, RegisterType.L, true, false, true),
+
+                Arguments.of(0x3D, 0, RegisterType.A, true, true, false),
+                Arguments.of(0x3D, 0x10, RegisterType.A, true, true, false),
+                Arguments.of(0x3D, 0x0E, RegisterType.A, true, false, false),
+                Arguments.of(0x3D, 0x01, RegisterType.A, true, false, true)
+            );
     }
 
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})

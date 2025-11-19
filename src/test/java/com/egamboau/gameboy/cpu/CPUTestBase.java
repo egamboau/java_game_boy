@@ -42,6 +42,17 @@ public class CPUTestBase {
         currentCpu = new CPU(currentBus);
     }
 
+    /**
+     * Return a map of CPU registers to their current integer values, excluding any registers
+     * supplied as arguments.
+     *
+     * The map contains an entry for each RegisterType returned by RegisterType.values()
+     * except those provided in the varargs parameter. If no registers are supplied, the
+     * returned map will contain all registers.
+     *
+     * @param registers zero or more register types to exclude from the returned map
+     * @return a map from RegisterType to Integer representing the current value of each included register
+     */
     protected final Map<RegisterType, Integer> getCpuRegisters(final RegisterType... registers) {
         List<RegisterType> filterAsList = Arrays.asList(registers);
         return Arrays.stream(RegisterType.values())

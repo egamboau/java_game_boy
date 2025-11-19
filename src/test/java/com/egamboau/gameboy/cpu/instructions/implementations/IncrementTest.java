@@ -98,7 +98,12 @@ class IncrementTest  extends CPUTestBase {
                 Arguments.of(0x2C, 0, RegisterType.L, false, false, false),
                 Arguments.of(0x2C, 0x10, RegisterType.L, false, false, false),
                 Arguments.of(0x2C, 0x0E, RegisterType.L, false, false, false),
-                Arguments.of(0x2C, 0xFF, RegisterType.L, false, true, true)
+                Arguments.of(0x2C, 0xFF, RegisterType.L, false, true, true),
+
+                Arguments.of(0x3C, 0, RegisterType.A, false, false, false),
+                Arguments.of(0x3C, 0x10, RegisterType.A, false, false, false),
+                Arguments.of(0x3C, 0x0E, RegisterType.A, false, false, false),
+                Arguments.of(0x3C, 0xFF, RegisterType.A, false, true, true)
 
         );
     }

@@ -34,6 +34,10 @@ public class LoadInstruction extends Instruction {
                 storeMemoryDataintoRegister(currentCpu);
                 currentCpu.incrementRegisterPair(getSourceRegister());
                 break;
+            case DECREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER:
+                storeMemoryDataintoRegister(currentCpu);
+                currentCpu.decrementRegisterPair(getSourceRegister());
+                break;
             case REGISTER_TO_INCREMENT_16_BIT_MEMORY_ADDRESS:
                 storeRegisterDataInMemory(currentCpu);
                 currentCpu.incrementRegisterPair(getDestinationRegister());

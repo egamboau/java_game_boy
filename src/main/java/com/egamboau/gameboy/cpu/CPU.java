@@ -378,6 +378,9 @@ public class CPU {
     @SuppressWarnings("checkstyle:magicnumber")
     public final void setValueInRegister(final int[] data, final RegisterType destinationRegister) {
         switch (destinationRegister) {
+            case A:
+                a.set(data[0]);
+                break;
             case B:
                 b.set(data[0]);
                 break;
