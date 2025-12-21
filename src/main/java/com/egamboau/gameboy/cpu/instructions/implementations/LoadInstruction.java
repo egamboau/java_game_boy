@@ -58,6 +58,9 @@ public class LoadInstruction extends Instruction {
             case DATA_8_BIT_TO_MEMORY_ADDRESS_REGISTER:
                 storeDataInMemory(currentCpu, data);
                 break;
+            case REGISTER_TO_REGISTER:
+                storeSourceRegisterDataInDestinationRegister(currentCpu);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown address mode: " + getAddressMode());
         }
@@ -71,6 +74,10 @@ public class LoadInstruction extends Instruction {
 
     private void storeDataInRegister(final CPU currentCpu, final int[] data) {
         currentCpu.setValueInRegister(data, getDestinationRegister());
+    }
+
+    private void storeSourceRegisterDataInDestinationRegister(final CPU currentCpu) {
+        currentCpu.setValueInRegister(currentCpu.getValueFromRegister(getSourceRegister()), getDestinationRegister());
     }
 
     @SuppressWarnings("checkstyle:magicnumber")

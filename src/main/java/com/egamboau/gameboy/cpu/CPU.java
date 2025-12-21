@@ -76,6 +76,8 @@ public class CPU {
      */
     private long cycles;
 
+    /** Indicates whether the CPU is currently stopped (true when in the STOP state). */
+    private boolean stopped;
 
     /**
      * Constructs a CPU instance and initializes it with the provided memory bus.
@@ -106,6 +108,32 @@ public class CPU {
     }
 
     /**
+     * Returns whether the CPU is currently in the stopped state.
+     *
+     * When this method returns true, the CPU is considered stopped and will not
+     * execute instructions until it is resumed. This simply exposes the current
+     * value of the internal stopped flag.
+     *
+     * @return true if the CPU is stopped, false otherwise
+     */
+    public final boolean isStopped() {
+        return stopped;
+    }
+
+    /**
+     * Sets the CPU's stopped state.
+     *
+     * When the stopped flag is set to true the CPU enters a halted/STOP state and
+     * should cease normal instruction execution; when set to false the CPU leaves
+     * the STOP state and may resume execution.
+     *
+     * @param newValue true to put the CPU into the STOP state, false to clear it
+     */
+    public final void setStopped(final boolean newValue) {
+        this.stopped = newValue;
+    }
+
+    /**
      * Increment the cycles count on the CPU.
      *
      * @param cyclesAdjustment
@@ -119,6 +147,10 @@ public class CPU {
      * one at a time.
      */
     public void cpuStep() {
+        if (halted || stopped) {
+            // CPU is halted or stopped, skip instruction execution
+            incrementCpuCycles(1);
+        }
         Instruction instruction = this.fetchInstruction();
         instruction.executeInstruction(this);
     }
@@ -188,6 +220,7 @@ public class CPU {
         this.spRegister = 0;
         this.pcRegister = 0;
         this.halted = false;
+        this.stopped = false;
         this.cycles = 0;
     }
 

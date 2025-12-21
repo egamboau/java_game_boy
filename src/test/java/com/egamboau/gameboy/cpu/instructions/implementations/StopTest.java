@@ -33,6 +33,23 @@ class StopTest extends CPUTestBase {
         long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
 
+        //PC should be incremented by one on the old, so it is possible to verify the new one
+        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
+        assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not matching.");
+        assertEquals(oldRegisterValues, newRegisterValues);
+        assertTrue(getCurrentCpu().isStopped());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void testHalt() {
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(0x76);
+        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters();
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
+
         //PC should be incremented by one on the old, so it possible to verify the new one
         oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
         assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not matching.");

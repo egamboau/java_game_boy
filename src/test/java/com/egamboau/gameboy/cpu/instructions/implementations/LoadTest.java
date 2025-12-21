@@ -45,7 +45,15 @@ class LoadTest extends CPUTestBase {
     static Stream<Arguments> generateArgumentForRegisterToIndirectRegisterTest() {
         return Stream.of(
             Arguments.of(0x02, RegisterType.BC, RegisterType.A),
-            Arguments.of(0x12, RegisterType.DE, RegisterType.A)
+            Arguments.of(0x12, RegisterType.DE, RegisterType.A),
+            Arguments.of(0x70, RegisterType.HL, RegisterType.B),
+            Arguments.of(0x71, RegisterType.HL, RegisterType.C),
+            Arguments.of(0x72, RegisterType.HL, RegisterType.D),
+            Arguments.of(0x73, RegisterType.HL, RegisterType.E),
+            Arguments.of(0x74, RegisterType.HL, RegisterType.H),
+            Arguments.of(0x75, RegisterType.HL, RegisterType.L),
+            Arguments.of(0x77, RegisterType.HL, RegisterType.A)
+
         );
     }
 
@@ -53,7 +61,14 @@ class LoadTest extends CPUTestBase {
     static Stream<Arguments> generateArgumentForIndirectRegisterToRegisterTest() {
         return Stream.of(
             Arguments.of(0x0A, RegisterType.BC, RegisterType.A),
-            Arguments.of(0x1A, RegisterType.DE, RegisterType.A)
+            Arguments.of(0x1A, RegisterType.DE, RegisterType.A),
+            Arguments.of(0x46, RegisterType.HL, RegisterType.B),
+            Arguments.of(0x4E, RegisterType.HL, RegisterType.C),
+            Arguments.of(0x56, RegisterType.HL, RegisterType.D),
+            Arguments.of(0x5E, RegisterType.HL, RegisterType.E),
+            Arguments.of(0x66, RegisterType.HL, RegisterType.H),
+            Arguments.of(0x6E, RegisterType.HL, RegisterType.L),
+            Arguments.of(0x7E, RegisterType.HL, RegisterType.A)
         );
     }
 
@@ -91,6 +106,93 @@ class LoadTest extends CPUTestBase {
         return Stream.of(
             Arguments.of(0x3A, RegisterType.HL, RegisterType.A)
         );
+    }
+
+    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
+    static Stream<Arguments> generateArgumentsFor8BitRegisterTo8BitRegister() {
+        return Stream.of(
+            Arguments.of(0x40, RegisterType.B, RegisterType.B),
+            Arguments.of(0x41, RegisterType.C, RegisterType.B),
+            Arguments.of(0x42, RegisterType.D, RegisterType.B),
+            Arguments.of(0x43, RegisterType.E, RegisterType.B),
+            Arguments.of(0x44, RegisterType.H, RegisterType.B),
+            Arguments.of(0x45, RegisterType.L, RegisterType.B),
+            Arguments.of(0x47, RegisterType.A, RegisterType.B),
+
+            Arguments.of(0x48, RegisterType.B, RegisterType.C),
+            Arguments.of(0x49, RegisterType.C, RegisterType.C),
+            Arguments.of(0x4A, RegisterType.D, RegisterType.C),
+            Arguments.of(0x4B, RegisterType.E, RegisterType.C),
+            Arguments.of(0x4C, RegisterType.H, RegisterType.C),
+            Arguments.of(0x4D, RegisterType.L, RegisterType.C),
+            Arguments.of(0x4F, RegisterType.A, RegisterType.C),
+
+            Arguments.of(0x50, RegisterType.B, RegisterType.D),
+            Arguments.of(0x51, RegisterType.C, RegisterType.D),
+            Arguments.of(0x52, RegisterType.D, RegisterType.D),
+            Arguments.of(0x53, RegisterType.E, RegisterType.D),
+            Arguments.of(0x54, RegisterType.H, RegisterType.D),
+            Arguments.of(0x55, RegisterType.L, RegisterType.D),
+            Arguments.of(0x57, RegisterType.A, RegisterType.D),
+
+            Arguments.of(0x58, RegisterType.B, RegisterType.E),
+            Arguments.of(0x59, RegisterType.C, RegisterType.E),
+            Arguments.of(0x5A, RegisterType.D, RegisterType.E),
+            Arguments.of(0x5B, RegisterType.E, RegisterType.E),
+            Arguments.of(0x5C, RegisterType.H, RegisterType.E),
+            Arguments.of(0x5D, RegisterType.L, RegisterType.E),
+            Arguments.of(0x5F, RegisterType.A, RegisterType.E),
+
+            Arguments.of(0x60, RegisterType.B, RegisterType.H),
+            Arguments.of(0x61, RegisterType.C, RegisterType.H),
+            Arguments.of(0x62, RegisterType.D, RegisterType.H),
+            Arguments.of(0x63, RegisterType.E, RegisterType.H),
+            Arguments.of(0x64, RegisterType.H, RegisterType.H),
+            Arguments.of(0x65, RegisterType.L, RegisterType.H),
+            Arguments.of(0x67, RegisterType.A, RegisterType.H),
+
+            Arguments.of(0x68, RegisterType.B, RegisterType.L),
+            Arguments.of(0x69, RegisterType.C, RegisterType.L),
+            Arguments.of(0x6A, RegisterType.D, RegisterType.L),
+            Arguments.of(0x6B, RegisterType.E, RegisterType.L),
+            Arguments.of(0x6C, RegisterType.H, RegisterType.L),
+            Arguments.of(0x6D, RegisterType.L, RegisterType.L),
+            Arguments.of(0x6F, RegisterType.A, RegisterType.L),
+
+            Arguments.of(0x78, RegisterType.B, RegisterType.A),
+            Arguments.of(0x79, RegisterType.C, RegisterType.A),
+            Arguments.of(0x7A, RegisterType.D, RegisterType.A),
+            Arguments.of(0x7B, RegisterType.E, RegisterType.A),
+            Arguments.of(0x7C, RegisterType.H, RegisterType.A),
+            Arguments.of(0x7D, RegisterType.L, RegisterType.A),
+            Arguments.of(0x7F, RegisterType.A, RegisterType.A)
+
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("generateArgumentsFor8BitRegisterTo8BitRegister")
+    @SuppressWarnings({"checkstyle:magicnumber"})
+    void run8BitRegisterTo8BitRegister(final int opcode, final RegisterType sourceRegister,
+            final RegisterType destinationRegister) {
+        int data =  TestUtils.getRandomIntegerInRange(0x00, 0xFF);
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
+            opcode //the opcode
+            );
+
+        this.getCurrentCpu().setValueInRegister(data, sourceRegister);
+
+        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister));
+        long previousCycleCount = getCurrentCpu().getCycles();
+        this.getCurrentCpu().cpuStep();
+        long currentCycleCount = getCurrentCpu().getCycles();
+        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(destinationRegister));
+
+        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
+        assertEquals(registerValues, newRegisterValues);
+        assertEquals(previousCycleCount + 1, currentCycleCount);
+        assertEquals(data, this.getCurrentCpu().getValueFromRegister(destinationRegister));
+        assertEquals(data, this.getCurrentCpu().getValueFromRegister(sourceRegister));
     }
 
     @ParameterizedTest
@@ -306,7 +408,7 @@ class LoadTest extends CPUTestBase {
         registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
         assertEquals(registerValues, newRegisterValues);
         assertEquals(previousCycleCount + 2, currentCycleCount);
-        verify(this.getCurrentBus(), times(1)).writeByteToAddress(registerData, address);
+        verify(this.getCurrentBus(), times(1)).writeByteToAddress(this.getCurrentCpu().getValueFromRegister(sourceRegister), address);
     }
 
     private void runLoadMemoryDataIntoRegister(final int address, final RegisterType addressRegister,

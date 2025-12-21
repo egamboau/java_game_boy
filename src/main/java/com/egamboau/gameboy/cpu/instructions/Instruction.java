@@ -8,6 +8,7 @@ import com.egamboau.gameboy.cpu.instructions.implementations.AddInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecimalAdjustAccumulatorInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecrementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.FlipCarryFlagInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.HaltInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.IncrementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.JumpRelativeInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.LoadInstruction;
@@ -232,11 +233,19 @@ public abstract class Instruction {
                 break;
             case 1:
                 if (z == 6 && y == 6) {
-                    throw new IllegalArgumentException(String.format("\"Opcode still not implemented: \": %02x", opcode));
+                    return new HaltInstruction();
                 } else {
+                    RegisterType sourceRegister = RegisterType.getRegister(z);
                     RegisterType destinationRegister = RegisterType.getRegister(y);
-                    RegisterType sourceRegister = RegisterType.getRegister(x);
-                    Instruction result = new LoadInstruction(AddressMode.REGISTER_TO_REGISTER, sourceRegister, destinationRegister, null, null);
+                    AddressMode addressMode = null;
+                    if (destinationRegister.equals(RegisterType.HL)) {
+                        addressMode = AddressMode.REGISTER_TO_INDIRECT_REGISTER;
+                    } else if (sourceRegister.equals(RegisterType.HL)) {
+                        addressMode = AddressMode.MEMORY_ADDRESS_REGISTER_TO_REGISTER;
+                    } else {
+                        addressMode = AddressMode.REGISTER_TO_REGISTER;
+                    }
+                    Instruction result = new LoadInstruction(addressMode, sourceRegister, destinationRegister, null, null);
                     return result;
                 }
             default:

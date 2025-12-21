@@ -26,6 +26,6 @@ public class StopInstruction extends Instruction {
     @Override
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         // Stop behaves weird, but not all the hardware is actually implemented for that. For now, set it as stopped
-        currentCpu.setHalted(true);
+        currentCpu.setStopped(true);
     }
 }
