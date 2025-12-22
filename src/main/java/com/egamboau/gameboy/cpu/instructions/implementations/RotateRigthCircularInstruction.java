@@ -7,8 +7,13 @@ import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 
+/**
+ * Rotate right circular (RRC) instruction: rotates the value right by one bit
+ * with the LSB moving into the MSB and into the carry flag.
+ */
 public class RotateRigthCircularInstruction  extends Instruction {
 
+    //region Constructors
     /**
      * Constructs a Rotate Right Circular Instruction.
      *
@@ -22,7 +27,9 @@ public class RotateRigthCircularInstruction  extends Instruction {
             final RegisterType destinationRegister, final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+    //endregion
 
+    //region Execution
     @Override
     @SuppressWarnings("checkstyle:magicnumber")
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
@@ -35,5 +42,6 @@ public class RotateRigthCircularInstruction  extends Instruction {
         currentCpu.setSubtract(false);
         currentCpu.setHalfCarry(false);
     }
+    //endregion
 
 }

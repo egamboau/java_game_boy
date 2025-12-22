@@ -7,7 +7,16 @@ import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 
+/**
+ * Implements the Decimal Adjust Accumulator (DAA) instruction used to
+ * adjust the accumulator (A) register after binary addition or subtraction
+ * so that the result is a valid packed BCD (Binary Coded Decimal) value.
+ *
+ * The instruction updates the Zero and Carry flags and clears the Half-Carry flag.
+ */
 public class DecimalAdjustAccumulatorInstruction extends Instruction {
+
+    //region Constructors
 
     /**
      * Constructs a DecimalAdjustAccumulatorInstruction.
@@ -23,6 +32,24 @@ public class DecimalAdjustAccumulatorInstruction extends Instruction {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
 
+    //endregion
+
+    //region Instruction execution
+
+    /**
+     * Executes the DAA instruction logic. Adjusts the accumulator value
+     * according to the current flags (Subtract, Half-Carry, Carry) to
+     * produce a valid BCD result.
+     *
+     * Effects:
+     * - Updates the destination register (typically A) with the adjusted 8-bit value.
+     * - Sets the Zero flag if result is zero.
+     * - Clears the Half-Carry flag.
+     * - Sets the Carry flag when adjustment overflows past 0x99 in addition mode.
+     *
+     * @param currentCpu the CPU instance on which to operate
+     * @param data unused for this instruction but follows the Instruction signature
+     */
     @Override
     @SuppressWarnings("checkstyle:magicnumber")
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
@@ -53,5 +80,7 @@ public class DecimalAdjustAccumulatorInstruction extends Instruction {
         currentCpu.setHalfCarry(false);
         currentCpu.setValueInRegister(registerValue, getDestinationRegister());
     }
+
+    //endregion
 
 }

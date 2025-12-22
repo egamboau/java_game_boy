@@ -6,8 +6,13 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
+/**
+ * Rotate right through carry (RR) instruction. Shifts the value right by one,
+ * filling MSB with previous carry and storing LSB into the carry flag.
+ */
 public class RotateRightInstruction extends Instruction {
 
+    //region Constructors
     /**
      * Constructs a RotateRightInstruction.
      *
@@ -21,7 +26,9 @@ public class RotateRightInstruction extends Instruction {
             final RegisterType destinationRegister, final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+    //endregion
 
+    //region Execution
     @Override
     @SuppressWarnings("checkstyle:magicnumber")
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
@@ -36,7 +43,6 @@ public class RotateRightInstruction extends Instruction {
         currentCpu.setSubtract(false);
         currentCpu.setHalfCarry(false);
     }
-
-
+    //endregion
 
 }

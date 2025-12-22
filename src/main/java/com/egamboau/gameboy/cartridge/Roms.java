@@ -9,6 +9,7 @@ import java.util.Map;
  */
 public enum Roms {
 
+    //region Enum entries
     /**
      * ROM without any memory bank controller (MBC).
      */
@@ -153,7 +154,9 @@ public enum Roms {
      * Unknown ROM type.
      */
     UNKNOWN((byte) 0x4);
+    //endregion
 
+    //region Fields
     /**
      * The byte value associated with the ROM type.
      */
@@ -172,13 +175,17 @@ public enum Roms {
      * A map for quick lookup of ROM types by their byte value.
      */
     private static final Map<Byte, Roms> BY_CODE = new HashMap<>();
+    //endregion
 
+    //region Static initialization
     static {
         for (Roms rom : values()) {
             BY_CODE.put(rom.byteValue, rom);
         }
     }
+    //endregion
 
+    //region Constructor
     /**
      * Constructor for the enum.
      *
@@ -187,7 +194,9 @@ public enum Roms {
     Roms(final byte value) {
         this.byteValue = value;
     }
+    //endregion
 
+    //region Factory
     /**
      * Retrieves the ROM type corresponding to the given byte value.
      *
@@ -203,4 +212,5 @@ public enum Roms {
         }
         return rom;
     }
+    //endregion
 }

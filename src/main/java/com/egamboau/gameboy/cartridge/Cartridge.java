@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 import com.egamboau.gameboy.memory.BitMasks;
 
 public class Cartridge {
-
+    //region Constants
     /**
      * The ending address of the global checksum section in the cartridge header.
      */
@@ -79,6 +79,7 @@ public class Cartridge {
      * The ending address of the title section in the ROM.
      */
     private static final int TITLE_SECTION_END = 0x0143;
+
     /**
      * The starting address of the logo section in the ROM.
      */
@@ -98,7 +99,9 @@ public class Cartridge {
      * The ending address of the entry point in the ROM.
      */
     private static final int ENTRY_POINT_END = 0x104;
+    //endregion
 
+    //region Fields
     /**
      * The name of the file associated with the cartridge.
      */
@@ -113,7 +116,9 @@ public class Cartridge {
      * Logger instance for logging cartridge-related information.
      */
     private static final Logger LOGGER = LogManager.getLogger();
+    //endregion
 
+    //region Constructor
     /**
      * Constructs a Cartridge object by loading ROM data from the specified file path.
      *
@@ -125,7 +130,9 @@ public class Cartridge {
         Path filePath = Paths.get(fileName);
         this.romData = Files.readAllBytes(filePath);
     }
+    //endregion
 
+    //region Basic accessors
     /**
      * Get the Rom data.
      *
@@ -143,7 +150,9 @@ public class Cartridge {
     public String getFileName() {
         return fileName;
     }
+    //endregion
 
+    //region Entry point & image data
     /**
      * Get the entry point bytes for the rom
      * After displaying the logo, the built-in boot ROM jumps to the address $0100,
@@ -187,7 +196,9 @@ public class Cartridge {
             Arrays.copyOfRange(getRomData(), TITLE_SECTION_START, TITLE_SECTION_END),
             StandardCharsets.US_ASCII);
     }
+    //endregion
 
+    //region Header flags & licensee info
     /**
      * Get the CGB flag, used to decide whether to enable Color mode (“CGB Mode”) or
      * to fall back to monochrome compatibility mode (“Non-CGB Mode”).
@@ -218,6 +229,27 @@ public class Cartridge {
     }
 
     /**
+     * Gets the old licensee code stored in the ROM, indicating the actual
+     * publisher.
+     *
+     * @return the old license code stored
+     */
+    public OldLicensee getOldLicensee() {
+        return OldLicensee.fromByte(getRomData()[OLD_LICENSEE_CODE_LOCATION]);
+    }
+
+    /**
+     * Get the destination of the actual game.
+     *
+     * @return the destination on the ROM
+     */
+    public Destination getDestination() {
+        return Destination.fromByte(getRomData()[DESTINATION_LOCATION]);
+    }
+    //endregion
+
+    //region ROM type & size
+    /**
      * Get the rom type, and what hardware was present on the cartridge.
      *
      * @return the hardware type
@@ -235,26 +267,9 @@ public class Cartridge {
     public RomSize getRomSize() {
         return RomSize.fromByte(getRomData()[ROM_SIZE_LOCATION]);
     }
+    //endregion
 
-    /**
-     * Get the destination of the actual game.
-     *
-     * @return the destination on the ROM
-     */
-    public Destination getDestination() {
-        return Destination.fromByte(getRomData()[DESTINATION_LOCATION]);
-    }
-
-    /**
-     * Gets the old licensee code stored in the rom, indicating the actual publisher.
-     * name
-     *
-     * @return the old license code stored
-     */
-    public OldLicensee getOldLicensee() {
-        return OldLicensee.fromByte(getRomData()[OLD_LICENSEE_CODE_LOCATION]);
-    }
-
+    //region Checksum & header validation
     /**
      * Return the byte for the checksum of the header.
      *
@@ -290,7 +305,9 @@ public class Cartridge {
         }
         return checksum == getChecksum();
     }
+    //endregion
 
+    //region Memory access (read/write)
     /**
      * Read a byte from the memory on the cartdrige and returns it.
      *
@@ -317,4 +334,5 @@ public class Cartridge {
             getRomData()[address] = (byte) (value & BitMasks.MASK_8_BIT_DATA);
         }
     }
+    //endregion
 }

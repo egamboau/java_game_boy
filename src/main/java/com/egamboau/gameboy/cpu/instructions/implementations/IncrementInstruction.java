@@ -7,8 +7,16 @@ import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 
+/**
+ * Increment instruction implementation.
+ *
+ * <p>Supports incrementing 8-bit registers, 16-bit register pairs and memory
+ * locations referenced indirectly. Updates CPU flags according to the result
+ * for 8-bit operations.</p>
+ */
 public class IncrementInstruction extends Instruction {
 
+    //region Constructors
     /**
      * Constructs an IncrementInstruction with the specified parameters.
      *
@@ -23,7 +31,9 @@ public class IncrementInstruction extends Instruction {
             final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+    //endregion
 
+    //region Execution
     @Override
     public final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         switch (getAddressMode()) {
@@ -41,7 +51,9 @@ public class IncrementInstruction extends Instruction {
                         String.format("Address mode %s not supported for Increment Instruction", getAddressMode()));
         }
     }
+    //endregion
 
+    //region Helpers
     private int getIncrementedRegisterData(final CPU currentCpu) {
         int originalValue = currentCpu.getValueFromRegister(getSourceRegister());
         return originalValue + 1;
@@ -75,4 +87,6 @@ public class IncrementInstruction extends Instruction {
 
         currentCpu.writeByteToAddress(memoryAddress, result);
     }
+    //endregion
+
 }

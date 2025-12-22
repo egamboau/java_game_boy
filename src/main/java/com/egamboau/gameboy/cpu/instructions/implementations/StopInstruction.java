@@ -6,8 +6,13 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
+/**
+ * STOP instruction. Puts the CPU into a stopped state. Full hardware behavior
+ * is more complex; this implementation marks the CPU as stopped.
+ */
 public class StopInstruction extends Instruction {
 
+    //region Constructors
     /**
      * Constructs a StopInstruction with the specified parameters.
      *
@@ -22,10 +27,13 @@ public class StopInstruction extends Instruction {
             final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+    //endregion
 
+    //region Execution
     @Override
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         // Stop behaves weird, but not all the hardware is actually implemented for that. For now, set it as stopped
         currentCpu.setStopped(true);
     }
+    //endregion
 }

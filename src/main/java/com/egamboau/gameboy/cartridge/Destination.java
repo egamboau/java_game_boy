@@ -5,6 +5,7 @@ import java.util.Map;
 
 public enum Destination {
 
+    //region Enum entries
     /**
      * Represents the destination as Japan.
      */
@@ -14,7 +15,9 @@ public enum Destination {
      * Represents the destination as Overseas.
      */
     OVERSEAS((byte) 0x01);
+    //endregion
 
+    //region Fields
     /**
      * The code representing the destination.
      */
@@ -24,17 +27,23 @@ public enum Destination {
      * A map to associate destination codes with their corresponding enum values.
      */
     private static final Map<Byte, Destination> BY_CODE = new HashMap<>();
+    //endregion
 
+    //region Static initialization
     static {
         for (Destination size : values()) {
             BY_CODE.put(size.code, size);
         }
     }
+    //endregion
 
+    //region Constructor
     Destination(final byte currentCode) {
         this.code = currentCode;
     }
+    //endregion
 
+    //region Factory
     /**
      * Retrieves the Destination enum corresponding to the given byte code.
      *
@@ -49,4 +58,5 @@ public enum Destination {
         }
         return size;
     }
+    //endregion
 }

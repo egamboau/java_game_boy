@@ -7,7 +7,15 @@ import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 
+/**
+ * Instruction that decrements a register, register pair or memory location.
+ *
+ * The instruction updates Zero, Subtract and Half-Carry flags as appropriate
+ * for 8-bit decrement operations. 16-bit decrements only affect the register pair value.
+ */
 public class DecrementInstruction extends Instruction {
+
+    //region Constructors
 
     /**
      * Constructs a DecrementInstruction with the specified parameters.
@@ -23,6 +31,10 @@ public class DecrementInstruction extends Instruction {
             final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+
+    //endregion
+
+    //region Instruction execution
 
     @Override
     public final void runInstructionLogic(final CPU currentCpu, final int[] data) {
@@ -40,6 +52,10 @@ public class DecrementInstruction extends Instruction {
                 throw new IllegalArgumentException(String.format("Address mode %s not supported", getAddressMode()));
         }
     }
+
+    //endregion
+
+    //region Helper methods
 
     private void decrementRegisterPair(final CPU currentCpu) {
         int result = getDecrementedRegisterData(currentCpu) & BitMasks.MASK_16_BIT_DATA;
@@ -71,5 +87,7 @@ public class DecrementInstruction extends Instruction {
 
         currentCpu.writeByteToAddress(memoryAddress, result);
     }
+
+    //endregion
 
 }

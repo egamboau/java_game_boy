@@ -7,8 +7,13 @@ import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 
+/**
+ * Rotate left through carry (RL) instruction. Shifts the value left by one,
+ * filling LSB with previous carry and storing MSB into the carry flag.
+ */
 public class RotateLeftInstruction extends Instruction {
 
+    //region Constructors
     /**
      * Constructs a RotateLeftInstruction.
      *
@@ -23,7 +28,9 @@ public class RotateLeftInstruction extends Instruction {
             final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+    //endregion
 
+    //region Execution
     @Override
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         int value = currentCpu.getValueFromRegister(getSourceRegister());
@@ -38,5 +45,6 @@ public class RotateLeftInstruction extends Instruction {
         currentCpu.setSubtract(false);
         currentCpu.setHalfCarry(false);
     }
+    //endregion
 
 }

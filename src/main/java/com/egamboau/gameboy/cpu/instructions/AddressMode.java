@@ -6,6 +6,7 @@ package com.egamboau.gameboy.cpu.instructions;
  */
 public enum AddressMode {
 
+    //region Enum entries
     /**
      * Addressing mode where 16-bit data is loaded into a register.
      */
@@ -84,4 +85,5 @@ public enum AddressMode {
      * Addressing mode where a memory address is specified by a register.
      */
     MEMORY_ADDRESS_REGISTER,
+    //endregion
 }

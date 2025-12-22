@@ -24,12 +24,7 @@ package com.egamboau.gameboy.memory;
  */
 public final class MemoryMapConstants {
 
-    /**
-     * Private constructor to prevent instantiation of this utility class.
-     */
-    private MemoryMapConstants() {
-    }
-
+    //region ROM Regions
     /**
      * Start address of ROM Bank 00.
      */
@@ -49,7 +44,9 @@ public final class MemoryMapConstants {
      * End address of ROM Bank NN (switchable bank).
      */
     public static final int ROM_BANK_NN_END = 0x7FFF;
+    //endregion
 
+    //region Video and External RAM
     /**
      * Start address of Video RAM (VRAM).
      */
@@ -69,7 +66,9 @@ public final class MemoryMapConstants {
      * End address of External RAM.
      */
     public static final int EXTERNAL_RAM_END = 0xBFFF;
+    //endregion
 
+    //region Work RAM (WRAM)
     /**
      * Start address of Work RAM Bank 0 (WRAM0).
      */
@@ -89,7 +88,9 @@ public final class MemoryMapConstants {
      * End address of Work RAM Bank 1 (WRAM1).
      */
     public static final int WRAM_1_END = 0xDFFF;
+    //endregion
 
+    //region Echo RAM and OAM
     /**
      * Start address of Echo RAM (mirror of WRAM).
      */
@@ -119,7 +120,9 @@ public final class MemoryMapConstants {
      * End address of the unusable memory region.
      */
     public static final int NOT_USABLE_END = 0xFEFF;
+    //endregion
 
+    //region IO Registers and HRAM
     /**
      * Start address of I/O Registers.
      */
@@ -139,9 +142,20 @@ public final class MemoryMapConstants {
      * End address of High RAM (HRAM).
      */
     public static final int HRAM_END = 0xFFFE;
+    //endregion
 
+    //region Interrupts
     /**
      * Address of the Interrupt Enable Register.
      */
     public static final int INTERRUPT_ENABLE_REGISTER = 0xFFFF;
+    //endregion
+
+    //region Construction
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private MemoryMapConstants() {
+    }
+    //endregion
 }

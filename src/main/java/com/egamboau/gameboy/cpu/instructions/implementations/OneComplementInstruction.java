@@ -6,8 +6,13 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
+/**
+ * One's complement instruction (COM or CPL): flips all bits of the operand.
+ * This instruction clears the half-carry flag and sets the subtract flag to false.
+ */
 public class OneComplementInstruction extends Instruction {
 
+    //region Constructors
     /**
      * Constructs a OneComplementInstruction.
      *
@@ -21,7 +26,9 @@ public class OneComplementInstruction extends Instruction {
             final RegisterType destinationRegister, final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+    //endregion
 
+    //region Execution
     @Override
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         int value = currentCpu.getValueFromRegister(getSourceRegister());
@@ -30,5 +37,6 @@ public class OneComplementInstruction extends Instruction {
         currentCpu.setSubtract(false);
         currentCpu.setHalfCarry(false);
     }
+    //endregion
 
 }

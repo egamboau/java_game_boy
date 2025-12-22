@@ -6,8 +6,15 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
+/**
+ * Jump (relative) instruction implementation.
+ *
+ * <p>Performs a signed relative branch of the program counter optionally
+ * conditioned on CPU flags.</p>
+ */
 public class JumpRelativeInstruction extends Instruction {
 
+    //region Constructors
     /**
      * Constructs a JumpRelativeInstruction.
      *
@@ -21,7 +28,9 @@ public class JumpRelativeInstruction extends Instruction {
             final RegisterType destinationRegister, final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+    //endregion
 
+    //region Execution
     @Override
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         //get the data from the array. Cast to byte to get the sign correctly
@@ -51,4 +60,6 @@ public class JumpRelativeInstruction extends Instruction {
             currentCpu.incrementPCRegister(address);
         }
     }
+    //endregion
+
 }

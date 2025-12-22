@@ -19,6 +19,14 @@ public class CPUTestBase {
      * are considered, effectively truncating any higher bits.
      */
     protected static final int MASK_INT_16_BIT = 0xFFFF;
+
+    /**
+     * Bitmask for isolating the lower 8 bits of an int value.
+     *
+     * Used to convert a signed Java byte or any integer into its
+     * unsigned 0–255 representation
+     */
+    protected static final int MASK_INT_8_BIT = 0xFF;
     /**
      * The CPU instance used in the test environment.
      * This is initialized before each test execution.

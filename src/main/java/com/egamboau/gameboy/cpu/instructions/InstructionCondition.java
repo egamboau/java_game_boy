@@ -6,6 +6,7 @@ package com.egamboau.gameboy.cpu.instructions;
  */
 public enum InstructionCondition {
 
+    //region Enum entries
     /**
      * Condition where the Carry flag (C) is not set.
      * The instruction will execute if the Carry flag is cleared (0).
@@ -29,7 +30,9 @@ public enum InstructionCondition {
      * The instruction will execute if the Zero flag is set (1).
      */
     Z_FLAG_SET;
+    //endregion
 
+    //region Mapping
     /**
      * Array mapping indices to their corresponding InstructionCondition.
      */
@@ -40,8 +43,15 @@ public enum InstructionCondition {
      *
      * @param index the index of the condition (0 to 3)
      * @return the corresponding InstructionCondition
+     * @throws IndexOutOfBoundsException if the index is not within the valid range
+     *                                   (0..conditionArray.length-1)
      */
     public static InstructionCondition getInstructionConditionFromIndex(final int index) {
+        if (index < 0 || index >= conditionArray.length) {
+            throw new IndexOutOfBoundsException(
+                "Invalid InstructionCondition index: " + index + ". Valid range is 0.." + (conditionArray.length - 1));
+        }
         return conditionArray[index];
     }
+    //endregion
 }

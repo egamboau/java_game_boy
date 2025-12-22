@@ -6,6 +6,7 @@ import java.util.Map;
 
 public enum OldLicensee {
 
+    //region Enum entries
     /**
      * No licensee.
      */
@@ -430,7 +431,9 @@ public enum OldLicensee {
      * LJN (again) licensee.
      */
     LJN_AGAIN((byte) 0xFF);
+    //endregion
 
+    //region Fields
     /**
      * The byte code associated with the licensee.
      */
@@ -440,13 +443,17 @@ public enum OldLicensee {
      * A map for quick lookup of licensees by their byte code.
      */
     private static final Map<Byte, OldLicensee> BY_CODE = new HashMap<>();
+    //endregion
 
+    //region Static initialization
     static {
         for (OldLicensee licensee : values()) {
             BY_CODE.put(licensee.code, licensee);
         }
     }
+    //endregion
 
+    //region Constructor
     /**
      * Constructor for the enum.
      *
@@ -455,7 +462,9 @@ public enum OldLicensee {
     OldLicensee(final byte licenseeCode) {
         this.code = licenseeCode;
     }
+    //endregion
 
+    //region Accessors & Factory
     /**
      * Gets the byte code associated with the licensee.
      *
@@ -479,4 +488,5 @@ public enum OldLicensee {
         }
         return licensee;
     }
+    //endregion
 }

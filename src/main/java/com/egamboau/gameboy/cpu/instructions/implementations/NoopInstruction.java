@@ -6,8 +6,13 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
+/**
+ * No-operation instruction (NOP). This instruction performs no state changes,
+ * but exists to consume cycles or align program flow.
+ */
 public class NoopInstruction extends Instruction {
 
+    //region Constructors
     /**
      * Constructs a NoopInstruction.
      *
@@ -22,9 +27,12 @@ public class NoopInstruction extends Instruction {
         final InstructionCondition condition, final Byte parameter) {
       super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+    //endregion
 
+    //region Execution
     @Override
     public void runInstructionLogic(final CPU currentCpu, final int[] data) {
       // Instruction for the NOOP does nothing, thus leaving method empty.
     }
+    //endregion
 }

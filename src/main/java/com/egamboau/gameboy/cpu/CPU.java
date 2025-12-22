@@ -10,6 +10,7 @@ import com.egamboau.gameboy.memory.Bus;
 
 public class CPU {
 
+    //region Fields
     /**
      * Logger instance for logging CPU-related information.
      */
@@ -78,7 +79,9 @@ public class CPU {
 
     /** Indicates whether the CPU is currently stopped (true when in the STOP state). */
     private boolean stopped;
+    //endregion
 
+    //region Constructor & initialization
     /**
      * Constructs a CPU instance and initializes it with the provided memory bus.
      *
@@ -89,6 +92,25 @@ public class CPU {
         this.initializeCPU();
     }
 
+    private void initializeCPU() {
+        LOGGER.info("Initializing CPU Registers to default values");
+        this.a = new Register();
+        this.b = new Register();
+        this.c = new Register();
+        this.d = new Register();
+        this.e = new Register();
+        this.f = new FlagRegister();
+        this.h = new Register();
+        this.l = new Register();
+        this.spRegister = 0;
+        this.pcRegister = 0;
+        this.halted = false;
+        this.stopped = false;
+        this.cycles = 0;
+    }
+    //endregion
+
+    //region State accessors (halt/stop)
     /**
      * Checks if the CPU is in a halted state.
      *
@@ -132,7 +154,9 @@ public class CPU {
     public final void setStopped(final boolean newValue) {
         this.stopped = newValue;
     }
+    //endregion
 
+    //region Cycle management
     /**
      * Increment the cycles count on the CPU.
      *
@@ -142,6 +166,17 @@ public class CPU {
         this.cycles += cyclesAdjustment;
     }
 
+    /**
+     * Retrieves the total number of cycles executed by the CPU.
+     *
+     * @return The total number of CPU cycles.
+     */
+    public final long getCycles() {
+        return cycles;
+    }
+    //endregion
+
+    //region Fetch & execute
     /**
      * Executes one step on the CPU, basically reading and executing instructions
      * one at a time.
@@ -168,7 +203,33 @@ public class CPU {
         incrementCpuCycles(1L);
         return Instruction.geInstructionFromOpcode(opcode);
     }
+    //endregion
 
+    //region Memory access
+    /**
+     * Reads a byte from the specified memory address and increments the CPU cycles.
+     *
+     * @param address The memory address to read from.
+     * @return The byte value read from the specified address.
+     */
+    public final int readByteFromAddress(final int address) {
+        this.incrementCpuCycles(1L);
+        return memoryBus.readByteFromAddress(address);
+    }
+
+    /**
+     * Writes a byte of data to the specified memory address and increments the CPU cycles.
+     *
+     * @param address The memory address to write to.
+     * @param data The byte value to write to the specified address.
+     */
+    public final void writeByteToAddress(final int address, final int data) {
+        memoryBus.writeByteToAddress(data, address);
+        incrementCpuCycles(1L);
+    }
+    //endregion
+
+    //region Register pair operations
     /**
      * Increments the value of a 16-bit register pair by 1.
      *
@@ -206,46 +267,9 @@ public class CPU {
                         "Register %s not supported for 16 bit increment instruction", register));
         }
     }
+    //endregion
 
-    private void initializeCPU() {
-        LOGGER.info("Initializing CPU Registers to default values");
-        this.a = new Register();
-        this.b = new Register();
-        this.c = new Register();
-        this.d = new Register();
-        this.e = new Register();
-        this.f = new FlagRegister();
-        this.h = new Register();
-        this.l = new Register();
-        this.spRegister = 0;
-        this.pcRegister = 0;
-        this.halted = false;
-        this.stopped = false;
-        this.cycles = 0;
-    }
-
-    /**
-     * Reads a byte from the specified memory address and increments the CPU cycles.
-     *
-     * @param address The memory address to read from.
-     * @return The byte value read from the specified address.
-     */
-    public final int readByteFromAddress(final int address) {
-        this.incrementCpuCycles(1L);
-        return memoryBus.readByteFromAddress(address);
-    }
-
-    /**
-     * Writes a byte of data to the specified memory address and increments the CPU cycles.
-     *
-     * @param address The memory address to write to.
-     * @param data The byte value to write to the specified address.
-     */
-    public final void writeByteToAddress(final int address, final int data) {
-        memoryBus.writeByteToAddress(data, address);
-        incrementCpuCycles(1L);
-    }
-
+    //region Register read/write helpers
     /**
      * Retrieves the value stored in the specified register.
      *
@@ -305,33 +329,6 @@ public class CPU {
     }
 
     /**
-     * Sets the subtract flag in the flag register.
-     *
-     * @param value true to set the subtract flag, false to clear it.
-     */
-    public final void setSubtract(final boolean value) {
-        f.setSubtract(value);
-    }
-
-    /**
-     * Sets the half-carry flag in the flag register.
-     *
-     * @param value true to set the half-carry flag, false to clear it.
-     */
-    public final void setHalfCarry(final boolean value) {
-        f.setHalfCarry(value);
-    }
-
-    /**
-     * Sets the carry flag in the flag register.
-     *
-     * @param value true to set the carry flag, false to clear it.
-     */
-    public final void setCarry(final boolean value) {
-        f.setCarry(value);
-    }
-
-    /**
      * Sets the value in the specified register.
      *
      * @param data The value to set in the register.
@@ -380,25 +377,6 @@ public class CPU {
             default:
                 throw new IllegalArgumentException("Setting data not supported for this register " + registerType);
         }
-    }
-
-    /**
-     * Sets the zero flag in the flag register.
-     *
-     * @param value true to set the zero flag, false to clear it.
-     */
-    public final void setZero(final boolean value) {
-        f.setZero(value);
-    }
-
-    /**
-     * Reads a byte from the memory address pointed to by the program counter (PC),
-     * increments the PC, and returns the byte read.
-     *
-     * @return The byte value read from the memory address pointed to by the PC.
-     */
-    public final int getDataFromPCAndIncrement() {
-        return readByteFromAddress(pcRegister++);
     }
 
     /**
@@ -451,14 +429,43 @@ public class CPU {
                 throw new IllegalArgumentException("Unknown destination register: " + destinationRegister);
         }
     }
+    //endregion
+
+    //region Flag wrappers
+    /**
+     * Sets the subtract flag in the flag register.
+     *
+     * @param value true to set the subtract flag, false to clear it.
+     */
+    public final void setSubtract(final boolean value) {
+        f.setSubtract(value);
+    }
 
     /**
-     * Retrieves the total number of cycles executed by the CPU.
+     * Sets the half-carry flag in the flag register.
      *
-     * @return The total number of CPU cycles.
+     * @param value true to set the half-carry flag, false to clear it.
      */
-    public final long getCycles() {
-        return cycles;
+    public final void setHalfCarry(final boolean value) {
+        f.setHalfCarry(value);
+    }
+
+    /**
+     * Sets the carry flag in the flag register.
+     *
+     * @param value true to set the carry flag, false to clear it.
+     */
+    public final void setCarry(final boolean value) {
+        f.setCarry(value);
+    }
+
+    /**
+     * Sets the zero flag in the flag register.
+     *
+     * @param value true to set the zero flag, false to clear it.
+     */
+    public final void setZero(final boolean value) {
+        f.setZero(value);
     }
 
     /**
@@ -496,6 +503,18 @@ public class CPU {
     public final boolean getZero() {
         return f.getZero();
     }
+    //endregion
+
+    //region PC helpers
+    /**
+     * Reads a byte from the memory address pointed to by the program counter (PC),
+     * increments the PC, and returns the byte read.
+     *
+     * @return The byte value read from the memory address pointed to by the PC.
+     */
+    public final int getDataFromPCAndIncrement() {
+        return readByteFromAddress(pcRegister++);
+    }
 
     /**
      * Increments the program counter (PC) register by the specified address value.
@@ -506,4 +525,5 @@ public class CPU {
         this.pcRegister += address;
         this.incrementCpuCycles(1);
     }
+    //endregion
 }

@@ -6,8 +6,12 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
+/**
+ * Instruction that sets the carry flag and clears subtract and half-carry flags.
+ */
 public class SetCarryFlagInstruction extends Instruction {
 
+    //region Constructors
     /**
      * Constructs a SetCarryFlagInstruction with the specified parameters.
      *
@@ -22,12 +26,15 @@ public class SetCarryFlagInstruction extends Instruction {
             final Byte currentParameter) {
         super(currentAddressMode, currentSourceRegister, currentDestinationRegister, currentCondition, currentParameter);
     }
+    //endregion
 
+    //region Execution
     @Override
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         currentCpu.setCarry(true);
         currentCpu.setSubtract(false);
         currentCpu.setHalfCarry(false);
     }
+    //endregion
 
 }

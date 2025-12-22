@@ -74,4 +74,22 @@ public final class TestUtils {
         }
         return result.toArray(new RegisterType[0]);
     }
+
+    /**
+     * Returns {@code true} if the given register type represents a single (8-bit) register.
+     *
+     * <p>This method considers the registers A, B, C, D, E and F as single registers and
+     * returns {@code true} for them. For all other register types it returns {@code false}.
+     *
+     * @param registerType the register type to test
+     * @return {@code true} if {@code registerType} is one of A, B, C, D, E or F; {@code false} otherwise
+     */
+    public static boolean isSingleRegister(final RegisterType registerType) {
+        switch (registerType) {
+            case A, B, C, D, E, F:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

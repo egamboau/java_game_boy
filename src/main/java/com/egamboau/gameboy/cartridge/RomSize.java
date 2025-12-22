@@ -5,6 +5,7 @@ import java.util.Map;
 
 public enum RomSize {
 
+    //region Enum entries
     /**
      * Represents a ROM size of 32 KiB with 2 banks.
      */
@@ -59,7 +60,9 @@ public enum RomSize {
      * Represents a ROM size of 1.5 MiB with 96 banks.
      */
     SIZE_1_5MB((byte) 0x54, "1.5 MiB", 96);
+    //endregion
 
+    //region Fields
     /**
      * The unique code representing the ROM size.
      */
@@ -78,19 +81,25 @@ public enum RomSize {
      * A mapping of ROM size codes to their corresponding {@link RomSize} instances.
      */
     private static final Map<Byte, RomSize> BY_CODE = new HashMap<>();
+    //endregion
 
+    //region Static initialization
     static {
         for (RomSize size : values()) {
             BY_CODE.put(size.code, size);
         }
     }
+    //endregion
 
+    //region Constructor
     RomSize(final byte codeValue, final String romSizeValue, final int numberOfBanksValue) {
         this.code = codeValue;
         this.romSize = romSizeValue;
         this.numberOfBanks = numberOfBanksValue;
     }
+    //endregion
 
+    //region Accessors
     /**
      * Gets the unique code representing the ROM size.
      *
@@ -117,7 +126,9 @@ public enum RomSize {
     public int getNumberOfBanks() {
         return numberOfBanks;
     }
+    //endregion
 
+    //region Factory
     /**
      * Retrieves the {@link RomSize} corresponding to the given code.
      *
@@ -132,4 +143,5 @@ public enum RomSize {
         }
         return size;
     }
+    //endregion
 }

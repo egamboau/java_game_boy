@@ -5,6 +5,7 @@ import java.util.Map;
 
 public enum RamType {
 
+    //region Enum entries
     /**
      * Represents no RAM available.
      */
@@ -32,7 +33,9 @@ public enum RamType {
      * Represents 64 KiB of RAM.
      */
     SIZE_64KB((byte) 0x05, "64 KiB", 8);
+    //endregion
 
+    //region Fields
     /**
      * The code representing the RAM type.
      */
@@ -51,19 +54,25 @@ public enum RamType {
      * A map to associate RAM type codes with their corresponding {@link RamType} instances.
      */
     private static final Map<Byte, RamType> BY_CODE = new HashMap<>();
+    //endregion
 
+    //region Static initialization
     static {
         for (RamType size : values()) {
             BY_CODE.put(size.code, size);
         }
     }
+    //endregion
 
+    //region Constructor
     RamType(final byte ramCode, final String ramSizeDescription, final int ramBanks) {
         this.code = ramCode;
         this.ramSize = ramSizeDescription;
         this.numberOfBanks = ramBanks;
     }
+    //endregion
 
+    //region Accessors
     /**
      * Gets the code representing the RAM type.
      *
@@ -90,7 +99,9 @@ public enum RamType {
     public int getNumberOfBanks() {
         return numberOfBanks;
     }
+    //endregion
 
+    //region Factory
     /**
      * Retrieves the {@link RamType} corresponding to the given code.
      *
@@ -105,4 +116,5 @@ public enum RamType {
         }
         return size;
     }
+    //endregion
 }

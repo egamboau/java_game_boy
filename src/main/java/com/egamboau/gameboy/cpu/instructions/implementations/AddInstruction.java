@@ -9,6 +9,7 @@ import com.egamboau.gameboy.memory.BitMasks;
 
 public class AddInstruction extends Instruction {
 
+    //region Constructor
     /**
      * Constructs an AddInstruction with the specified parameters.
      *
@@ -23,7 +24,9 @@ public class AddInstruction extends Instruction {
             final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+    //endregion
 
+    //region Public API
     @Override
     public final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         switch (getAddressMode()) {
@@ -38,23 +41,33 @@ public class AddInstruction extends Instruction {
                         "Address mode not supported for ADD instruction: " + getAddressMode());
         }
     }
+    //endregion
 
+    //region Private helpers
     private void addRegisterPairs(final CPU currentCpu) {
-        int result = currentCpu.getValueFromRegister(getSourceRegister())
-                + currentCpu.getValueFromRegister(getDestinationRegister());
+        int sourceValue = currentCpu.getValueFromRegister(getSourceRegister());
+        int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
+        int result = sourceValue + destinationValue;
+        int additionHalfBits = (sourceValue &  BitMasks.HALF_CARRY_16_BIT_RESULT) + (destinationValue &  BitMasks.HALF_CARRY_16_BIT_RESULT);
+
         currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_16_BIT_RESULT) != 0);
+        currentCpu.setHalfCarry(additionHalfBits > BitMasks.HALF_CARRY_16_BIT_RESULT);
         currentCpu.setCarry(result > BitMasks.CARRY_16_BIT_RESULTS);
     }
 
     private void addRegisters(final CPU currentCpu) {
-        int result = currentCpu.getValueFromRegister(getSourceRegister())
-                + currentCpu.getValueFromRegister(getDestinationRegister());
+        int sourceValue = currentCpu.getValueFromRegister(getSourceRegister());
+        int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
+        int result = sourceValue + destinationValue;
+        int additionHalfBits = (sourceValue &  BitMasks.HALF_CARRY_8_BIT_RESULT) + (destinationValue &  BitMasks.HALF_CARRY_8_BIT_RESULT);
+
         currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT) != 0);
-        currentCpu.setCarry(result > BitMasks.CARRY_8_BIT_RESULTS);
+        currentCpu.setHalfCarry(additionHalfBits > BitMasks.HALF_CARRY_8_BIT_RESULT);
+        currentCpu.setCarry(result  > BitMasks.CARRY_8_BIT_RESULTS);
+        currentCpu.setZero((result & BitMasks.MASK_8_BIT_DATA) == 0);
     }
+    //endregion
 
 }

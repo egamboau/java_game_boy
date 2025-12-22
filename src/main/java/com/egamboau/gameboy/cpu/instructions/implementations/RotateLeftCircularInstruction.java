@@ -7,8 +7,13 @@ import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 
+/**
+ * Rotate left circular (RLC) instruction: rotates the value left by one bit
+ * with the MSB moving into the LSB and into the carry flag.
+ */
 public class RotateLeftCircularInstruction extends Instruction {
 
+    //region Constructors
     /**
      * Constructs a RotateLeftCircularInstruction with the specified parameters.
      *
@@ -22,7 +27,9 @@ public class RotateLeftCircularInstruction extends Instruction {
             final RegisterType destinationRegister, final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+    //endregion
 
+    //region Execution
     @Override
     @SuppressWarnings("checkstyle:magicnumber")
     public final void runInstructionLogic(final CPU currentCpu, final int[] data) {
@@ -35,5 +42,6 @@ public class RotateLeftCircularInstruction extends Instruction {
         currentCpu.setSubtract(false);
         currentCpu.setHalfCarry(false);
     }
+    //endregion
 
 }

@@ -7,8 +7,16 @@ import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 
+/**
+ * Load instruction implementation.
+ *
+ * <p>Handles the various load/addressing modes supported by the Game Boy CPU.
+ * This class centralises the logic to move data between registers, memory and
+ * immediate operands according to the instruction's addressing mode.</p>
+ */
 public class LoadInstruction extends Instruction {
 
+    //region Constructors
     /**
      * Constructs a LoadInstruction with the specified parameters.
      *
@@ -23,7 +31,9 @@ public class LoadInstruction extends Instruction {
             final InstructionCondition condition, final Byte parameter) {
         super(addressMode, sourceRegister, destinationRegister, condition, parameter);
     }
+    //endregion
 
+    //region Execution
     @Override
     public final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         switch (getAddressMode()) {
@@ -65,7 +75,9 @@ public class LoadInstruction extends Instruction {
                 throw new IllegalArgumentException("Unknown address mode: " + getAddressMode());
         }
     }
+    //endregion
 
+    //region Helpers
     private void storeMemoryDataintoRegister(final CPU currentCpu) {
         int address = currentCpu.getValueFromRegister(getSourceRegister());
         int data = currentCpu.readByteFromAddress(address);
@@ -105,4 +117,6 @@ public class LoadInstruction extends Instruction {
         int dataToStore = data[0];
         currentCpu.writeByteToAddress(address, dataToStore);
     }
+    //endregion
+
 }
