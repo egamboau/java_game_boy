@@ -17,49 +17,71 @@ import com.egamboau.test.TestUtils;
 
 class JumpTest extends CPUTestBase {
 
+    /** Opcode for an unconditional relative jump. */
+    private static final int OPCODE_JR = 0x18;
+    /** Opcode for a relative jump when the zero flag is not set. */
+    private static final int OPCODE_JR_NZ = 0x20;
+    /** Opcode for a relative jump when the zero flag is set. */
+    private static final int OPCODE_JR_Z = 0x28;
+    /** Opcode for a relative jump when the carry flag is not set. */
+    private static final int OPCODE_JR_NC = 0x30;
+    /** Opcode for a relative jump when the carry flag is set. */
+    private static final int OPCODE_JR_C = 0x38;
+
+    /** Cycle count for an unconditional relative jump. */
+    private static final int CYCLES_JR = 3;
+    /** Cycle count for a conditional relative jump when its condition is met. */
+    private static final int CYCLES_CONDITIONAL_TAKEN = 3;
+    /** Cycle count for a conditional relative jump when its condition is not met. */
+    private static final int CYCLES_CONDITIONAL_NOT_TAKEN = 2;
+    /** Size of a relative jump instruction in bytes. */
+    private static final int INSTRUCTION_SIZE = 2;
+
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateJrTestArguments() {
         return Stream.of(
-            Arguments.of(0x18, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF),
-            Arguments.of(0x18, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF)
+            Arguments.of(OPCODE_JR, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF),
+            Arguments.of(OPCODE_JR, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF)
         );
     }
+
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateJrNzTestArguments() {
         return Stream.of(
-            Arguments.of(0x20, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, 3),
-            Arguments.of(0x20, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, 2),
-            Arguments.of(0x20, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, 3),
-            Arguments.of(0x20, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, 2)
+            Arguments.of(OPCODE_JR_NZ, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, CYCLES_CONDITIONAL_TAKEN),
+            Arguments.of(OPCODE_JR_NZ, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, CYCLES_CONDITIONAL_NOT_TAKEN),
+            Arguments.of(OPCODE_JR_NZ, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, CYCLES_CONDITIONAL_TAKEN),
+            Arguments.of(OPCODE_JR_NZ, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, CYCLES_CONDITIONAL_NOT_TAKEN)
         );
     }
+
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateJrZTestArguments() {
         return Stream.of(
-            Arguments.of(0x28, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, 2),
-            Arguments.of(0x28, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, 3),
-            Arguments.of(0x28, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, 2),
-            Arguments.of(0x28, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, 3)
+            Arguments.of(OPCODE_JR_Z, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, CYCLES_CONDITIONAL_NOT_TAKEN),
+            Arguments.of(OPCODE_JR_Z, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, CYCLES_CONDITIONAL_TAKEN),
+            Arguments.of(OPCODE_JR_Z, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, CYCLES_CONDITIONAL_NOT_TAKEN),
+            Arguments.of(OPCODE_JR_Z, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, CYCLES_CONDITIONAL_TAKEN)
         );
     }
 
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateJrNcTestArguments() {
         return Stream.of(
-            Arguments.of(0x30, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, 3),
-            Arguments.of(0x30, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, 2),
-            Arguments.of(0x30, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, 3),
-            Arguments.of(0x30, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, 2)
+            Arguments.of(OPCODE_JR_NC, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, CYCLES_CONDITIONAL_TAKEN),
+            Arguments.of(OPCODE_JR_NC, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, CYCLES_CONDITIONAL_NOT_TAKEN),
+            Arguments.of(OPCODE_JR_NC, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, CYCLES_CONDITIONAL_TAKEN),
+            Arguments.of(OPCODE_JR_NC, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, CYCLES_CONDITIONAL_NOT_TAKEN)
         );
     }
 
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateJrcTestArguments() {
         return Stream.of(
-            Arguments.of(0x38, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, 2),
-            Arguments.of(0x38, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, 3),
-            Arguments.of(0x38, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, 2),
-            Arguments.of(0x38, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, 3)
+            Arguments.of(OPCODE_JR_C, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, CYCLES_CONDITIONAL_NOT_TAKEN),
+            Arguments.of(OPCODE_JR_C, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, CYCLES_CONDITIONAL_TAKEN),
+            Arguments.of(OPCODE_JR_C, TestUtils.getRandomIntegerInRange(1, 127) & 0xFF, false, CYCLES_CONDITIONAL_NOT_TAKEN),
+            Arguments.of(OPCODE_JR_C, TestUtils.getRandomIntegerInRange(-127, -1) & 0xFF, true, CYCLES_CONDITIONAL_TAKEN)
         );
     }
 
@@ -67,108 +89,125 @@ class JumpTest extends CPUTestBase {
     @MethodSource("generateJrTestArguments")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     void testJR(final int opcode, final int offset) {
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-                opcode, // the opcode
-                offset);
+        stubNextInstructions(opcode, offset);
 
-        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters();
-        long previousCycleCount = getCurrentCpu().getCycles();
-        this.getCurrentCpu().cpuStep();
-        long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
+        JumpTestContext context = executeJumpInstruction();
 
-        // pc should increment by 2 (the size of the instruction) + the encoded offset
-        oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> (u + 2 + (byte) offset) & 0xFFFF);
-        assertEquals(previousCycleCount + 3, currentCycleCount);
-        assertEquals(oldRegisterValues, newRegisterValues);
-
+        context.expectedPcOffset = INSTRUCTION_SIZE + (byte) offset;
+        context.expectedCycles = CYCLES_JR;
+        verifyJumpResult(context);
     }
 
     @ParameterizedTest
     @MethodSource("generateJrNzTestArguments")
     void testJRNZ(final int opcode, final int offset, final boolean zeroFlagStatus, final int cycleCountOffset) {
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-                opcode, // the opcode
-                offset);
-        runZeroFlagJumpTest(zeroFlagStatus, true, cycleCountOffset, offset);
-
+        stubNextInstructions(opcode, offset);
+        runConditionalFlagJumpTest(zeroFlagStatus, !zeroFlagStatus, cycleCountOffset, offset,
+                () -> this.getCurrentCpu().setZero(zeroFlagStatus));
     }
 
     @ParameterizedTest
     @MethodSource("generateJrZTestArguments")
     void testJRZ(final int opcode, final int offset, final boolean zeroFlagStatus, final int cycleCountOffset) {
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-                opcode, // the opcode
-                offset);
-
-        runZeroFlagJumpTest(zeroFlagStatus, false, cycleCountOffset, offset);
-
+        stubNextInstructions(opcode, offset);
+        runConditionalFlagJumpTest(zeroFlagStatus, zeroFlagStatus, cycleCountOffset, offset,
+                () -> this.getCurrentCpu().setZero(zeroFlagStatus));
     }
 
     @ParameterizedTest
     @MethodSource("generateJrNcTestArguments")
     void testJRNC(final int opcode, final int offset, final boolean carryFlagStatus, final int cycleCountOffset) {
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-                opcode, // the opcode
-                offset);
-
-        runCarryFlagJumpTest(carryFlagStatus, true, cycleCountOffset, offset);
-
+        stubNextInstructions(opcode, offset);
+        runConditionalFlagJumpTest(carryFlagStatus, !carryFlagStatus, cycleCountOffset, offset,
+                () -> this.getCurrentCpu().setCarry(carryFlagStatus));
     }
 
     @ParameterizedTest
     @MethodSource("generateJrcTestArguments")
     void testJRC(final int opcode, final int offset, final boolean carryFlagStatus, final int cycleCountOffset) {
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-                opcode, // the opcode
-                offset);
-
-        runCarryFlagJumpTest(carryFlagStatus, false, cycleCountOffset, offset);
-
+        stubNextInstructions(opcode, offset);
+        runConditionalFlagJumpTest(carryFlagStatus, carryFlagStatus, cycleCountOffset, offset,
+                () -> this.getCurrentCpu().setCarry(carryFlagStatus));
     }
 
-    private void runZeroFlagJumpTest(final boolean zeroFlagStatus, final boolean jumpIfUnset,
-            final int cycleCountOffset, final int offset) {
-        this.getCurrentCpu().setZero(zeroFlagStatus);
-        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters();
-        long previousCycleCount = getCurrentCpu().getCycles();
+    // Helper methods
+
+    /**
+     * Stubs the next opcode and offset bytes to be read from the bus.
+     *
+     * @param opcode the relative jump opcode
+     * @param offset the signed relative jump offset encoded as an unsigned byte
+     */
+    private void stubNextInstructions(final int opcode, final int offset) {
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(opcode, offset);
+    }
+
+    /**
+     * Executes a single CPU step and captures register and cycle state.
+     *
+     * @return the CPU state captured before and after the instruction
+     */
+    private JumpTestContext executeJumpInstruction() {
+        JumpTestContext context = new JumpTestContext();
+        context.oldRegisterValues = this.getCpuRegisters();
+        context.previousCycleCount = getCurrentCpu().getCycles();
         this.getCurrentCpu().cpuStep();
-        long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
-
-        checkJumpCondition(jumpIfUnset ? !zeroFlagStatus : zeroFlagStatus, cycleCountOffset, offset, oldRegisterValues,
-                previousCycleCount, currentCycleCount,
-                newRegisterValues);
+        context.currentCycleCount = getCurrentCpu().getCycles();
+        context.newRegisterValues = this.getCpuRegisters();
+        return context;
     }
 
-    private void runCarryFlagJumpTest(final boolean carryFlagStatus, final boolean jumpIfUnset,
-            final int cycleCountOffset, final int offset) {
-        this.getCurrentCpu().setCarry(carryFlagStatus);
-        Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters();
-        long previousCycleCount = getCurrentCpu().getCycles();
-        this.getCurrentCpu().cpuStep();
-        long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
-
-        checkJumpCondition(jumpIfUnset ? !carryFlagStatus : carryFlagStatus, cycleCountOffset, offset,
-                oldRegisterValues, previousCycleCount, currentCycleCount,
-                newRegisterValues);
+    /**
+     * Verifies that the jump result matches expected PC offset and cycle count.
+     *
+     * @param context the captured and expected jump state
+     */
+    private void verifyJumpResult(final JumpTestContext context) {
+        context.oldRegisterValues.computeIfPresent(RegisterType.PC,
+                (t, u) -> (u + context.expectedPcOffset) & MASK_INT_16_BIT);
+        assertEquals(context.previousCycleCount + context.expectedCycles, context.currentCycleCount);
+        assertEquals(context.oldRegisterValues, context.newRegisterValues);
     }
 
-    @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
-    private void checkJumpCondition(final boolean condition, final int cycleCountOffset, final int offset,
-            final Map<RegisterType, Integer> oldRegisterValues, final long previousCycleCount,
-            final long currentCycleCount,
-            final Map<RegisterType, Integer> newRegisterValues) {
-        //pc should increment by 2 (the size of the instruction) + the encoded offset
-        if (condition) {
-            oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> (u + 2  + (byte) offset) & 0xFFFF);
+    /**
+     * Runs a conditional flag-based jump test with the given flag setter and condition.
+     *
+     * @param flagStatus the flag value to set before executing the instruction
+     * @param jumpCondition whether the jump is expected to be taken
+     * @param cycleCountOffset the expected number of cycles consumed
+     * @param offset the signed relative jump offset encoded as an unsigned byte
+     * @param flagSetter the operation that sets the tested CPU flag
+     */
+    @SuppressWarnings("checkstyle:parameternumbercheck")
+    private void runConditionalFlagJumpTest(final boolean flagStatus, final boolean jumpCondition,
+            final int cycleCountOffset, final int offset, final Runnable flagSetter) {
+        flagSetter.run();
+        JumpTestContext context = executeJumpInstruction();
+
+        if (jumpCondition) {
+            context.expectedPcOffset = INSTRUCTION_SIZE + (byte) offset;
         } else {
-            oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 2);
+            context.expectedPcOffset = INSTRUCTION_SIZE;
         }
-        assertEquals(previousCycleCount + cycleCountOffset, currentCycleCount);
-        assertEquals(oldRegisterValues, newRegisterValues);
+        context.expectedCycles = cycleCountOffset;
+        verifyJumpResult(context);
     }
 
-
+    /**
+     * Helper class to encapsulate jump test state.
+     */
+    private static final class JumpTestContext {
+        /** Register values captured before executing the instruction. */
+        private Map<RegisterType, Integer> oldRegisterValues;
+        /** Register values captured after executing the instruction. */
+        private Map<RegisterType, Integer> newRegisterValues;
+        /** CPU cycle count before executing the instruction. */
+        private long previousCycleCount;
+        /** CPU cycle count after executing the instruction. */
+        private long currentCycleCount;
+        /** Expected change to the program counter. */
+        private int expectedPcOffset;
+        /** Expected number of cycles consumed by the instruction. */
+        private int expectedCycles;
+    }
 }

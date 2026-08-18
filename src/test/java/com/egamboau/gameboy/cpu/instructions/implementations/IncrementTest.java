@@ -17,27 +17,26 @@ import com.egamboau.gameboy.cpu.CPUTestBase;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.test.TestUtils;
 
-class IncrementTest  extends CPUTestBase {
+class IncrementTest extends CPUTestBase {
+
+    /** Code for the indirect HL Increment instruction.*/
+    private static final int OPCODE_INDIRECT_INC_HL = 0x34;
 
     @ParameterizedTest
     @MethodSource("generateTestArgumentsFor8BitTests")
     void testIncInstructionFor8BitRegisters(final int opcode, final int registerData, final RegisterType register,
             final boolean expectedSubstractFlag, final boolean expectedHalfCarryFlag, final boolean expectedZeroFlag) {
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(opcode);
+        stubNextOpcode(opcode);
         executeIncTestWithSingleRegister(registerData, register);
 
-        // check if the registerValues are set accordingly
-        assertEquals(expectedSubstractFlag, getCurrentCpu().getSubtract(), "Substract flag set incorrectly");
-        assertEquals(expectedHalfCarryFlag, getCurrentCpu().getHalfCarry(), "Half Carry flag set incorrectly");
-        assertEquals(expectedZeroFlag, getCurrentCpu().getZero(), "Carry flag set incorrectly");
+        assertFlagStates(expectedZeroFlag, expectedSubstractFlag, expectedHalfCarryFlag);
     }
 
     @ParameterizedTest
     @MethodSource("generateTestArgumentsFor16BitTests")
     void testIncInstructionFor16BitRegisters(final int opcode, final int registerData,
             final RegisterType register) {
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-                opcode);
+        stubNextOpcode(opcode);
 
         executeIncrementTest(registerData, register);
     }
@@ -48,8 +47,7 @@ class IncrementTest  extends CPUTestBase {
     void testIndirectIncInstructionFor16BitRegisters(final int opcode, final int memoryData,
     final RegisterType register, final boolean expectedZeroFlag, final boolean expectedSubstractFlag, final boolean expectedHalfCarryFlag) {
         int registerData = TestUtils.getRandomIntegerInRange(0, 0xFFFF) & 0xFFFF;
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-                opcode);
+        stubNextOpcode(opcode);
 
         when(this.getCurrentBus().readByteFromAddress(registerData)).thenReturn(memoryData);
 
@@ -59,10 +57,10 @@ class IncrementTest  extends CPUTestBase {
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateTestArgumentsForIndirectInc() {
         return Stream.of(
-                Arguments.of(0x34, 0, RegisterType.HL, false, false, false),
-                Arguments.of(0x34, 0x10, RegisterType.HL, false, false, false),
-                Arguments.of(0x34, 0x0E, RegisterType.HL, false, false, false),
-                Arguments.of(0x34, 0xFF, RegisterType.HL, false, false, true)
+                Arguments.of(OPCODE_INDIRECT_INC_HL, 0, RegisterType.HL, false, false, false),
+                Arguments.of(OPCODE_INDIRECT_INC_HL, 0x10, RegisterType.HL, false, false, false),
+                Arguments.of(OPCODE_INDIRECT_INC_HL, 0x0E, RegisterType.HL, false, false, false),
+                Arguments.of(OPCODE_INDIRECT_INC_HL, 0xFF, RegisterType.HL, false, false, true)
         );
     }
 
@@ -169,11 +167,19 @@ class IncrementTest  extends CPUTestBase {
 
         assertEquals(previousCycleCount + 3, currentCycleCount);
 
-         // check if the registerValues are set accordingly
+        assertFlagStates(expectedZeroFlag, expectedSubstractFlag, expectedHalfCarryFlag);
+
+        verify(this.getCurrentBus(), times(1)).writeByteToAddress(registerData, memoryData + 1);
+    }
+
+    private void stubNextOpcode(final int opcode) {
+        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(opcode);
+    }
+
+    private void assertFlagStates(final boolean expectedZeroFlag, final boolean expectedSubstractFlag,
+            final boolean expectedHalfCarryFlag) {
         assertEquals(expectedSubstractFlag, getCurrentCpu().getSubtract(), "Substract flag set incorrectly");
         assertEquals(expectedHalfCarryFlag, getCurrentCpu().getHalfCarry(), "Half Carry flag set incorrectly");
-        assertEquals(expectedZeroFlag, getCurrentCpu().getZero(), "Carry flag set incorrectly");
-
-        verify(this.getCurrentBus(), times(1)).writeByteToAddress(memoryData + 1, registerData);
+        assertEquals(expectedZeroFlag, getCurrentCpu().getZero(), "Zero flag set incorrectly");
     }
 }

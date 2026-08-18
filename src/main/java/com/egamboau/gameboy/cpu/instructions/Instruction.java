@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.egamboau.gameboy.cpu.CPU;
 import com.egamboau.gameboy.cpu.instructions.implementations.AddInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.AddWithCarryInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecimalAdjustAccumulatorInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecrementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.FlipCarryFlagInstruction;
@@ -330,6 +331,8 @@ public abstract class Instruction {
         switch (operationType) {
             case ADD_A:
                 return new AddInstruction(addressMode, register, RegisterType.A, null, null);
+            case ADC_A:
+                return new AddWithCarryInstruction(addressMode, register, RegisterType.A);
             default:
                 throw new IllegalArgumentException(String.format("\"Opcode still not implemented: \": %s", operationType));
         }

@@ -1,7 +1,6 @@
 package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,30 +14,32 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.egamboau.gameboy.cpu.CPUTestBase;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
+import com.egamboau.test.CpuSnapshot;
 import com.egamboau.test.TestUtils;
 
 class DecrementTest extends CPUTestBase {
 
+    /** Number of cycles used for decrementing indirect memory through HL. */
+    private static final int INDIRECT_MEMORY_DECREMENT_CYCLES = 3;
+    /** Number of cycles used for decrementing a 16-bit register pair. */
+    private static final int SIXTEEN_BIT_DECREMENT_CYCLES = 2;
+    /** Number of cycles used for decrementing an 8-bit register. */
+    private static final int EIGHT_BIT_DECREMENT_CYCLES = 1;
+
     @ParameterizedTest
     @MethodSource("generateTestArgumentsFor8BitTests")
     void testDecInstructionFor8BitRegisters(final int opcode, final int registerData, final RegisterType register,
-            final boolean expectedSubstractFlag, final boolean expectedHalfCarryFlag, final boolean expectedZeroFlag) {
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(opcode);
+            final boolean expectedSubtractFlag, final boolean expectedHalfCarryFlag, final boolean expectedZeroFlag) {
+        stubOpcode(opcode);
         executeDecrementTest(registerData, register, false);
-
-        // check if the registerValues are set accordingly
-        assertEquals(expectedSubstractFlag, getCurrentCpu().getSubtract(), "Substract flag set incorrectly");
-        assertEquals(expectedHalfCarryFlag, getCurrentCpu().getHalfCarry(), "Half Carry flag set incorrectly");
-        assertEquals(expectedZeroFlag, getCurrentCpu().getZero(), "Carry flag set incorrectly");
+        assertExpectedFlags(expectedSubtractFlag, expectedHalfCarryFlag, expectedZeroFlag);
     }
 
     @ParameterizedTest
     @MethodSource("generateTestArgumentsFor16BitTests")
-    void testDetestDecInstructionFor16BitRegisterscBC(final int opcode, final int registerData,
+    void testDecInstructionFor16BitRegisters(final int opcode, final int registerData,
             final RegisterType register) {
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-                opcode);
-
+        stubOpcode(opcode);
         executeDecrementTest(registerData, register, true);
     }
 
@@ -46,14 +47,13 @@ class DecrementTest extends CPUTestBase {
     @SuppressWarnings("checkstyle:magicnumber")
     @MethodSource("generateTestArgumentsForIndirectDec")
     void testIndirectDecInstructionFor16BitRegisters(final int opcode, final int memoryData,
-    final RegisterType register, final boolean expectedSubstractFlag, final boolean expectedHalfCarryFlag, final boolean expectedZeroFlag) {
-        int registerData = TestUtils.getRandomIntegerInRange(0, 0xFFFF) & 0xFFFF;
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(
-                opcode);
-
-        when(this.getCurrentBus().readByteFromAddress(registerData)).thenReturn(memoryData);
-
-        executeIndirectDecTest(registerData, register, memoryData, expectedZeroFlag, expectedSubstractFlag, expectedHalfCarryFlag);
+            final RegisterType register, final boolean expectedSubtractFlag, final boolean expectedHalfCarryFlag,
+            final boolean expectedZeroFlag) {
+        int registerData = TestUtils.getRandomIntegerInRange(0, MASK_INT_16_BIT) & MASK_INT_16_BIT;
+        stubOpcode(opcode);
+        when(getCurrentBus().readByteFromAddress(registerData)).thenReturn(memoryData);
+        executeIndirectDecTest(registerData, register, memoryData, expectedZeroFlag, expectedSubtractFlag,
+                expectedHalfCarryFlag);
     }
 
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
@@ -116,60 +116,65 @@ class DecrementTest extends CPUTestBase {
 
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     private void executeDecrementTest(final int registerData, final RegisterType register, final boolean is16Bit) {
-        int expectedValue;
-        RegisterType[] filteredRegister;
-        int expectedCycles;
-        if (is16Bit) {
-            expectedValue = (registerData - 1) & 0xFFFF;
-            filteredRegister = TestUtils.getPairForRegister(register);
-            expectedCycles = 2;
-        } else {
-            expectedValue = (registerData - 1) & 0xFF;
-            filteredRegister = TestUtils.getPairForRegister(register, RegisterType.F);
-            expectedCycles = 1;
-        }
+        int expectedValue = calculateExpectedValue(registerData, is16Bit);
+        RegisterType[] filteredRegister = determineFilteredRegister(register, is16Bit);
+        int expectedCycles = determineExpectedCycles(is16Bit);
 
-        this.getCurrentCpu().setValueInRegister(registerData, register);
+        getCurrentCpu().setValueInRegister(registerData, register);
+        CpuSnapshot before = captureCpuState(filteredRegister);
+        getCurrentCpu().cpuStep();
+        CpuSnapshot after = captureCpuState(filteredRegister);
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(filteredRegister);
-        long previousCycleCount = getCurrentCpu().getCycles();
-        this.getCurrentCpu().cpuStep();
-        long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(filteredRegister);
-
-        // Register must be correct
-        assertEquals(expectedValue, this.getCurrentCpu().getValueFromRegister(register), "Register value incorrect: " + register);
-        // cycles must be updated as required
-        assertEquals(previousCycleCount + expectedCycles, currentCycleCount, "Cycle count not currently matching.");
-        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
-
-        assertEquals(registerValues, newRegisterValues, "CPU Register values did not match the previous state.");
+        assertEquals(expectedValue, getCurrentCpu().getValueFromRegister(register), "Register value incorrect: " + register);
+        assertEquals(before.cycles() + expectedCycles, after.cycles(), "Cycle count not currently matching.");
+        assertRegistersAdvancedPcByOne(before.registers(), after.registers());
     }
 
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     private void executeIndirectDecTest(final int registerData, final RegisterType registerType,
-    final int memoryData, final boolean expectedZeroFlag, final boolean expectedSubstractFlag, final boolean expectedHalfCarryFlag) {
+            final int memoryData, final boolean expectedZeroFlag, final boolean expectedSubtractFlag,
+            final boolean expectedHalfCarryFlag) {
 
-        this.getCurrentBus().writeByteToAddress(registerData, memoryData);
-        this.getCurrentCpu().setValueInRegister(registerData, registerType);
+        getCurrentCpu().setValueInRegister(registerData, registerType);
+        CpuSnapshot before = captureCpuState(TestUtils.getPairForRegister(registerType, RegisterType.F));
+        getCurrentCpu().cpuStep();
+        CpuSnapshot after = captureCpuState(TestUtils.getPairForRegister(registerType, RegisterType.F));
 
-        Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(registerType, RegisterType.F));
-        long previousCycleCount = getCurrentCpu().getCycles();
-        this.getCurrentCpu().cpuStep();
-        long currentCycleCount = getCurrentCpu().getCycles();
-        Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters(TestUtils.getPairForRegister(registerType, RegisterType.F));
+        assertRegistersAdvancedPcByOne(before.registers(), after.registers());
+        assertEquals(before.cycles() + INDIRECT_MEMORY_DECREMENT_CYCLES, after.cycles(), "Cycle count not currently matching.");
+        assertExpectedFlags(expectedSubtractFlag, expectedHalfCarryFlag, expectedZeroFlag);
+        verify(getCurrentBus(), times(1)).writeByteToAddress(memoryData - 1, registerData);
+    }
 
-        registerValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
-        assertEquals(registerValues, newRegisterValues);
-
-        assertEquals(previousCycleCount + 3, currentCycleCount);
-
-         // check if the registerValues are set accordingly
-        assertEquals(expectedSubstractFlag, getCurrentCpu().getSubtract(), "Substract flag set incorrectly");
+    private void assertExpectedFlags(final boolean expectedSubtractFlag, final boolean expectedHalfCarryFlag,
+            final boolean expectedZeroFlag) {
+        assertEquals(expectedSubtractFlag, getCurrentCpu().getSubtract(), "Subtract flag set incorrectly");
         assertEquals(expectedHalfCarryFlag, getCurrentCpu().getHalfCarry(), "Half Carry flag set incorrectly");
-        assertEquals(expectedZeroFlag, getCurrentCpu().getZero(), "Carry flag set incorrectly");
+        assertEquals(expectedZeroFlag, getCurrentCpu().getZero(), "Zero flag set incorrectly");
+    }
 
-        verify(this.getCurrentBus(), times(1)).writeByteToAddress(memoryData - 1, registerData);
+    private CpuSnapshot captureCpuState(final RegisterType... excludedRegisters) {
+        return new CpuSnapshot(getCpuRegisters(excludedRegisters), getCurrentCpu().getCycles());
+    }
+
+    private void assertRegistersAdvancedPcByOne(final Map<RegisterType, Integer> before,
+            final Map<RegisterType, Integer> after) {
+        Map<RegisterType, Integer> expectedRegisters = new java.util.HashMap<>(before);
+        expectedRegisters.computeIfPresent(RegisterType.PC, (register, value) -> value + 1);
+        assertEquals(expectedRegisters, after, "CPU Register values did not match the previous state.");
+    }
+
+    private int calculateExpectedValue(final int registerData, final boolean is16Bit) {
+        return is16Bit ? (registerData - 1) & MASK_INT_16_BIT : (registerData - 1) & MASK_INT_8_BIT;
+    }
+
+    private RegisterType[] determineFilteredRegister(final RegisterType register, final boolean is16Bit) {
+        return is16Bit ? TestUtils.getPairForRegister(register)
+                : TestUtils.getPairForRegister(register, RegisterType.F);
+    }
+
+    private int determineExpectedCycles(final boolean is16Bit) {
+        return is16Bit ? SIXTEEN_BIT_DECREMENT_CYCLES : EIGHT_BIT_DECREMENT_CYCLES;
     }
 }
 

@@ -88,4 +88,17 @@ public class CPUTestBase {
     protected CPU getCurrentCpu() {
         return currentCpu;
     }
+
+    /**
+     * Helper for tests to stub the opcode byte read from the bus when the CPU
+     * fetches from the program counter. Uses a generic anyInt matcher so specific
+     * address-based stubs can still be added in tests where needed.
+     *
+     * @param opcode the opcode byte to return
+     */
+    protected void stubOpcode(final int opcode) {
+        // import is static in tests; avoid adding unused static imports here
+        org.mockito.Mockito.when(this.getCurrentBus().readByteFromAddress(org.mockito.ArgumentMatchers.anyInt()))
+            .thenReturn(opcode);
+    }
 }
