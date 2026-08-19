@@ -170,7 +170,7 @@ class LoadTest extends CPUTestBase {
         );
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, LD {2},{1}")
     @MethodSource("generateArgumentsFor8BitRegisterTo8BitRegister")
     @SuppressWarnings({"checkstyle:magicnumber"})
     void run8BitRegisterTo8BitRegister(final int opcode, final RegisterType sourceRegister,
@@ -195,7 +195,7 @@ class LoadTest extends CPUTestBase {
         assertEquals(data, this.getCurrentCpu().getValueFromRegister(sourceRegister));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, LD {1},d16")
     @MethodSource("generateArgumentFor16BitsInmediateDataLoadTest")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     void run16BitInmediateDataLoad(final int opcode, final RegisterType register) {
@@ -211,7 +211,7 @@ class LoadTest extends CPUTestBase {
         runLoadInmediateDataToRegister(expectedData, register, true);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, LD ({1}),{2}")
     @MethodSource("generateArgumentForRegisterToIndirectRegisterTest")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     void runRegisterToIndirectRegisterTest(final int opcode, final RegisterType addressRegister,
@@ -230,7 +230,7 @@ class LoadTest extends CPUTestBase {
         runLoadRegisterDataIntoIndirectAddress(address, addressRegister, registerData, sourceRegister);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, LD {1},d8")
     @MethodSource("generateArgumentFor8BitsInmediateDataLoadTest")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     void run8BitsInmediateDataLoadTest(final int opcode, final RegisterType register) {
@@ -246,7 +246,7 @@ class LoadTest extends CPUTestBase {
 
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, LD {2},({1})")
     @MethodSource("generateArgumentForIndirectRegisterToRegisterTest")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     void runIndirectRegistertRegisterTest(final int opcode, final RegisterType addressRegister,
@@ -269,7 +269,7 @@ class LoadTest extends CPUTestBase {
         runLoadMemoryDataIntoRegister(address, addressRegister, expectedData, destination);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, LD ({1}+),{2}")
     @MethodSource("generateArgumentForRegisterToIndirectIncrementRegister")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     void runRegisterToIndirectIncrementRegister(final int opcode, final RegisterType addressRegister,
@@ -287,7 +287,7 @@ class LoadTest extends CPUTestBase {
         runLoadRegisterDataIntoIndirectAddressWithSourceIncrement(address, addressRegister, registerData, source);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, LD {2},({1}+)")
     @MethodSource("generateArgumentForIndirectIncrementRegisterToRegister")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     void runIndirectIncrementRegisterToRegisterTest(final int opcode, final RegisterType addressRegister,
@@ -307,7 +307,7 @@ class LoadTest extends CPUTestBase {
         runLoadMemoryDataIntoRegisterWithSourceIncremenet(address, addressRegister, expectedData, destinationRegister);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, LD {2},({1}-)")
     @MethodSource("generateArgumentForIndirectDecrementRegisterToRegister")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     void runIndirectDecrementRegisterToRegisterTest(final int opcode, final RegisterType addressRegister,
@@ -327,7 +327,7 @@ class LoadTest extends CPUTestBase {
         runLoadMemoryDataIntoRegisterWithSourceDecrement(address, addressRegister, expectedData, destinationRegister);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, LD ({1}-),{2}")
     @MethodSource("generateArgumentForRegisterToIndirectDecrementRegister")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     void runRegisterToIndirectDecrementRegisterTest(final int opcode, final RegisterType addressRegister,
@@ -350,7 +350,7 @@ class LoadTest extends CPUTestBase {
                 sourceRegister);
     }
 
-@ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, LD ({1}),d8")
     @MethodSource("generateArgumentsInmediateToIndirectRegister")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     void runInmediateToIndirectRegisterTest(final int opcode, final RegisterType addressRegister) {

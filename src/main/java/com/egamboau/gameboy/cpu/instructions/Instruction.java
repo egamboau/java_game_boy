@@ -21,6 +21,8 @@ import com.egamboau.gameboy.cpu.instructions.implementations.RotateRightInstruct
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateRigthCircularInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.SetCarryFlagInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.StopInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.SubInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.SubWithCarryInstruction;
 
 /**
  * Represents a single CPU instruction in the Game Boy emulator.
@@ -333,6 +335,10 @@ public abstract class Instruction {
                 return new AddInstruction(addressMode, register, RegisterType.A, null, null);
             case ADC_A:
                 return new AddWithCarryInstruction(addressMode, register, RegisterType.A);
+            case SUB:
+                return new SubInstruction(addressMode, register, RegisterType.A, null, null);
+            case SBC_A:
+                return new SubWithCarryInstruction(addressMode, register, RegisterType.A);
             default:
                 throw new IllegalArgumentException(String.format("\"Opcode still not implemented: \": %s", operationType));
         }

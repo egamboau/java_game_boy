@@ -20,7 +20,7 @@ class DecimalAdjustAccumulatorTest extends CPUTestBase {
     /** Opcode for the decimal adjust accumulator instruction. */
     private static final int DAA_OPCODE = 0x27;
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: A={0} -> {1}, N={2}, H={3}, C={4}")
     @MethodSource("generateArgumentsForTests")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumber"})
     void testDecimalAdjustAccumulatorInstruction(final int registerValue, final int expectedValue,

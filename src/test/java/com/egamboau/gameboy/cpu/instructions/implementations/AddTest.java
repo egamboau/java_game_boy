@@ -43,7 +43,7 @@ class AddTest extends CPUTestBase {
 
     // region Test cases: basic add
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, {1} -> {2}")
     @SuppressWarnings("checkstyle:magicnumber")
     @MethodSource("generateArgumentsForAdd")
     void testAddInstruction(final int opcode, final RegisterType sourceRegister,
@@ -56,7 +56,7 @@ class AddTest extends CPUTestBase {
         executeAddTest(sourceValue, destinationValue, sourceRegister, destinationRegister);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, {1}={2}, {3}={4}")
     @SuppressWarnings({ "checkstyle:magicnumber", "checkstyle:parameternumber" })
     @MethodSource("generateArgumentsForAddWithFlags")
     void testAddInstructionWithFlagsCheck(
@@ -74,7 +74,7 @@ class AddTest extends CPUTestBase {
         assertFlags(expectedSubtractFlag, expectedHalfCarryFlag, expectedCarryFlag, false);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, {1}={2}, {3}={4}, Z={8}")
     @SuppressWarnings({ "checkstyle:magicnumber", "checkstyle:parameternumber" })
     @MethodSource("generateArgumentForAddWithFlagsIncludingZero")
     void testAddInstructionWithFlagsCheckOnSingleRegisters(
@@ -93,7 +93,7 @@ class AddTest extends CPUTestBase {
         assertFlags(expectedSubtractFlag, expectedHalfCarryFlag, expectedCarryFlag, expectedZeroFlag);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, ({1}) -> {2}")
     @SuppressWarnings({ "checkstyle:magicnumber", "checkstyle:parameternumbercheck" })
     @MethodSource("generateArgumentForAddIndirectRegister")
     void testAddInstructionWithIndirectSource(final int opcode, final RegisterType sourceRegister,
@@ -110,7 +110,7 @@ class AddTest extends CPUTestBase {
         verify(getCurrentBus(), times(1)).readByteFromAddress(address);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, ({1})={2}, {3}={4}")
     @SuppressWarnings({ "checkstyle:magicnumber", "checkstyle:parameternumber" })
     @MethodSource("generateArgumentForAddWithFlagsIndirectRegister")
     void testAddInstructionWithIndirectSourceWithFlags(

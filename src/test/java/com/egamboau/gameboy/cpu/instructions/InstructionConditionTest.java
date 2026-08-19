@@ -29,10 +29,10 @@ class InstructionConditionTest {
     @Test
     @SuppressWarnings({"checkstyle:magicnumber"})
     void testGetInstructionConditionFromIndexThrowsExceptionForInvalidIndex() {
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> {
+        assertThrows(IndexOutOfBoundsException.class, () -> {
             InstructionCondition.getInstructionConditionFromIndex(-1);
         });
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> {
+        assertThrows(IndexOutOfBoundsException.class, () -> {
             InstructionCondition.getInstructionConditionFromIndex(4);
         });
     }

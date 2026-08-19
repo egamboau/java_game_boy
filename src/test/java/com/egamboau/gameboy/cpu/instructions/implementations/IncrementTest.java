@@ -22,7 +22,7 @@ class IncrementTest extends CPUTestBase {
     /** Code for the indirect HL Increment instruction.*/
     private static final int OPCODE_INDIRECT_INC_HL = 0x34;
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, INC {2} from {1}")
     @MethodSource("generateTestArgumentsFor8BitTests")
     void testIncInstructionFor8BitRegisters(final int opcode, final int registerData, final RegisterType register,
             final boolean expectedSubstractFlag, final boolean expectedHalfCarryFlag, final boolean expectedZeroFlag) {
@@ -32,7 +32,7 @@ class IncrementTest extends CPUTestBase {
         assertFlagStates(expectedZeroFlag, expectedSubstractFlag, expectedHalfCarryFlag);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, INC {2} from {1}")
     @MethodSource("generateTestArgumentsFor16BitTests")
     void testIncInstructionFor16BitRegisters(final int opcode, final int registerData,
             final RegisterType register) {
@@ -41,7 +41,7 @@ class IncrementTest extends CPUTestBase {
         executeIncrementTest(registerData, register);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, INC ({2}) from {1}")
     @SuppressWarnings("checkstyle:magicnumber")
     @MethodSource("generateTestArgumentsForIndirectInc")
     void testIndirectIncInstructionFor16BitRegisters(final int opcode, final int memoryData,
@@ -153,7 +153,6 @@ class IncrementTest extends CPUTestBase {
     private void executeIndirectIncTest(final int registerData, final RegisterType registerType,
     final int memoryData, final boolean expectedZeroFlag, final boolean expectedSubstractFlag, final boolean expectedHalfCarryFlag) {
 
-        this.getCurrentBus().writeByteToAddress(registerData, memoryData);
         this.getCurrentCpu().setValueInRegister(registerData, registerType);
 
         Map<RegisterType, Integer> registerValues = this.getCpuRegisters(TestUtils.getPairForRegister(registerType, RegisterType.F));
@@ -169,7 +168,7 @@ class IncrementTest extends CPUTestBase {
 
         assertFlagStates(expectedZeroFlag, expectedSubstractFlag, expectedHalfCarryFlag);
 
-        verify(this.getCurrentBus(), times(1)).writeByteToAddress(registerData, memoryData + 1);
+        verify(this.getCurrentBus(), times(1)).writeByteToAddress(memoryData + 1, registerData);
     }
 
     private void stubNextOpcode(final int opcode) {

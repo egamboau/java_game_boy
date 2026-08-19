@@ -1,0 +1,71 @@
+package com.egamboau.gameboy.cpu.instructions.implementations;
+
+import com.egamboau.gameboy.cpu.CPU;
+import com.egamboau.gameboy.cpu.instructions.AddressMode;
+import com.egamboau.gameboy.cpu.instructions.Instruction;
+import com.egamboau.gameboy.cpu.instructions.RegisterType;
+import com.egamboau.gameboy.memory.BitMasks;
+
+public class SubWithCarryInstruction extends Instruction {
+
+    /**
+     * Creates a subtraction-with-carry instruction.
+     *
+     * @param currentAddressMode instruction addressing mode
+     * @param currentSourceRegister source operand register
+     * @param currentDestinationRegister destination register
+     */
+    public SubWithCarryInstruction(final AddressMode currentAddressMode, final RegisterType currentSourceRegister,
+            final RegisterType currentDestinationRegister) {
+        super(currentAddressMode, currentSourceRegister, currentDestinationRegister, null, null);
+    }
+
+    @Override
+    protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
+        switch (getAddressMode()) {
+            case REGISTER_TO_REGISTER:
+                this.substractRegisters(currentCpu);
+                break;
+            case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
+                this.substractIndirectRegisterData(currentCpu);
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Address mode not supported for ADD instruction: " + getAddressMode());
+        }
+    }
+
+    private void substractIndirectRegisterData(final CPU currentCpu) {
+        int addressValue = currentCpu.getValueFromRegister(getSourceRegister());
+        int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
+        int sourceValue = currentCpu.readByteFromAddress(addressValue);
+        int result = destinationValue - sourceValue;
+        boolean carry = currentCpu.getCarry();
+        if (carry) {
+            result -= 1;
+        }
+
+        currentCpu.setValueInRegister(result, getDestinationRegister());
+        currentCpu.setSubtract(true);
+        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT) == BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT);
+        currentCpu.setCarry(destinationValue < sourceValue + (carry ? 1 : 0));
+        currentCpu.setZero((result & BitMasks.MASK_8_BIT_DATA) == 0);
+    }
+
+    private void substractRegisters(final CPU currentCpu) {
+        int sourceValue = currentCpu.getValueFromRegister(getSourceRegister());
+        int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
+        boolean carry = currentCpu.getCarry();
+        int result = destinationValue - sourceValue;
+        if (carry) {
+            result -= 1;
+        }
+
+        currentCpu.setValueInRegister(result, getDestinationRegister());
+        currentCpu.setSubtract(true);
+        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT) == BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT);
+        currentCpu.setCarry(destinationValue < sourceValue + (carry ? 1 : 0));
+        currentCpu.setZero((result & BitMasks.MASK_8_BIT_DATA) == 0);
+    }
+
+}

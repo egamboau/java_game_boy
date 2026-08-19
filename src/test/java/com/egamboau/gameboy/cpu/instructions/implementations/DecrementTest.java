@@ -26,7 +26,7 @@ class DecrementTest extends CPUTestBase {
     /** Number of cycles used for decrementing an 8-bit register. */
     private static final int EIGHT_BIT_DECREMENT_CYCLES = 1;
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, DEC {2} from {1}")
     @MethodSource("generateTestArgumentsFor8BitTests")
     void testDecInstructionFor8BitRegisters(final int opcode, final int registerData, final RegisterType register,
             final boolean expectedSubtractFlag, final boolean expectedHalfCarryFlag, final boolean expectedZeroFlag) {
@@ -35,7 +35,7 @@ class DecrementTest extends CPUTestBase {
         assertExpectedFlags(expectedSubtractFlag, expectedHalfCarryFlag, expectedZeroFlag);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, DEC {2} from {1}")
     @MethodSource("generateTestArgumentsFor16BitTests")
     void testDecInstructionFor16BitRegisters(final int opcode, final int registerData,
             final RegisterType register) {
@@ -43,7 +43,7 @@ class DecrementTest extends CPUTestBase {
         executeDecrementTest(registerData, register, true);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: opcode {0}, DEC ({2}) from {1}")
     @SuppressWarnings("checkstyle:magicnumber")
     @MethodSource("generateTestArgumentsForIndirectDec")
     void testIndirectDecInstructionFor16BitRegisters(final int opcode, final int memoryData,
@@ -177,4 +177,3 @@ class DecrementTest extends CPUTestBase {
         return is16Bit ? SIXTEEN_BIT_DECREMENT_CYCLES : EIGHT_BIT_DECREMENT_CYCLES;
     }
 }
-

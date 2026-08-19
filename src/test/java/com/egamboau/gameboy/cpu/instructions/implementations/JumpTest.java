@@ -85,7 +85,7 @@ class JumpTest extends CPUTestBase {
         );
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: JR offset {1}")
     @MethodSource("generateJrTestArguments")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     void testJR(final int opcode, final int offset) {
@@ -98,7 +98,7 @@ class JumpTest extends CPUTestBase {
         verifyJumpResult(context);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: JR NZ offset {1}, Z={2}")
     @MethodSource("generateJrNzTestArguments")
     void testJRNZ(final int opcode, final int offset, final boolean zeroFlagStatus, final int cycleCountOffset) {
         stubNextInstructions(opcode, offset);
@@ -106,7 +106,7 @@ class JumpTest extends CPUTestBase {
                 () -> this.getCurrentCpu().setZero(zeroFlagStatus));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: JR Z offset {1}, Z={2}")
     @MethodSource("generateJrZTestArguments")
     void testJRZ(final int opcode, final int offset, final boolean zeroFlagStatus, final int cycleCountOffset) {
         stubNextInstructions(opcode, offset);
@@ -114,7 +114,7 @@ class JumpTest extends CPUTestBase {
                 () -> this.getCurrentCpu().setZero(zeroFlagStatus));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: JR NC offset {1}, C={2}")
     @MethodSource("generateJrNcTestArguments")
     void testJRNC(final int opcode, final int offset, final boolean carryFlagStatus, final int cycleCountOffset) {
         stubNextInstructions(opcode, offset);
@@ -122,7 +122,7 @@ class JumpTest extends CPUTestBase {
                 () -> this.getCurrentCpu().setCarry(carryFlagStatus));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: JR C offset {1}, C={2}")
     @MethodSource("generateJrcTestArguments")
     void testJRC(final int opcode, final int offset, final boolean carryFlagStatus, final int cycleCountOffset) {
         stubNextInstructions(opcode, offset);
