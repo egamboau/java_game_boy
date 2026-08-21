@@ -17,7 +17,7 @@ public class SubWithCarryInstruction extends Instruction {
      */
     public SubWithCarryInstruction(final AddressMode currentAddressMode, final RegisterType currentSourceRegister,
             final RegisterType currentDestinationRegister) {
-        super(currentAddressMode, currentSourceRegister, currentDestinationRegister, null, null);
+        super(currentAddressMode, currentSourceRegister, currentDestinationRegister);
     }
 
     @Override
@@ -47,7 +47,8 @@ public class SubWithCarryInstruction extends Instruction {
 
         currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setSubtract(true);
-        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT) == BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT);
+        currentCpu.setHalfCarry((destinationValue & BitMasks.HALF_CARRY_8_BIT_RESULT)
+                < (sourceValue & BitMasks.HALF_CARRY_8_BIT_RESULT) + (carry ? 1 : 0));
         currentCpu.setCarry(destinationValue < sourceValue + (carry ? 1 : 0));
         currentCpu.setZero((result & BitMasks.MASK_8_BIT_DATA) == 0);
     }
@@ -63,7 +64,8 @@ public class SubWithCarryInstruction extends Instruction {
 
         currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setSubtract(true);
-        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT) == BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT);
+        currentCpu.setHalfCarry((destinationValue & BitMasks.HALF_CARRY_8_BIT_RESULT)
+                < (sourceValue & BitMasks.HALF_CARRY_8_BIT_RESULT) + (carry ? 1 : 0));
         currentCpu.setCarry(destinationValue < sourceValue + (carry ? 1 : 0));
         currentCpu.setZero((result & BitMasks.MASK_8_BIT_DATA) == 0);
     }

@@ -17,7 +17,6 @@ import com.egamboau.gameboy.memory.BitMasks;
  */
 public class FlagRegister extends Register {
 
-    //region Constants
     /**
      * Bitmask for the Zero flag (Z).
      */
@@ -41,9 +40,7 @@ public class FlagRegister extends Register {
      */
     @SuppressWarnings("checkstyle:magicnumber")
     private static final int CARRY_FLAG = 1 << 4;
-    //endregion
 
-    //region Constructors
     /**
      * Constructs a new instance of the FlagRegister class with an initial value of 0.
      */
@@ -59,9 +56,7 @@ public class FlagRegister extends Register {
     public FlagRegister(final int value) {
         super(value);
     }
-    //endregion
 
-    //region Accessors
     /**
      * Retrieves the value of the flag register, masking out the lower 4 bits.
      *
@@ -71,9 +66,7 @@ public class FlagRegister extends Register {
     public final int get() {
         return super.get() & BitMasks.FLAGS_BYTES_ONLY;
     }
-    //endregion
 
-    //region Flag getters
     /**
      * Checks if the Zero flag (Z) is set in the flag register.
      *
@@ -110,9 +103,7 @@ public class FlagRegister extends Register {
     public boolean getCarry() {
         return isSet(CARRY_FLAG);
     }
-    //endregion
 
-    //region Flag setters
     /**
      * Sets the Zero flag (Z) in the flag register.
      * The Zero flag is used to indicate whether the result of the last operation was zero.
@@ -149,9 +140,7 @@ public class FlagRegister extends Register {
     public void setCarry(final boolean value) {
         setFlag(CARRY_FLAG, value);
     }
-    //endregion
 
-    //region Helpers
     /**
      * Checks if a specific flag is set in the flag register.
      *
@@ -179,5 +168,4 @@ public class FlagRegister extends Register {
         }
         set(f & BitMasks.FLAGS_BYTES_ONLY);
     }
-    //endregion
 }

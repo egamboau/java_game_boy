@@ -1,8 +1,8 @@
 package com.egamboau.test;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
@@ -13,18 +13,13 @@ public final class TestUtils {
     }
 
     /**
-     * Random instance used for generating random numbers in utility methods.
-     */
-    private static Random random = new Random();
-
-    /**
      * Get a new random integer, bound to the actual min and max values.
      * @param min the minimum value to be generated
      * @param max the maximum value to be generated
      * @return the random integer, between min and max.
      */
     public static int getRandomIntegerInRange(final int min, final int max) {
-        return random.nextInt(max - min) + min;
+        return ThreadLocalRandom.current().nextInt(min, max);
     }
 
     /**

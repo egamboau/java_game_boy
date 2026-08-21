@@ -41,7 +41,6 @@ class AddTest extends CPUTestBase {
      */
     private static final int SINGLE_REGISTER_CYCLE_INCREMENT = 1;
 
-    // region Test cases: basic add
 
     @ParameterizedTest(name = "{index}: opcode {0}, {1} -> {2}")
     @SuppressWarnings("checkstyle:magicnumber")
@@ -134,9 +133,7 @@ class AddTest extends CPUTestBase {
         assertFlags(expectedSubtractFlag, expectedHalfCarryFlag, expectedCarryFlag, expectedZeroFlag);
     }
 
-    // endregion
 
-    // region Helpers: execute tests
 
     private void executeAddTestWithIndirectRegister(final int sourceValue,
             final int destinationValue,
@@ -215,9 +212,7 @@ class AddTest extends CPUTestBase {
                 getCurrentCpu().getCycles());
     }
 
-    // endregion
 
-    // region Argument providers
 
     @SuppressWarnings("checkstyle:magicnumber")
     static Stream<Arguments> generateArgumentsForAdd() {
@@ -290,5 +285,4 @@ class AddTest extends CPUTestBase {
                 Arguments.of(0x86, RegisterType.HL, 0x01, RegisterType.A, 0x01, false, false, false, false));
     }
 
-    // endregion
 }

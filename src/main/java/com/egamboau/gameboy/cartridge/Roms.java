@@ -1,15 +1,11 @@
 package com.egamboau.gameboy.cartridge;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Enum representing the different types of ROMs used in Game Boy cartridges.
  * Each ROM type is associated with a unique byte value.
  */
 public enum Roms {
 
-    //region Enum entries
     /**
      * ROM without any memory bank controller (MBC).
      */
@@ -154,9 +150,7 @@ public enum Roms {
      * Unknown ROM type.
      */
     UNKNOWN((byte) 0x4);
-    //endregion
 
-    //region Fields
     /**
      * The byte value associated with the ROM type.
      */
@@ -174,18 +168,8 @@ public enum Roms {
     /**
      * A map for quick lookup of ROM types by their byte value.
      */
-    private static final Map<Byte, Roms> BY_CODE = new HashMap<>();
-    //endregion
 
-    //region Static initialization
-    static {
-        for (Roms rom : values()) {
-            BY_CODE.put(rom.byteValue, rom);
-        }
-    }
-    //endregion
 
-    //region Constructor
     /**
      * Constructor for the enum.
      *
@@ -194,9 +178,7 @@ public enum Roms {
     Roms(final byte value) {
         this.byteValue = value;
     }
-    //endregion
 
-    //region Factory
     /**
      * Retrieves the ROM type corresponding to the given byte value.
      *
@@ -206,11 +188,11 @@ public enum Roms {
      *         {@link Roms#UNKNOWN} is returned.
      */
     public static Roms fromByte(final byte value) {
-        Roms rom = BY_CODE.get(value);
-        if (rom == null) {
-            return UNKNOWN;
+        for (Roms rom : values()) {
+            if (rom.byteValue == value) {
+                return rom;
+            }
         }
-        return rom;
+        return UNKNOWN;
     }
-    //endregion
 }

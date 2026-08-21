@@ -3,7 +3,6 @@ package com.egamboau.gameboy.cpu.instructions.implementations;
 import com.egamboau.gameboy.cpu.CPU;
 import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.Instruction;
-import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 
@@ -16,24 +15,18 @@ import com.egamboau.gameboy.memory.BitMasks;
  */
 public class IncrementInstruction extends Instruction {
 
-    //region Constructors
     /**
      * Constructs an IncrementInstruction with the specified parameters.
      *
      * @param addressMode        The addressing mode of the instruction.
      * @param sourceRegister     The source register for the operation.
      * @param destinationRegister The destination register for the operation.
-     * @param condition          The condition under which the instruction executes.
-     * @param parameter          Additional parameter for the instruction.
      */
     public IncrementInstruction(final AddressMode addressMode, final RegisterType sourceRegister,
-            final RegisterType destinationRegister,
-            final InstructionCondition condition, final Byte parameter) {
-        super(addressMode, sourceRegister, destinationRegister, condition, parameter);
+            final RegisterType destinationRegister) {
+        super(addressMode, sourceRegister, destinationRegister);
     }
-    //endregion
 
-    //region Execution
     @Override
     public final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         switch (getAddressMode()) {
@@ -51,9 +44,7 @@ public class IncrementInstruction extends Instruction {
                         String.format("Address mode %s not supported for Increment Instruction", getAddressMode()));
         }
     }
-    //endregion
 
-    //region Helpers
     private int getIncrementedRegisterData(final CPU currentCpu) {
         int originalValue = currentCpu.getValueFromRegister(getSourceRegister());
         return originalValue + 1;
@@ -87,6 +78,5 @@ public class IncrementInstruction extends Instruction {
 
         currentCpu.writeByteToAddress(memoryAddress, result);
     }
-    //endregion
 
 }

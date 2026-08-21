@@ -28,13 +28,6 @@
             <type>pom</type>
             <scope>import</scope>
         </dependency>
-        <dependency>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-bom</artifactId>
-          <version>2.24.3</version>
-          <scope>import</scope>
-          <type>pom</type>
-        </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -62,14 +55,6 @@
         <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
@@ -124,14 +109,14 @@
 
   <reporting>
     <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-checkstyle-plugin</artifactId>
-            <configuration>
-              <configLocation>checkstyle.xml</configLocation>
-            </configuration>
-            <version>3.6.0</version>
-        </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>checkstyle.xml</configLocation>
+        </configuration>
+        <version>3.6.0</version>
+      </plugin>
     </plugins>
-</reporting>
+  </reporting>
 </project>

@@ -1,10 +1,6 @@
 package com.egamboau.gameboy.cartridge;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum NewLicensee {
-    //region Enum entries
     /**
      * Represents a licensee that is not available.
      */
@@ -256,9 +252,7 @@ public enum NewLicensee {
      * Represents Kodansha.
      */
     KODANSHA("DK");
-    //endregion
 
-    //region Fields
     /**
      * The code representing the licensee.
      */
@@ -267,26 +261,12 @@ public enum NewLicensee {
     /**
      * A map to store the mapping between licensee codes and their corresponding enum values.
      */
-    private static final Map<String, NewLicensee> BY_CODE = new HashMap<>();
-    //endregion
 
-    //region Static initialization
-    static {
-        for (NewLicensee licensee : values()) {
-            if (licensee.code != null) {
-                BY_CODE.put(licensee.code, licensee);
-            }
-        }
-    }
-    //endregion
 
-    //region Constructor
     NewLicensee(final String licenseeCode) {
         this.code = licenseeCode;
     }
-    //endregion
 
-    //region Accessors & Factory
     /**
      * Gets the code representing the licensee.
      *
@@ -303,11 +283,11 @@ public enum NewLicensee {
      * @return the corresponding NewLicensee enum value, or UNKNOWN if the code is not found.
      */
     public static NewLicensee fromCode(final String code) {
-        NewLicensee licensee = BY_CODE.get(code);
-        if (licensee == null) {
-            return UNKNOWN;
+        for (NewLicensee licensee : values()) {
+            if (licensee.code != null && licensee.code.equals(code)) {
+                return licensee;
+            }
         }
-        return licensee;
+        return UNKNOWN;
     }
-    //endregion
 }

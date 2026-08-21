@@ -12,7 +12,6 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
  */
 public class HaltInstruction extends Instruction {
 
-    //region Constructors
     /**
      * Constructs a HALT instruction instance.
      *
@@ -23,15 +22,12 @@ public class HaltInstruction extends Instruction {
      * by the emulator's instruction set.
      */
     public HaltInstruction() {
-        super(null, null, null, null, null);
+        super(null, null, null);
     }
-    //endregion
 
-    //region Execution
     @Override
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         currentCpu.setHalted(true);
     }
-    //endregion
 
 }

@@ -6,31 +6,29 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 
-public class SubInstruction extends Instruction {
+public class CompareInstruction extends Instruction {
 
     /**
-     * Creates a subtraction instruction.
+     * Creates a comparison that updates flags as if the source were subtracted from the destination.
      *
-     * @param currentAddressMode instruction addressing mode
-     * @param currentSourceRegister source operand register
-     * @param currentDestinationRegister destination register
+     * @param currentAddressMode how the source operand is addressed
+     * @param currentSourceRegister register supplying the operand or memory address
+     * @param currentDestinationRegister register compared without being modified
      */
-    public SubInstruction(final AddressMode currentAddressMode, final RegisterType currentSourceRegister,
+    public CompareInstruction(final AddressMode currentAddressMode, final RegisterType currentSourceRegister,
             final RegisterType currentDestinationRegister) {
         super(currentAddressMode, currentSourceRegister, currentDestinationRegister);
+
     }
 
     @Override
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         switch (getAddressMode()) {
             case REGISTER_TO_REGISTER:
-                this.substractRegister(currentCpu);
-                break;
-            case REGISTER_16_BIT_TO_REGISTER_16_BIT:
-                this.substractRegisterPairs(currentCpu);
+                this.compareRegisters(currentCpu);
                 break;
             case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
-                this.substractIndirectRegisterData(currentCpu);
+                this.compareIndirectRegisterData(currentCpu);
                 break;
             default:
                 throw new IllegalArgumentException(
@@ -38,13 +36,12 @@ public class SubInstruction extends Instruction {
         }
     }
 
-    private void substractIndirectRegisterData(final CPU currentCpu) {
+    private void compareIndirectRegisterData(final CPU currentCpu) {
         int addressValue = currentCpu.getValueFromRegister(getSourceRegister());
         int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
         int sourceValue = currentCpu.readByteFromAddress(addressValue);
         int result =  destinationValue - sourceValue;
 
-        currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setSubtract(true);
         currentCpu.setHalfCarry((destinationValue & BitMasks.HALF_CARRY_8_BIT_RESULT)
                 < (sourceValue & BitMasks.HALF_CARRY_8_BIT_RESULT));
@@ -52,24 +49,11 @@ public class SubInstruction extends Instruction {
         currentCpu.setZero((result & BitMasks.MASK_8_BIT_DATA) == 0);
     }
 
-    private void substractRegisterPairs(final CPU currentCpu) {
-        int sourceValue = currentCpu.getValueFromRegister(getSourceRegister());
-        int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
-        int result = sourceValue + destinationValue;
-        int additionHalfBits = (sourceValue &  BitMasks.HALF_CARRY_16_BIT_RESULT) + (destinationValue &  BitMasks.HALF_CARRY_16_BIT_RESULT);
-
-        currentCpu.setValueInRegister(result, getDestinationRegister());
-        currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry(additionHalfBits > BitMasks.HALF_CARRY_16_BIT_RESULT);
-        currentCpu.setCarry(result > BitMasks.CARRY_16_BIT_RESULTS);
-    }
-
-    private void substractRegister(final CPU currentCpu) {
+    private void compareRegisters(final CPU currentCpu) {
         int sourceValue = currentCpu.getValueFromRegister(getSourceRegister());
         int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
         int result = destinationValue - sourceValue;
 
-        currentCpu.setValueInRegister(result, getDestinationRegister());
         currentCpu.setSubtract(true);
         currentCpu.setHalfCarry((destinationValue & BitMasks.HALF_CARRY_8_BIT_RESULT)
                 < (sourceValue & BitMasks.HALF_CARRY_8_BIT_RESULT));

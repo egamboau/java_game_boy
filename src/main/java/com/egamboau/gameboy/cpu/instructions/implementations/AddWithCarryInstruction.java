@@ -17,7 +17,7 @@ public class AddWithCarryInstruction extends Instruction {
      */
     public AddWithCarryInstruction(final AddressMode addressMode, final RegisterType sourceRegister,
             final RegisterType destinationRegister) {
-        super(addressMode, sourceRegister, destinationRegister, null, null);
+        super(addressMode, sourceRegister, destinationRegister);
     }
 
     @Override

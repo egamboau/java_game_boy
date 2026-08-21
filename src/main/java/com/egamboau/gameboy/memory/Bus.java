@@ -10,7 +10,6 @@ import com.egamboau.gameboy.cartridge.Cartridge;
  */
 public class Bus {
 
-    //region Fields
     /**
      * The cartridge currently loaded into the Game Boy.
      */
@@ -60,9 +59,7 @@ public class Bus {
      * Interrupt Enable Register (IE).
      */
     private int interruptEnableRegister = 0;
-    //endregion
 
-    //region Constructor
     /**
      * Constructs a new Memory Bus.
      *
@@ -71,9 +68,7 @@ public class Bus {
     public Bus(final Cartridge currentCartridge) {
         this.cartridge = currentCartridge;
     }
-    //endregion
 
-    //region Public API - Read / Write
     /**
      * Reads one byte from the specified memory address.
      *
@@ -185,9 +180,7 @@ public class Bus {
 
         throw new UnsupportedOperationException(String.format("Writing to address %x not implemented", address));
     }
-    //endregion
 
-    //region Private Helper Predicates
     private boolean isHramMemory(final int address) {
         return address >= MemoryMapConstants.HRAM_START && address <= MemoryMapConstants.HRAM_END;
     }
@@ -227,5 +220,4 @@ public class Bus {
     private boolean isInterruptEnableRegister(final int address) {
         return address == MemoryMapConstants.INTERRUPT_ENABLE_REGISTER;
     }
-    //endregion
 }

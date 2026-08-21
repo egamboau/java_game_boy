@@ -14,32 +14,32 @@ import com.egamboau.gameboy.cpu.instructions.RegisterType;
  */
 public class JumpRelativeInstruction extends Instruction {
 
-    //region Constructors
+    /** Optional condition controlling whether the relative jump is taken. */
+    private final InstructionCondition condition;
+
     /**
      * Constructs a JumpRelativeInstruction.
      *
      * @param addressMode The addressing mode of the instruction.
      * @param sourceRegister The source register for the instruction.
      * @param destinationRegister The destination register for the instruction.
-     * @param condition The condition under which the jump occurs.
-     * @param parameter The parameter for the instruction.
+     * @param currentCondition The condition under which the jump occurs, or null for an unconditional jump.
      */
     public JumpRelativeInstruction(final AddressMode addressMode, final RegisterType sourceRegister,
-            final RegisterType destinationRegister, final InstructionCondition condition, final Byte parameter) {
-        super(addressMode, sourceRegister, destinationRegister, condition, parameter);
+            final RegisterType destinationRegister, final InstructionCondition currentCondition) {
+        super(addressMode, sourceRegister, destinationRegister);
+        this.condition = currentCondition;
     }
-    //endregion
 
-    //region Execution
     @Override
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         //get the data from the array. Cast to byte to get the sign correctly
         byte address = (byte) data[0];
         boolean shouldJump;
-        if (this.getCondition() == null) {
+        if (condition == null) {
             shouldJump = true;
         } else {
-            switch (getCondition()) {
+            switch (condition) {
                 case Z_FLAG_NOT_SET:
                     shouldJump = !currentCpu.getZero();
                     break;
@@ -53,13 +53,12 @@ public class JumpRelativeInstruction extends Instruction {
                     shouldJump = currentCpu.getCarry();
                     break;
                 default:
-                    throw new IllegalArgumentException(String.format("Condition not supported for jump: %s", getCondition()));
+                    throw new IllegalArgumentException(String.format("Condition not supported for jump: %s", condition));
             }
         }
         if (shouldJump) {
             currentCpu.incrementPCRegister(address);
         }
     }
-    //endregion
 
 }

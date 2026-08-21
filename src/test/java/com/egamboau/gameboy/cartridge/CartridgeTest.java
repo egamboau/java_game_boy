@@ -1,7 +1,5 @@
 package com.egamboau.gameboy.cartridge;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,11 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CartridgeTest {
 
     /**
-     * Logger instance for logging test information.
-     */
-    private static final Logger LOGGER = LogManager.getLogger();
-
-    /**
      * The Cartridge instance used for testing.
      */
     private static Cartridge cartridge;
@@ -61,12 +54,10 @@ class CartridgeTest {
             URI.create("https://github.com/retrio/gb-test-roms/raw/refs/heads/master/halt_bug.gb").toURL().openStream());
         FileAttribute<Set<PosixFilePermission>> attrs = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
         tempFile = Files.createTempFile("tmpDirPrefix", null, attrs).toFile();
-        LOGGER.info("Writting test rom to {}", tempFile.getAbsolutePath());
         OutputStream outStream = new FileOutputStream(tempFile);
         data = in.readAllBytes();
         outStream.write(data);
         outStream.close();
-        LOGGER.info("File Written");
     }
 
     @BeforeEach
@@ -77,7 +68,6 @@ class CartridgeTest {
 
     @AfterAll
     static void tearDown() {
-        LOGGER.info("Deleting file");
         tempFile.delete();
     }
 
@@ -87,11 +77,9 @@ class CartridgeTest {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(data);
         String expected = Base64.getEncoder().encodeToString(md.digest());
-        LOGGER.info("Expected MD5: {}", expected);
         md.reset();
         md.update(cartridge.getRomData());
         String loaded = Base64.getEncoder().encodeToString(md.digest());
-        LOGGER.info("Lodaded MD5: {}", loaded);
         assertEquals(expected, loaded);
     }
 

@@ -94,6 +94,8 @@ class SubtractionTest extends CPUTestBase {
                 new SubtractionScenario("no borrow", 0x03, 0x01, true, 0x02, false, false, false),
                 new SubtractionScenario("zero", 0x01, 0x01, false, 0x00, true, false, false),
                 new SubtractionScenario("half borrow", 0x10, 0x01, false, 0x0F, false, true, false),
+                new SubtractionScenario("half borrow with non-F result", 0x2A, 0x0C, false,
+                        0x1E, false, true, false),
                 new SubtractionScenario("full borrow", 0x00, 0x01, false, 0xFF, false, true, true));
     }
 
@@ -110,6 +112,8 @@ class SubtractionTest extends CPUTestBase {
                 new SubtractionScenario("without borrow-in", 0x03, 0x01, false, 0x02, false, false, false),
                 new SubtractionScenario("with borrow-in", 0x03, 0x01, true, 0x01, false, false, false),
                 new SubtractionScenario("half borrow", 0x10, 0x00, true, 0x0F, false, true, false),
+                new SubtractionScenario("half borrow with non-F result", 0x2A, 0x0B, true,
+                        0x1E, false, true, false),
                 new SubtractionScenario("full borrow", 0x00, 0x00, true, 0xFF, false, true, true),
                 new SubtractionScenario("zero", 0x01, 0x00, true, 0x00, true, false, false));
     }

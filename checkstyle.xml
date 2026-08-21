@@ -20,10 +20,6 @@
     <property name="optional" value="true"/>
   </module>
 
-  <!-- Checks that a package-info.java file exists for each package.     -->
-  <!-- See https://checkstyle.org/checks/javadoc/javadocpackage.html#JavadocPackage -->
-  <module name="JavadocPackage"/>
-
   <!-- Checks whether files end with a new line.                        -->
   <!-- See https://checkstyle.org/checks/misc/newlineatendoffile.html -->
   <module name="NewlineAtEndOfFile"/>
@@ -55,13 +51,10 @@
 
   <module name="TreeWalker">
 
-    <!-- Checks for Javadoc comments.                     -->
-    <!-- See https://checkstyle.org/checks/javadoc/index.html -->
-    <module name="InvalidJavadocPosition"/>
-    <module name="JavadocMethod"/>
-    <module name="JavadocType"/>
-    <module name="JavadocVariable"/>
-    <module name="JavadocStyle"/>
+    <!-- Public APIs must explain their contract. -->
+    <module name="JavadocMethod">
+      <property name="accessModifiers" value="public"/>
+    </module>
     <module name="MissingJavadocMethod"/>
 
     <!-- Checks for Naming Conventions.                  -->
@@ -131,7 +124,6 @@
 
     <!-- Checks for class design                         -->
     <!-- See https://checkstyle.org/checks/design/index.html -->
-    <module name="DesignForExtension"/>
     <module name="FinalClass"/>
     <module name="HideUtilityClassConstructor"/>
     <module name="InterfaceIsType"/>

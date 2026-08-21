@@ -1,11 +1,7 @@
 package com.egamboau.gameboy.cartridge;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum CGBValues {
 
-    //region Enum entries
     /**
      * The game supports CGB enhancements, but is backwards compatible.
      */
@@ -15,9 +11,7 @@ public enum CGBValues {
      * The game works on CGB only.
      */
     CGB_ONLY((byte) 0xC0);
-    //endregion
 
-    //region Fields
     /**
      * The code representing the CGB support type.
      */
@@ -26,24 +20,12 @@ public enum CGBValues {
     /**
      * A mapping of CGB support codes to their corresponding CGBValues enum.
      */
-    private static final Map<Byte, CGBValues> BY_CODE = new HashMap<>();
-    //endregion
 
-    //region Static initialization
-    static {
-        for (CGBValues support : values()) {
-            BY_CODE.put(support.code, support);
-        }
-    }
-    //endregion
 
-    //region Constructor
     CGBValues(final byte currentCode) {
         this.code = currentCode;
     }
-    //endregion
 
-    //region Accessors
     /**
      * Gets the code representing the CGB support type.
      *
@@ -52,9 +34,7 @@ public enum CGBValues {
     public byte getCode() {
         return code;
     }
-    //endregion
 
-    //region Factory
     /**
      * Retrieves the CGBValues enum corresponding to the given code.
      *
@@ -63,11 +43,11 @@ public enum CGBValues {
      * @throws IllegalArgumentException if the code does not match any CGBValues.
      */
     public static CGBValues fromByte(final byte code) {
-        CGBValues support = BY_CODE.get(code);
-        if (support == null) {
-            throw new IllegalArgumentException("Unknown CGB support code: " + code);
+        for (CGBValues support : values()) {
+            if (support.code == code) {
+                return support;
+            }
         }
-        return support;
+        throw new IllegalArgumentException("Unknown CGB support code: " + code);
     }
-    //endregion
 }

@@ -9,14 +9,11 @@ import com.egamboau.gameboy.memory.BitMasks;
  */
 public class Register {
 
-    //region Fields
     /**
      * The value stored in the register as a signed byte.
      */
     private byte value;
-    //endregion
 
-    //region Constructors
     /**
      * Creates a new register initialized to 0.
      */
@@ -32,9 +29,7 @@ public class Register {
     public Register(final int newValue) {
         set(newValue);
     }
-    //endregion
 
-    //region Accessors
     /**
      * Retrieves the value of the register as an unsigned 8-bit integer.
      *
@@ -61,9 +56,7 @@ public class Register {
     public byte raw() {
         return value;
     }
-    //endregion
 
-    //region Combine/Split utilities
     /**
      * Combines the values of two 8-bit registers into a single 16-bit integer.
      *
@@ -89,9 +82,7 @@ public class Register {
         high.set((value >> 8) & BitMasks.MASK_8_BIT_DATA);
         low.set(value & BitMasks.MASK_8_BIT_DATA);
     }
-    //endregion
 
-    //region Increment/Decrement
     /**
      * Increments the value of the register by 1.
      */
@@ -105,5 +96,4 @@ public class Register {
     public final void decrementValue() {
         set(get() - 1);
     }
-    //endregion
 }

@@ -3,7 +3,6 @@ package com.egamboau.gameboy.cpu.instructions.implementations;
 import com.egamboau.gameboy.cpu.CPU;
 import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.Instruction;
-import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 
@@ -16,24 +15,18 @@ import com.egamboau.gameboy.memory.BitMasks;
  */
 public class LoadInstruction extends Instruction {
 
-    //region Constructors
     /**
      * Constructs a LoadInstruction with the specified parameters.
      *
      * @param addressMode The addressing mode of the instruction.
      * @param sourceRegister The source register for the operation.
      * @param destinationRegister The destination register for the operation.
-     * @param condition The condition under which the instruction executes.
-     * @param parameter An optional parameter for the instruction.
      */
     public LoadInstruction(final AddressMode addressMode, final RegisterType sourceRegister,
-            final RegisterType destinationRegister,
-            final InstructionCondition condition, final Byte parameter) {
-        super(addressMode, sourceRegister, destinationRegister, condition, parameter);
+            final RegisterType destinationRegister) {
+        super(addressMode, sourceRegister, destinationRegister);
     }
-    //endregion
 
-    //region Execution
     @Override
     public final void runInstructionLogic(final CPU currentCpu, final int[] data) {
         switch (getAddressMode()) {
@@ -75,9 +68,7 @@ public class LoadInstruction extends Instruction {
                 throw new IllegalArgumentException("Unknown address mode: " + getAddressMode());
         }
     }
-    //endregion
 
-    //region Helpers
     private void storeMemoryDataintoRegister(final CPU currentCpu) {
         int address = currentCpu.getValueFromRegister(getSourceRegister());
         int data = currentCpu.readByteFromAddress(address);
@@ -117,6 +108,5 @@ public class LoadInstruction extends Instruction {
         int dataToStore = data[0];
         currentCpu.writeByteToAddress(address, dataToStore);
     }
-    //endregion
 
 }

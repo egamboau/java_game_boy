@@ -1,8 +1,5 @@
 package com.egamboau.gameboy.cpu;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
@@ -10,11 +7,9 @@ import com.egamboau.gameboy.memory.Bus;
 
 public class CPU {
 
-    //region Fields
     /**
      * Logger instance for logging CPU-related information.
      */
-    private static final Logger LOGGER = LogManager.getLogger();
 
     /**
      * Register A used for arithmetic and logic operations.
@@ -79,9 +74,7 @@ public class CPU {
 
     /** Indicates whether the CPU is currently stopped (true when in the STOP state). */
     private boolean stopped;
-    //endregion
 
-    //region Constructor & initialization
     /**
      * Constructs a CPU instance and initializes it with the provided memory bus.
      *
@@ -93,7 +86,6 @@ public class CPU {
     }
 
     private void initializeCPU() {
-        LOGGER.info("Initializing CPU Registers to default values");
         this.a = new Register();
         this.b = new Register();
         this.c = new Register();
@@ -108,9 +100,7 @@ public class CPU {
         this.stopped = false;
         this.cycles = 0;
     }
-    //endregion
 
-    //region State accessors (halt/stop)
     /**
      * Checks if the CPU is in a halted state.
      *
@@ -154,9 +144,7 @@ public class CPU {
     public final void setStopped(final boolean newValue) {
         this.stopped = newValue;
     }
-    //endregion
 
-    //region Cycle management
     /**
      * Increment the cycles count on the CPU.
      *
@@ -174,9 +162,7 @@ public class CPU {
     public final long getCycles() {
         return cycles;
     }
-    //endregion
 
-    //region Fetch & execute
     /**
      * Executes one step on the CPU, basically reading and executing instructions
      * one at a time.
@@ -198,14 +184,11 @@ public class CPU {
      * @return the instruction based on the opcode read from memory
      */
     private Instruction fetchInstruction() {
-        LOGGER.info("Fetching OPCODE instruction from memory");
         int opcode = this.memoryBus.readByteFromAddress(this.pcRegister++);
         incrementCpuCycles(1L);
         return Instruction.geInstructionFromOpcode(opcode);
     }
-    //endregion
 
-    //region Memory access
     /**
      * Reads a byte from the specified memory address and increments the CPU cycles.
      *
@@ -227,9 +210,7 @@ public class CPU {
         memoryBus.writeByteToAddress(data, address);
         incrementCpuCycles(1L);
     }
-    //endregion
 
-    //region Register pair operations
     /**
      * Increments the value of a 16-bit register pair by 1.
      *
@@ -267,9 +248,7 @@ public class CPU {
                         "Register %s not supported for 16 bit increment instruction", register));
         }
     }
-    //endregion
 
-    //region Register read/write helpers
     /**
      * Retrieves the value stored in the specified register.
      *
@@ -429,9 +408,7 @@ public class CPU {
                 throw new IllegalArgumentException("Unknown destination register: " + destinationRegister);
         }
     }
-    //endregion
 
-    //region Flag wrappers
     /**
      * Sets the subtract flag in the flag register.
      *
@@ -503,9 +480,7 @@ public class CPU {
     public final boolean getZero() {
         return f.getZero();
     }
-    //endregion
 
-    //region PC helpers
     /**
      * Reads a byte from the memory address pointed to by the program counter (PC),
      * increments the PC, and returns the byte read.
@@ -525,5 +500,4 @@ public class CPU {
         this.pcRegister += address;
         this.incrementCpuCycles(1);
     }
-    //endregion
 }

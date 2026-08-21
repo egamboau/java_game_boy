@@ -7,7 +7,6 @@ package com.egamboau.gameboy.cpu.instructions;
  */
 public enum AluOperationType {
 
-    //region Enum entries
     /** Addition: A <- A + value. */
     ADD_A,
     /** Addition with carry: A <- A + value + carry. */
@@ -24,9 +23,7 @@ public enum AluOperationType {
     OR,
     /** Compare: performs A - value to set flags, without storing the result in A. */
     CP;
-    //endregion
 
-    //region Utilities
     /**
      * Returns the ALU operation type for the given ordinal index.
      *
@@ -37,6 +34,5 @@ public enum AluOperationType {
     public static AluOperationType getAluOperationType(final int index) {
         return AluOperationType.values()[index];
     }
-    //endregion
 
 }

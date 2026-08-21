@@ -6,7 +6,6 @@ package com.egamboau.gameboy.cpu.instructions;
  */
 public enum RegisterType {
 
-    //region Enum entries
     /**
      * The 8-bit accumulator register (A).
      * Used for arithmetic and logical operations.
@@ -84,9 +83,7 @@ public enum RegisterType {
      * Points to the top of the stack in memory.
      */
     SP;
-    //endregion
 
-    //region Utility arrays
     /**
      * Array of 16-bit register pairs including the stack pointer (SP).
      */
@@ -96,9 +93,7 @@ public enum RegisterType {
      * Array of 8-bit and 16-bit registers used for single register operations.
      */
     private static RegisterType[] singleRegisters = {B, C, D, E, H, L, HL, A};
-    //endregion
 
-    //region Accessors
     /**
      * Returns the 16-bit register pair (including SP) at the specified index.
      *
@@ -118,5 +113,4 @@ public enum RegisterType {
     public static RegisterType getRegister(final int index) {
         return singleRegisters[index];
     }
-    //endregion
 }
