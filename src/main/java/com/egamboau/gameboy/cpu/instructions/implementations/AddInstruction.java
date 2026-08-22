@@ -38,16 +38,13 @@ public class AddInstruction extends Instruction {
         }
     }
 
-    private void addRegisterPairs(final CPU currentCpu) {
-        int sourceValue = currentCpu.getValueFromRegister(getSourceRegister());
-        int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
-        int result = sourceValue + destinationValue;
-        int additionHalfBits = (sourceValue &  BitMasks.HALF_CARRY_16_BIT_RESULT) + (destinationValue &  BitMasks.HALF_CARRY_16_BIT_RESULT);
+    @Override
+    protected final int getInternalCycles(final CPU currentCpu) {
+        return getAddressMode() == AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT ? 1 : 0;
+    }
 
-        currentCpu.setValueInRegister(result, getDestinationRegister());
-        currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry(additionHalfBits > BitMasks.HALF_CARRY_16_BIT_RESULT);
-        currentCpu.setCarry(result > BitMasks.CARRY_16_BIT_RESULTS);
+    private void addRegisterPairs(final CPU currentCpu) {
+        currentCpu.add16BitRegisters(getSourceRegister(), getDestinationRegister());
     }
 
     private void addRegisters(final CPU currentCpu) {

@@ -46,11 +46,15 @@ public class DecrementInstruction extends Instruction {
         }
     }
 
+    @Override
+    protected final int getInternalCycles(final CPU currentCpu) {
+        return getAddressMode() == AddressMode.REGISTER_16_BIT ? 1 : 0;
+    }
+
 
 
     private void decrementRegisterPair(final CPU currentCpu) {
-        int result = getDecrementedRegisterData(currentCpu) & BitMasks.MASK_16_BIT_DATA;
-        currentCpu.setValueInRegister(result, getDestinationRegister());
+        currentCpu.decrement16BitRegister(getDestinationRegister());
     }
 
     private void decrementRegister(final CPU currentCpu) {

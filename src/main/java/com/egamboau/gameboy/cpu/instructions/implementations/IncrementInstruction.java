@@ -45,6 +45,11 @@ public class IncrementInstruction extends Instruction {
         }
     }
 
+    @Override
+    protected final int getInternalCycles(final CPU currentCpu) {
+        return getAddressMode() == AddressMode.REGISTER_16_BIT ? 1 : 0;
+    }
+
     private int getIncrementedRegisterData(final CPU currentCpu) {
         int originalValue = currentCpu.getValueFromRegister(getSourceRegister());
         return originalValue + 1;
@@ -62,8 +67,7 @@ public class IncrementInstruction extends Instruction {
     }
 
     private void incrementRegisterPair(final CPU currentCpu) {
-        int result = getIncrementedRegisterData(currentCpu) & BitMasks.MASK_16_BIT_DATA;
-        currentCpu.setValueInRegister(result, getDestinationRegister());
+        currentCpu.increment16BitRegister(getDestinationRegister());
     }
 
     private void incrementIndirectAddres(final CPU currentCpu) {

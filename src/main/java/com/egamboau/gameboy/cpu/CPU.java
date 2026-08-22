@@ -65,7 +65,7 @@ public class CPU {
     /**
      * Memory bus used for communication between the CPU and memory.
      */
-    private Bus memoryBus;
+    private final Bus memoryBus;
 
     /**
      * The number of cycles executed by the CPU.
@@ -150,7 +150,7 @@ public class CPU {
      *
      * @param cyclesAdjustment
      */
-    public void incrementCpuCycles(final long cyclesAdjustment) {
+    private void incrementCpuCycles(final long cyclesAdjustment) {
         this.cycles += cyclesAdjustment;
     }
 
@@ -171,9 +171,10 @@ public class CPU {
         if (halted || stopped) {
             // CPU is halted or stopped, skip instruction execution
             incrementCpuCycles(1);
+            return;
         }
         Instruction instruction = this.fetchInstruction();
-        instruction.executeInstruction(this);
+        incrementCpuCycles(instruction.executeInstruction(this));
     }
 
     /**
@@ -184,8 +185,7 @@ public class CPU {
      * @return the instruction based on the opcode read from memory
      */
     private Instruction fetchInstruction() {
-        int opcode = this.memoryBus.readByteFromAddress(this.pcRegister++);
-        incrementCpuCycles(1L);
+        int opcode = readByteFromAddress(this.pcRegister++);
         return Instruction.geInstructionFromOpcode(opcode);
     }
 
@@ -247,6 +247,43 @@ public class CPU {
                     String.format(
                         "Register %s not supported for 16 bit increment instruction", register));
         }
+    }
+
+    /**
+     * Increments a 16-bit register.
+     *
+     * @param register register to increment
+     */
+    public final void increment16BitRegister(final RegisterType register) {
+        setValueInRegister(getValueFromRegister(register) + 1, register);
+    }
+
+    /**
+     * Decrements a 16-bit register.
+     *
+     * @param register register to decrement
+     */
+    public final void decrement16BitRegister(final RegisterType register) {
+        setValueInRegister(getValueFromRegister(register) - 1, register);
+    }
+
+    /**
+     * Adds one 16-bit register to another.
+     *
+     * @param source source register
+     * @param destination destination register
+     */
+    public final void add16BitRegisters(final RegisterType source, final RegisterType destination) {
+        int sourceValue = getValueFromRegister(source);
+        int destinationValue = getValueFromRegister(destination);
+        int result = sourceValue + destinationValue;
+        int additionHalfBits = (sourceValue & BitMasks.HALF_CARRY_16_BIT_RESULT)
+                + (destinationValue & BitMasks.HALF_CARRY_16_BIT_RESULT);
+
+        setValueInRegister(result, destination);
+        setSubtract(false);
+        setHalfCarry(additionHalfBits > BitMasks.HALF_CARRY_16_BIT_RESULT);
+        setCarry(result > BitMasks.CARRY_16_BIT_RESULTS);
     }
 
     /**
@@ -339,73 +376,21 @@ public class CPU {
                 break;
             case SP:
                 spRegister = data & BitMasks.MASK_16_BIT_DATA;
-                incrementCpuCycles(1L);
+                break;
+            case PC:
+                pcRegister = data & BitMasks.MASK_16_BIT_DATA;
                 break;
             case HL:
                 Register.split(data, h, l);
-                incrementCpuCycles(1L);
                 break;
             case BC:
                 Register.split(data, b, c);
-                incrementCpuCycles(1L);
                 break;
             case DE:
                 Register.split(data, d, e);
-                incrementCpuCycles(1L);
                 break;
             default:
                 throw new IllegalArgumentException("Setting data not supported for this register " + registerType);
-        }
-    }
-
-    /**
-     * Sets the value in the specified register or register pair using an array of data.
-     *
-     * @param data The array of data to set in the register. For 16-bit registers, the array should contain two elements.
-     * @param destinationRegister The type of register where the value will be set.
-     * @throws IllegalArgumentException if the register type is not supported.
-     */
-    @SuppressWarnings("checkstyle:magicnumber")
-    public final void setValueInRegister(final int[] data, final RegisterType destinationRegister) {
-        switch (destinationRegister) {
-            case A:
-                a.set(data[0]);
-                break;
-            case B:
-                b.set(data[0]);
-                break;
-            case C:
-                c.set(data[0]);
-                break;
-            case D:
-                d.set(data[0]);
-                break;
-            case E:
-                e.set(data[0]);
-                break;
-            case H:
-                h.set(data[0]);
-                break;
-            case L:
-                l.set(data[0]);
-                break;
-            case BC:
-                c.set(data[0]);
-                b.set(data[1]);
-                break;
-            case DE:
-                e.set(data[0]);
-                d.set(data[1]);
-                break;
-            case HL:
-                l.set(data[0]);
-                h.set(data[1]);
-                break;
-            case SP:
-                this.spRegister = ((data[1] << 8) | data[0]) & BitMasks.MASK_16_BIT_DATA;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown destination register: " + destinationRegister);
         }
     }
 

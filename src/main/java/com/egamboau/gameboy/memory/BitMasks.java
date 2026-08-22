@@ -15,6 +15,11 @@ public final class BitMasks {
     }
 
     /**
+     * Mask to be used to shift a number 8 bits
+     */
+    public static final int MASK_8_BIT_SHIFT = 8;
+
+    /**
      * A mask for 8-bit data, representing the maximum value of an 8-bit number (255).
      */
     public static final int MASK_8_BIT_DATA = 0XFF;

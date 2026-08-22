@@ -5,6 +5,7 @@ import com.egamboau.gameboy.cpu.instructions.implementations.AddInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.AddWithCarryInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.AndInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.CompareInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.ConditionalReturnInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecimalAdjustAccumulatorInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecrementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.FlipCarryFlagInstruction;
@@ -160,10 +161,23 @@ public abstract class Instruction {
      * then call {@link #runInstructionLogic(CPU, int[])} to perform the instruction.</p>
      *
      * @param currentCpu the CPU instance on which to execute the instruction
+     * @return internal cycles consumed beyond memory accesses
      */
-    public final void executeInstruction(final CPU currentCpu) {
+    public final int executeInstruction(final CPU currentCpu) {
         int[] data = fetchData(currentCpu);
+        int internalCycles = getInternalCycles(currentCpu);
         runInstructionLogic(currentCpu, data);
+        return internalCycles;
+    }
+
+    /**
+     * Returns cycles consumed internally, excluding memory accesses.
+     *
+     * @param currentCpu CPU state before instruction logic runs
+     * @return internal cycle count
+     */
+    protected int getInternalCycles(final CPU currentCpu) {
+        return 0;
     }
 
     /**
@@ -258,6 +272,14 @@ public abstract class Instruction {
                 }
             case 2:
                 return generateOperationOnAccumulatorAndRegisterOrMemory(y, z);
+            case 3:
+                if (z == 0) {
+                    if (y >= 0 && y <= 3) {
+                        ConditionalReturnInstruction instruction =  new ConditionalReturnInstruction(null, null, null);
+                        instruction.setCondition(InstructionCondition.getInstructionConditionFromIndex(y));
+                        return instruction;
+                    }
+                }
             default:
                 throw new IllegalArgumentException(String.format("\"Opcode still not implemented: \": %02x", opcode));
          }

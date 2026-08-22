@@ -76,7 +76,13 @@ public class LoadInstruction extends Instruction {
     }
 
     private void storeDataInRegister(final CPU currentCpu, final int[] data) {
-        currentCpu.setValueInRegister(data, getDestinationRegister());
+        int dataToSet = 0;
+        if (data.length == 2) {
+            dataToSet = (data[1] << BitMasks.MASK_8_BIT_SHIFT) + data[0];
+        } else {
+            dataToSet = data[0];
+        }
+        currentCpu.setValueInRegister(dataToSet, getDestinationRegister());
     }
 
     private void storeSourceRegisterDataInDestinationRegister(final CPU currentCpu) {
