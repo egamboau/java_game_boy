@@ -5,7 +5,6 @@ import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.InstructionCondition;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
-import com.egamboau.gameboy.memory.BitMasks;
 
 
 public class ConditionalReturnInstruction extends Instruction {
@@ -44,10 +43,7 @@ public class ConditionalReturnInstruction extends Instruction {
         if (checkForCondition(currentCpu)) {
             /*If the Z flag is 0, control is returned to the source program by popping from the memory stack the program counter PC
             value that was pushed to the stack when the subroutine was called. */
-            int currentSpValue = currentCpu.getValueFromRegister(RegisterType.SP);
-            int newPcCount =  currentCpu.readByteFromAddress(currentSpValue++);
-            newPcCount += currentCpu.readByteFromAddress(currentSpValue++)  << BitMasks.MASK_8_BIT_SHIFT;
-            currentCpu.setValueInRegister(currentSpValue, RegisterType.SP);
+            int newPcCount = currentCpu.popWord();
             currentCpu.setValueInRegister(newPcCount, RegisterType.PC);
         }
     }

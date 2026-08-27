@@ -345,6 +345,31 @@ public class CPU {
     }
 
     /**
+     * Pops a 16-bit value from the stack.
+     *
+     * @return the popped value
+     */
+    public int popWord() {
+        int currentSpValue = this.getValueFromRegister(RegisterType.SP);
+        int value =  this.readByteFromAddress(currentSpValue++);
+        value += this.readByteFromAddress(currentSpValue++) << BitMasks.MASK_8_BIT_SHIFT;
+        this.setValueInRegister(currentSpValue, RegisterType.SP);
+        return value & BitMasks.MASK_16_BIT_DATA;
+    }
+
+    /**
+     * Pushes a 16-bit value onto the stack.
+     *
+     * @param value the value to push
+     */
+    public void pushWord(final int value) {
+        int currentSpValue = this.getValueFromRegister(RegisterType.SP);
+        this.writeByteToAddress(--currentSpValue, (value >> BitMasks.MASK_8_BIT_SHIFT) & BitMasks.MASK_8_BIT_DATA);
+        this.writeByteToAddress(--currentSpValue, value & BitMasks.MASK_8_BIT_DATA);
+        this.setValueInRegister(currentSpValue, RegisterType.SP);
+    }
+
+    /**
      * Sets the value in the specified register.
      *
      * @param data The value to set in the register.
@@ -382,6 +407,9 @@ public class CPU {
                 break;
             case HL:
                 Register.split(data, h, l);
+                break;
+            case AF:
+                Register.split(data, a, f);
                 break;
             case BC:
                 Register.split(data, b, c);

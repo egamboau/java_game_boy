@@ -7,23 +7,15 @@ import org.junit.jupiter.api.Test;
 
 import com.egamboau.test.TestUtils;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigInteger;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,16 +40,20 @@ class CartridgeTest {
     private static byte[] data;
 
     @BeforeAll
+    @SuppressWarnings("checkstyle:magicnumber")
     static void setUp() throws IOException {
-        //download a test rom for this.
-        BufferedInputStream in = new BufferedInputStream(
-            URI.create("https://github.com/retrio/gb-test-roms/raw/refs/heads/master/halt_bug.gb").toURL().openStream());
-        FileAttribute<Set<PosixFilePermission>> attrs = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"));
-        tempFile = Files.createTempFile("tmpDirPrefix", null, attrs).toFile();
-        OutputStream outStream = new FileOutputStream(tempFile);
-        data = in.readAllBytes();
-        outStream.write(data);
-        outStream.close();
+        data = new byte[0x150];
+        data[0x143] = (byte) 0x80;
+        data[0x147] = 0x02;
+
+        byte checksum = 0;
+        for (int address = 0x134; address <= 0x14C; address++) {
+            checksum = (byte) (checksum - data[address] - 1);
+        }
+        data[0x14D] = checksum;
+
+        tempFile = Files.createTempFile("test-rom", ".gb").toFile();
+        Files.write(tempFile.toPath(), data);
     }
 
     @BeforeEach
