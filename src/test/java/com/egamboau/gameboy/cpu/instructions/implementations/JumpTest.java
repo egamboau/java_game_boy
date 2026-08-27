@@ -27,6 +27,11 @@ class JumpTest extends CPUTestBase {
     private static final int OPCODE_JR_NC = 0x30;
     /** Opcode for a relative jump when the carry flag is set. */
     private static final int OPCODE_JR_C = 0x38;
+    private static final int OPCODE_JP_NZ = 0xC2;
+    private static final int OPCODE_JP_Z = 0xCA;
+    private static final int OPCODE_JP_NC = 0xD2;
+    private static final int OPCODE_JP_C = 0xDA;
+    private static final int JUMP_ADDRESS = 0x1234;
 
     /** Cycle count for an unconditional relative jump. */
     private static final int CYCLES_JR = 3;
@@ -34,8 +39,11 @@ class JumpTest extends CPUTestBase {
     private static final int CYCLES_CONDITIONAL_TAKEN = 3;
     /** Cycle count for a conditional relative jump when its condition is not met. */
     private static final int CYCLES_CONDITIONAL_NOT_TAKEN = 2;
+    private static final int CYCLES_JP_TAKEN = 4;
+    private static final int CYCLES_JP_NOT_TAKEN = 3;
     /** Size of a relative jump instruction in bytes. */
     private static final int INSTRUCTION_SIZE = 2;
+    private static final int JP_INSTRUCTION_SIZE = 3;
 
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
     static Stream<Arguments> generateJrTestArguments() {
@@ -85,6 +93,19 @@ class JumpTest extends CPUTestBase {
         );
     }
 
+    static Stream<Arguments> generateJpTestArguments() {
+        return Stream.of(
+            Arguments.of(OPCODE_JP_NZ, false, false, true),
+            Arguments.of(OPCODE_JP_NZ, true, false, false),
+            Arguments.of(OPCODE_JP_Z, false, false, false),
+            Arguments.of(OPCODE_JP_Z, true, false, true),
+            Arguments.of(OPCODE_JP_NC, false, false, true),
+            Arguments.of(OPCODE_JP_NC, false, true, false),
+            Arguments.of(OPCODE_JP_C, false, false, false),
+            Arguments.of(OPCODE_JP_C, false, true, true)
+        );
+    }
+
     @ParameterizedTest(name = "{index}: JR offset {1}")
     @MethodSource("generateJrTestArguments")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
@@ -128,6 +149,20 @@ class JumpTest extends CPUTestBase {
         stubNextInstructions(opcode, offset);
         runConditionalFlagJumpTest(carryFlagStatus, carryFlagStatus, cycleCountOffset, offset,
                 () -> this.getCurrentCpu().setCarry(carryFlagStatus));
+    }
+
+    @ParameterizedTest(name = "{index}: JP opcode {0}, Z={1}, C={2}")
+    @MethodSource("generateJpTestArguments")
+    void conditionalJpUsesFlag(final int opcode, final boolean zero, final boolean carry, final boolean taken) {
+        when(getCurrentBus().readByteFromAddress(anyInt()))
+            .thenReturn(opcode, JUMP_ADDRESS & MASK_INT_8_BIT, JUMP_ADDRESS >> 8);
+        getCurrentCpu().setZero(zero);
+        getCurrentCpu().setCarry(carry);
+        JumpTestContext context = executeJumpInstruction();
+
+        context.expectedPcOffset = taken ? JUMP_ADDRESS : JP_INSTRUCTION_SIZE;
+        context.expectedCycles = taken ? CYCLES_JP_TAKEN : CYCLES_JP_NOT_TAKEN;
+        verifyJumpResult(context);
     }
 
     // Helper methods
