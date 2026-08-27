@@ -67,6 +67,11 @@ public class FlagRegister extends Register {
         return super.get() & BitMasks.FLAGS_BYTES_ONLY;
     }
 
+    @Override
+    public final void set(final int value) {
+        super.set(value & BitMasks.FLAGS_BYTES_ONLY);
+    }
+
     /**
      * Checks if the Zero flag (Z) is set in the flag register.
      *
