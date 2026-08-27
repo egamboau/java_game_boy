@@ -5,7 +5,8 @@ import com.egamboau.gameboy.cpu.instructions.implementations.AddInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.AddWithCarryInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.AndInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.CompareInstruction;
-import com.egamboau.gameboy.cpu.instructions.implementations.ConditionalReturnInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.JumpInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.ReturnInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecimalAdjustAccumulatorInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecrementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.FlipCarryFlagInstruction;
@@ -271,15 +272,32 @@ public abstract class Instruction {
             case 3:
                 if (z == 0) {
                     if (y >= 0 && y <= 3) {
-                        ConditionalReturnInstruction instruction =  new ConditionalReturnInstruction(null, null, null);
+                        ReturnInstruction instruction =  new ReturnInstruction(null, null, RegisterType.PC);
                         instruction.setCondition(InstructionCondition.getInstructionConditionFromIndex(y));
                         return instruction;
                     }
                 } else if (z == 1) {
                     if (q == 1) {
                         if (p == 0) {
-                            return new ConditionalReturnInstruction(null, null, null);
+                            return new ReturnInstruction(null, null, RegisterType.PC);
+                        } else if (p == 2) {
+                            JumpInstruction instruction =  new JumpInstruction(
+                            AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT, RegisterType.HL, RegisterType.PC);
+                        return instruction;
                         }
+                    }
+                } else if (z == 2) {
+                    if (y >= 0 && y <= 3) {
+                        JumpInstruction instruction =  new JumpInstruction(
+                            AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.PC);
+                        instruction.setCondition(InstructionCondition.getInstructionConditionFromIndex(y));
+                        return instruction;
+                    }
+                } else if (z == 3) {
+                    if (y == 0) {
+                        JumpInstruction instruction =  new JumpInstruction(
+                            AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.PC);
+                        return instruction;
                     }
                 }
             default:

@@ -6,7 +6,7 @@ import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
 
-public class ConditionalReturnInstruction extends ConditionalInstruction {
+public class ReturnInstruction extends ConditionalInstruction {
 
 
     /**
@@ -16,7 +16,7 @@ public class ConditionalReturnInstruction extends ConditionalInstruction {
      * @param currentSourceRegister source register
      * @param currentDestinationRegister destination register
      */
-    public ConditionalReturnInstruction(final AddressMode currentAddressMode,
+    public ReturnInstruction(final AddressMode currentAddressMode,
             final RegisterType currentSourceRegister, final RegisterType currentDestinationRegister) {
         super(currentAddressMode, currentSourceRegister, currentDestinationRegister);
     }
@@ -27,7 +27,7 @@ public class ConditionalReturnInstruction extends ConditionalInstruction {
             /*If the Z flag is 0, control is returned to the source program by popping from the memory stack the program counter PC
             value that was pushed to the stack when the subroutine was called. */
             int newPcCount = currentCpu.popWord();
-            currentCpu.setValueInRegister(newPcCount, RegisterType.PC);
+            currentCpu.setValueInRegister(newPcCount, getDestinationRegister());
         }
     }
 
