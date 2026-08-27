@@ -41,10 +41,6 @@ import com.egamboau.gameboy.cpu.instructions.implementations.XorInstruction;
 public abstract class Instruction {
 
     /**
-     * Logger instance for logging messages related to the Instruction class.
-     */
-
-    /**
      * The addressing mode used by the instruction.
      */
     private AddressMode addressMode = null;
@@ -278,6 +274,12 @@ public abstract class Instruction {
                         ConditionalReturnInstruction instruction =  new ConditionalReturnInstruction(null, null, null);
                         instruction.setCondition(InstructionCondition.getInstructionConditionFromIndex(y));
                         return instruction;
+                    }
+                } else if (z == 1) {
+                    if (q == 1) {
+                        if (p == 0) {
+                            return new ConditionalReturnInstruction(null, null, null);
+                        }
                     }
                 }
             default:
