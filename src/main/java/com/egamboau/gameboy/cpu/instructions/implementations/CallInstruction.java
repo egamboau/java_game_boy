@@ -6,38 +6,32 @@ import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 
-public class JumpInstruction extends ConditionalInstruction {
+
+public class CallInstruction extends ConditionalInstruction {
 
     /**
-     * Creates a jump instruction.
+     * Creates a call instruction.
      *
      * @param currentAddressMode address mode used by the instruction
      * @param currentSourceRegister source register
      * @param currentDestinationRegister destination register
      */
-    public JumpInstruction(final AddressMode currentAddressMode, final RegisterType currentSourceRegister,
-                            final RegisterType currentDestinationRegister) {
+    public CallInstruction(final AddressMode currentAddressMode, final RegisterType currentSourceRegister,
+                    final RegisterType currentDestinationRegister) {
         super(currentAddressMode, currentSourceRegister, currentDestinationRegister);
     }
 
     @Override
     protected void runInstructionLogic(final CPU currentCpu, final int[] data) {
         if (checkForCondition(currentCpu)) {
-            int newPC = 0;
-            if (getAddressMode() == AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT) {
-                newPC = currentCpu.getValueFromRegister(getSourceRegister());
-            } else {
-                newPC = data[0] + (data[1] << BitMasks.MASK_8_BIT_SHIFT);
-            }
-            currentCpu.setValueInRegister(newPC, getDestinationRegister());
+            currentCpu.pushWord(currentCpu.getValueFromRegister(getDestinationRegister()));
+            int operand = data[0] + (data[1] << BitMasks.MASK_8_BIT_SHIFT);
+            currentCpu.setValueInRegister(operand, getDestinationRegister());
         }
     }
 
     @Override
     protected int getInternalCycles(final CPU currentCpu) {
-        if (getAddressMode() == AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT) {
-            return 0;
-        }
         return checkForCondition(currentCpu) ? 1 : 0;
     }
 
