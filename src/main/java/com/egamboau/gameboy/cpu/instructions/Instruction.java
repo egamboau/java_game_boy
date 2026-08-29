@@ -18,6 +18,8 @@ import com.egamboau.gameboy.cpu.instructions.implementations.LoadInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.NoopInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.OneComplementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.OrInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.PopInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.PushInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.ResetInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftCircularInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftInstruction;
@@ -279,7 +281,9 @@ public abstract class Instruction {
                         return instruction;
                     }
                 } else if (z == 1) {
-                    if (q == 1) {
+                    if (q == 0) {
+                        return new PopInstruction(null, null, RegisterType.getRegisterPairFeaturingAF(p));
+                    } else if (q == 1) {
                         if (p == 0) {
                             return new ReturnInstruction(null, null, RegisterType.PC);
                         } else if (p == 2) {
@@ -308,7 +312,9 @@ public abstract class Instruction {
                         return instruction;
                     }
                 } else if (z == 5) {
-                    if (q == 1) {
+                    if (q == 0) {
+                        return new PushInstruction(null, RegisterType.getRegisterPairFeaturingAF(p), null);
+                    } else if (q == 1) {
                         if (p == 0) {
                         CallInstruction instruction =  new CallInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.PC);
                         return instruction;
