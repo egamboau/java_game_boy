@@ -4,6 +4,7 @@ import com.egamboau.gameboy.cpu.CPU;
 import com.egamboau.gameboy.cpu.instructions.implementations.AddInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.AddWithCarryInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.AndInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.CallInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.CompareInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.JumpInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.ReturnInstruction;
@@ -17,6 +18,7 @@ import com.egamboau.gameboy.cpu.instructions.implementations.LoadInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.NoopInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.OneComplementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.OrInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.ResetInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftCircularInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateRightInstruction;
@@ -299,6 +301,21 @@ public abstract class Instruction {
                             AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.PC);
                         return instruction;
                     }
+                } else if (z == 4) {
+                    if (y >= 0 && y <= 3) {
+                        CallInstruction instruction =  new CallInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.PC);
+                        instruction.setCondition(InstructionCondition.getInstructionConditionFromIndex(y));
+                        return instruction;
+                    }
+                } else if (z == 5) {
+                    if (q == 1) {
+                        if (p == 0) {
+                        CallInstruction instruction =  new CallInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.PC);
+                        return instruction;
+                        }
+                    }
+                } else if (z == 7) {
+                    return new ResetInstruction(y * 8);
                 }
             default:
                 throw new IllegalArgumentException(String.format("\"Opcode still not implemented: \": %02x", opcode));

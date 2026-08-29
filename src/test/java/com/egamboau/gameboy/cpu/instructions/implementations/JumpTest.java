@@ -2,6 +2,8 @@ package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -34,7 +36,13 @@ class JumpTest extends CPUTestBase {
     private static final int OPCODE_JP_Z = 0xCA;
     private static final int OPCODE_JP_NC = 0xD2;
     private static final int OPCODE_JP_C = 0xDA;
+    private static final int OPCODE_CALL_NZ = 0xC4;
+    private static final int OPCODE_CALL_Z = 0xCC;
+    private static final int OPCODE_CALL = 0xCD;
+    private static final int OPCODE_CALL_NC = 0xD4;
+    private static final int OPCODE_CALL_C = 0xDC;
     private static final int JUMP_ADDRESS = 0x1234;
+    private static final int STACK_POINTER = 0xC100;
 
     /** Cycle count for an unconditional relative jump. */
     private static final int CYCLES_JR = 3;
@@ -45,6 +53,9 @@ class JumpTest extends CPUTestBase {
     private static final int CYCLES_JP_TAKEN = 4;
     private static final int CYCLES_JP_NOT_TAKEN = 3;
     private static final int CYCLES_JP_HL = 1;
+    private static final int CYCLES_CALL_TAKEN = 6;
+    private static final int CYCLES_CALL_NOT_TAKEN = 3;
+    private static final int CYCLES_RST = 4;
     /** Size of a relative jump instruction in bytes. */
     private static final int INSTRUCTION_SIZE = 2;
     private static final int JP_INSTRUCTION_SIZE = 3;
@@ -110,6 +121,33 @@ class JumpTest extends CPUTestBase {
         );
     }
 
+    static Stream<Arguments> generateCallTestArguments() {
+        return Stream.of(
+            Arguments.of(OPCODE_CALL_NZ, false, false, true),
+            Arguments.of(OPCODE_CALL_NZ, true, false, false),
+            Arguments.of(OPCODE_CALL_Z, false, false, false),
+            Arguments.of(OPCODE_CALL_Z, true, false, true),
+            Arguments.of(OPCODE_CALL_NC, false, false, true),
+            Arguments.of(OPCODE_CALL_NC, false, true, false),
+            Arguments.of(OPCODE_CALL_C, false, false, false),
+            Arguments.of(OPCODE_CALL_C, false, true, true)
+        );
+    }
+
+    @SuppressWarnings("checkstyle:magicnumber")
+    static Stream<Arguments> generateRstTestArguments() {
+        return Stream.of(
+            Arguments.of(0xC7, 0x00),
+            Arguments.of(0xCF, 0x08),
+            Arguments.of(0xD7, 0x10),
+            Arguments.of(0xDF, 0x18),
+            Arguments.of(0xE7, 0x20),
+            Arguments.of(0xEF, 0x28),
+            Arguments.of(0xF7, 0x30),
+            Arguments.of(0xFF, 0x38)
+        );
+    }
+
     @ParameterizedTest(name = "{index}: JR offset {1}")
     @MethodSource("generateJrTestArguments")
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})
@@ -168,6 +206,66 @@ class JumpTest extends CPUTestBase {
         context.expectedPcOffset = taken ? JUMP_ADDRESS : JP_INSTRUCTION_SIZE;
         context.expectedCycles = taken ? CYCLES_JP_TAKEN : CYCLES_JP_NOT_TAKEN;
         verifyJumpResult(context);
+    }
+
+    @ParameterizedTest(name = "{index}: CALL opcode {0}, Z={1}, C={2}")
+    @MethodSource("generateCallTestArguments")
+    @SuppressWarnings("checkstyle:magicnumber")
+    void conditionalCallUsesFlag(final int opcode, final boolean zero, final boolean carry, final boolean taken) {
+        when(getCurrentBus().readByteFromAddress(anyInt()))
+            .thenReturn(opcode, JUMP_ADDRESS & MASK_INT_8_BIT, JUMP_ADDRESS >> 8);
+        getCurrentCpu().setValueInRegister(STACK_POINTER, RegisterType.SP);
+        getCurrentCpu().setZero(zero);
+        getCurrentCpu().setCarry(carry);
+        long cyclesBefore = getCurrentCpu().getCycles();
+
+        getCurrentCpu().cpuStep();
+
+        assertEquals(taken ? JUMP_ADDRESS : JP_INSTRUCTION_SIZE,
+            getCurrentCpu().getValueFromRegister(RegisterType.PC));
+        assertEquals(taken ? STACK_POINTER - 2 : STACK_POINTER,
+            getCurrentCpu().getValueFromRegister(RegisterType.SP));
+        assertEquals(cyclesBefore + (taken ? CYCLES_CALL_TAKEN : CYCLES_CALL_NOT_TAKEN),
+            getCurrentCpu().getCycles());
+        if (taken) {
+            verify(getCurrentBus()).writeByteToAddress(0, STACK_POINTER - 1);
+            verify(getCurrentBus()).writeByteToAddress(JP_INSTRUCTION_SIZE, STACK_POINTER - 2);
+        } else {
+            verify(getCurrentBus(), never()).writeByteToAddress(anyInt(), anyInt());
+        }
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void callPushesReturnAddressAndLoadsPc() {
+        when(getCurrentBus().readByteFromAddress(anyInt()))
+            .thenReturn(OPCODE_CALL, JUMP_ADDRESS & MASK_INT_8_BIT, JUMP_ADDRESS >> 8);
+        getCurrentCpu().setValueInRegister(STACK_POINTER, RegisterType.SP);
+        long cyclesBefore = getCurrentCpu().getCycles();
+
+        getCurrentCpu().cpuStep();
+
+        assertEquals(JUMP_ADDRESS, getCurrentCpu().getValueFromRegister(RegisterType.PC));
+        assertEquals(STACK_POINTER - 2, getCurrentCpu().getValueFromRegister(RegisterType.SP));
+        assertEquals(cyclesBefore + CYCLES_CALL_TAKEN, getCurrentCpu().getCycles());
+        verify(getCurrentBus()).writeByteToAddress(0, STACK_POINTER - 1);
+        verify(getCurrentBus()).writeByteToAddress(JP_INSTRUCTION_SIZE, STACK_POINTER - 2);
+    }
+
+    @ParameterizedTest(name = "{index}: RST opcode {0} loads vector {1}")
+    @MethodSource("generateRstTestArguments")
+    void rstPushesReturnAddressAndLoadsVector(final int opcode, final int vector) {
+        when(getCurrentBus().readByteFromAddress(anyInt())).thenReturn(opcode);
+        getCurrentCpu().setValueInRegister(STACK_POINTER, RegisterType.SP);
+        long cyclesBefore = getCurrentCpu().getCycles();
+
+        getCurrentCpu().cpuStep();
+
+        assertEquals(vector, getCurrentCpu().getValueFromRegister(RegisterType.PC));
+        assertEquals(STACK_POINTER - 2, getCurrentCpu().getValueFromRegister(RegisterType.SP));
+        assertEquals(cyclesBefore + CYCLES_RST, getCurrentCpu().getCycles());
+        verify(getCurrentBus()).writeByteToAddress(0, STACK_POINTER - 1);
+        verify(getCurrentBus()).writeByteToAddress(1, STACK_POINTER - 2);
     }
 
     @Test
