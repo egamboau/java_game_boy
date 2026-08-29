@@ -7,12 +7,62 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.egamboau.gameboy.cpu.CPUTestBase;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
 class StackManipulationTest extends CPUTestBase {
+
+    @SuppressWarnings("checkstyle:magicnumber")
+    private static Stream<Arguments> stackRegisterOpcodes() {
+        return Stream.of(
+            Arguments.of(0xC1, 0xC5, RegisterType.BC),
+            Arguments.of(0xD1, 0xD5, RegisterType.DE),
+            Arguments.of(0xE1, 0xE5, RegisterType.HL),
+            Arguments.of(0xF1, 0xF5, RegisterType.AF)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("stackRegisterOpcodes")
+    @SuppressWarnings("checkstyle:magicnumber")
+    void popLoadsRegisterPairAndAdvancesStackPointer(
+            final int popOpcode, final int pushOpcode, final RegisterType register) {
+        when(this.getCurrentBus().readByteFromAddress(0)).thenReturn(popOpcode);
+        when(this.getCurrentBus().readByteFromAddress(0xC0FE)).thenReturn(0xB0);
+        when(this.getCurrentBus().readByteFromAddress(0xC0FF)).thenReturn(0x12);
+        this.getCurrentCpu().setValueInRegister(0xC0FE, RegisterType.SP);
+
+        this.getCurrentCpu().cpuStep();
+
+        assertEquals(0x12B0, this.getCurrentCpu().getValueFromRegister(register));
+        assertEquals(0xC100, this.getCurrentCpu().getValueFromRegister(RegisterType.SP));
+        assertEquals(1, this.getCurrentCpu().getValueFromRegister(RegisterType.PC));
+        assertEquals(3, this.getCurrentCpu().getCycles());
+    }
+
+    @ParameterizedTest
+    @MethodSource("stackRegisterOpcodes")
+    @SuppressWarnings("checkstyle:magicnumber")
+    void pushStoresRegisterPairAndRetreatsStackPointer(
+            final int popOpcode, final int pushOpcode, final RegisterType register) {
+        when(this.getCurrentBus().readByteFromAddress(0)).thenReturn(pushOpcode);
+        this.getCurrentCpu().setValueInRegister(0x12B0, register);
+        this.getCurrentCpu().setValueInRegister(0xC100, RegisterType.SP);
+
+        this.getCurrentCpu().cpuStep();
+
+        verify(this.getCurrentBus()).writeByteToAddress(0x12, 0xC0FF);
+        verify(this.getCurrentBus()).writeByteToAddress(0xB0, 0xC0FE);
+        assertEquals(0xC0FE, this.getCurrentCpu().getValueFromRegister(RegisterType.SP));
+        assertEquals(1, this.getCurrentCpu().getValueFromRegister(RegisterType.PC));
+        assertEquals(4, this.getCurrentCpu().getCycles());
+    }
 
     @Test
     @SuppressWarnings({"checkstyle:magicnumber", "checkstyle:parameternumbercheck"})

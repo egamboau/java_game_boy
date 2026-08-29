@@ -89,6 +89,9 @@ public enum RegisterType {
      */
     private static RegisterType[] registerPairs = {BC, DE, HL, SP};
 
+
+    private static RegisterType[] registerPairsWithAF = {BC, DE, HL, AF};
+
     /**
      * Array of 8-bit and 16-bit registers used for single register operations.
      */
@@ -102,6 +105,16 @@ public enum RegisterType {
      */
     public static RegisterType getRegisterPairFeaturingSP(final int index) {
         return registerPairs[index];
+    }
+
+    /**
+     * Returns the 16-bit register pair (including AF) at the specified index.
+     *
+     * @param index the index of the register pair to retrieve
+     * @return the RegisterType corresponding to the given index
+     */
+    public static RegisterType getRegisterPairFeaturingAF(final int index) {
+        return registerPairsWithAF[index];
     }
 
     /**
