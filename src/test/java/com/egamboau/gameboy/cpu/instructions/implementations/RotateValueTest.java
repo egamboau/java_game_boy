@@ -187,11 +187,11 @@ class RotateValueTest extends CPUTestBase {
          */
 
         int registerData = 0x40 & 0xFF;
-        int expectedValue = 0x80 & 0xFF;
+        int expectedValue = 0x81 & 0xFF;
 
         getCurrentCpu().setCarry(true);
 
-        runRlcaTest(registerData, expectedValue);
+        runRlaTest(registerData, expectedValue);
 
         assertFalse(getCurrentCpu().getZero());
         assertFalse(getCurrentCpu().getSubtract());

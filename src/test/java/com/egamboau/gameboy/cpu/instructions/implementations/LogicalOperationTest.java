@@ -1,23 +1,39 @@
 package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.egamboau.gameboy.cpu.CPUTestBase;
+import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 
 /** Tests for the AND, XOR, OR, and CP opcode ranges. */
 class LogicalOperationTest extends CPUTestBase {
 
     private static final int INDIRECT_SOURCE_ADDRESS = 0xC000;
+
+    @Test
+    void compareRejectsUnsupportedAddressMode() {
+        CompareInstruction instruction = new CompareInstruction(
+                AddressMode.REGISTER_8_BIT, RegisterType.B, RegisterType.A);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> instruction.executeInstruction(getCurrentCpu()));
+
+        assertEquals("Address mode not supported for COMPARE instruction: REGISTER_8_BIT",
+                exception.getMessage());
+    }
 
     @ParameterizedTest(name = "opcode {0}: A={2}, source={3}, result={4}")
     @MethodSource("logicalOperationCases")

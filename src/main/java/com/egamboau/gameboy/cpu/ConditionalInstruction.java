@@ -19,18 +19,12 @@ public abstract class ConditionalInstruction extends Instruction {
         if (instructionCondition == null) {
             return true;
         }
-        switch (instructionCondition) {
-            case Z_FLAG_NOT_SET:
-                return !currentCpu.getZero();
-            case Z_FLAG_SET:
-                return currentCpu.getZero();
-            case CARRY_FLAG_NOT_SET:
-                return !currentCpu.getCarry();
-            case CARRY_FLAG_SET:
-                return currentCpu.getCarry();
-            default:
-                throw new IllegalArgumentException("Invalid Condition " + instructionCondition);
-        }
+        return switch (instructionCondition) {
+            case Z_FLAG_NOT_SET -> !currentCpu.getZero();
+            case Z_FLAG_SET -> currentCpu.getZero();
+            case CARRY_FLAG_NOT_SET -> !currentCpu.getCarry();
+            case CARRY_FLAG_SET -> currentCpu.getCarry();
+        };
     }
 
      /**

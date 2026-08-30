@@ -29,10 +29,26 @@ public class SubWithCarryInstruction extends Instruction {
             case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
                 this.substractIndirectRegisterData(currentCpu);
                 break;
+            case DATA_8_BIT_TO_REGISTER:
+                this.substractDirectDataToRegisterData(currentCpu, data);
+                break;
             default:
                 throw new IllegalArgumentException(
-                        "Address mode not supported for ADD instruction: " + getAddressMode());
+                        "Address mode not supported for SBC instruction: " + getAddressMode());
         }
+    }
+
+    private void substractDirectDataToRegisterData(final CPU currentCpu, final int[] data) {
+        int sourceValue = data[0];
+        int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
+        boolean carry = currentCpu.getCarry();
+        int result = destinationValue - sourceValue;
+        if (carry) {
+            result -= 1;
+        }
+
+        currentCpu.setValueInRegister(result, getDestinationRegister());
+        setFlags(currentCpu, sourceValue, destinationValue, result, carry);
     }
 
     private void substractIndirectRegisterData(final CPU currentCpu) {
@@ -46,11 +62,7 @@ public class SubWithCarryInstruction extends Instruction {
         }
 
         currentCpu.setValueInRegister(result, getDestinationRegister());
-        currentCpu.setSubtract(true);
-        currentCpu.setHalfCarry((destinationValue & BitMasks.HALF_CARRY_8_BIT_RESULT)
-                < (sourceValue & BitMasks.HALF_CARRY_8_BIT_RESULT) + (carry ? 1 : 0));
-        currentCpu.setCarry(destinationValue < sourceValue + (carry ? 1 : 0));
-        currentCpu.setZero((result & BitMasks.MASK_8_BIT_DATA) == 0);
+        setFlags(currentCpu, sourceValue, destinationValue, result, carry);
     }
 
     private void substractRegisters(final CPU currentCpu) {
@@ -63,10 +75,16 @@ public class SubWithCarryInstruction extends Instruction {
         }
 
         currentCpu.setValueInRegister(result, getDestinationRegister());
+        setFlags(currentCpu, sourceValue, destinationValue, result, carry);
+    }
+
+    private void setFlags(final CPU currentCpu, final int sourceValue,
+            final int destinationValue, final int result, final boolean carry) {
+        int sourceWithCarry = sourceValue + (carry ? 1 : 0);
         currentCpu.setSubtract(true);
         currentCpu.setHalfCarry((destinationValue & BitMasks.HALF_CARRY_8_BIT_RESULT)
                 < (sourceValue & BitMasks.HALF_CARRY_8_BIT_RESULT) + (carry ? 1 : 0));
-        currentCpu.setCarry(destinationValue < sourceValue + (carry ? 1 : 0));
+        currentCpu.setCarry(destinationValue < sourceWithCarry);
         currentCpu.setZero((result & BitMasks.MASK_8_BIT_DATA) == 0);
     }
 

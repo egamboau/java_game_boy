@@ -294,54 +294,22 @@ public class CPU {
      * @throws IllegalArgumentException if the register type is not supported.
      */
     public final int getValueFromRegister(final RegisterType register) {
-        int result;
-        switch (register) {
-            case A:
-                result = a.get();
-                break;
-            case AF:
-                result = Register.combine(a, f);
-                break;
-            case B:
-                result = b.get();
-                break;
-            case BC:
-                result = Register.combine(b, c);
-                break;
-            case C:
-                result = c.get();
-                break;
-            case D:
-                result = d.get();
-                break;
-            case DE:
-                result = Register.combine(d, e);
-                break;
-            case E:
-                result = e.get();
-                break;
-            case F:
-                result = f.get();
-                break;
-            case H:
-                result = h.get();
-                break;
-            case HL:
-                result = Register.combine(h, l);
-                break;
-            case L:
-                result = l.get();
-                break;
-            case PC:
-                result = pcRegister & BitMasks.MASK_16_BIT_DATA;
-                break;
-            case SP:
-                result = spRegister & BitMasks.MASK_16_BIT_DATA;
-                break;
-            default:
-                throw new IllegalArgumentException("Retrieving data not supported for this register " + register);
-        }
-        return result;
+        return switch (register) {
+            case A -> a.get();
+            case AF -> Register.combine(a, f);
+            case B -> b.get();
+            case BC -> Register.combine(b, c);
+            case C -> c.get();
+            case D -> d.get();
+            case DE -> Register.combine(d, e);
+            case E -> e.get();
+            case F -> f.get();
+            case H -> h.get();
+            case HL -> Register.combine(h, l);
+            case L -> l.get();
+            case PC -> pcRegister & BitMasks.MASK_16_BIT_DATA;
+            case SP -> spRegister & BitMasks.MASK_16_BIT_DATA;
+        };
     }
 
     /**

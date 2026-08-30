@@ -36,6 +36,7 @@
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
     <mockito.version>5.17.0</mockito.version>
+    <argLine></argLine>
     <checkstyle.config.location>checkstyle.xml</checkstyle.config.location>
   </properties>
 
@@ -78,7 +79,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.0.0</version>
           <configuration>
-            <argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
+            <argLine>@{argLine} -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
           </configuration>
         </plugin>
         <plugin>

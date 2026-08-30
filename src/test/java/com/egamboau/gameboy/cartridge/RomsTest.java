@@ -16,6 +16,7 @@ class RomsTest {
         assertEquals(Roms.MBC1, Roms.fromByte((byte) 0x01));
         assertEquals(Roms.MBC1_RAM, Roms.fromByte((byte) 0x02));
         assertEquals(Roms.MBC1_RAM_BATTERY, Roms.fromByte((byte) 0x03));
+        assertEquals(Roms.UNKNOWN, Roms.fromByte((byte) 0x04));
         assertEquals(Roms.MBC2, Roms.fromByte((byte) 0x05));
         assertEquals(Roms.MBC2_BATTERY, Roms.fromByte((byte) 0x06));
         assertEquals(Roms.ROM_RAM, Roms.fromByte((byte) 0x08));
@@ -48,8 +49,13 @@ class RomsTest {
         /*
          * Test if an invalid byte return an Unknown Value
          */
-        byte invalidValue = (byte) 0x04;
+        byte invalidValue = (byte) 0x07;
         Roms value = Roms.fromByte(invalidValue);
         assertEquals(Roms.UNKNOWN, value);
+    }
+
+    @Test
+    void testGetByteValue() {
+        assertEquals((byte) 0x01, Roms.MBC1.getByteValue());
     }
 }

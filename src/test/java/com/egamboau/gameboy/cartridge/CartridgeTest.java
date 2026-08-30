@@ -19,6 +19,7 @@ import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -115,6 +116,16 @@ class CartridgeTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void testGetNewLicenseeCodeWhenOldCodeSelectsIt() {
+        cartridge.getRomData()[0x14A] = 0x33;
+        cartridge.getRomData()[0x144] = '0';
+        cartridge.getRomData()[0x145] = '1';
+
+        assertEquals(NewLicensee.NINTENDO_RD1, cartridge.getNewLicenseeCode());
+    }
+
+    @Test
     void testGetRomType() {
         assertEquals(Roms.MBC1_RAM, cartridge.getRomType());
     }
@@ -153,6 +164,14 @@ class CartridgeTest {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void testIsHeaderInvalid() {
+        cartridge.getRomData()[0x134] = 1;
+
+        assertFalse(cartridge.isHeaderValid());
+    }
+
+    @Test
     void testReadByteFromAddress() {
         int address = TestUtils.getRandomIntegerInRange(0, data.length);
         byte expected = data[address];
@@ -173,5 +192,14 @@ class CartridgeTest {
         int readValue = cartridge.readByteFromAddress(address);
         assertEquals(value, readValue);
         assertNotEquals(value, data[address]);
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void testWriteByteToRomOnlyDoesNothing() {
+        cartridge.getRomData()[0x147] = 0;
+        cartridge.writeByteToAddress(0, 1);
+
+        assertEquals(0, cartridge.readByteFromAddress(0));
     }
 }

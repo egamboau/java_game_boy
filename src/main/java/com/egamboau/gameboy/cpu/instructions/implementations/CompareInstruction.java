@@ -30,10 +30,21 @@ public class CompareInstruction extends Instruction {
             case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
                 this.compareIndirectRegisterData(currentCpu);
                 break;
+            case DATA_8_BIT_TO_REGISTER:
+                this.compareDirectDataToRegister(currentCpu, data);
+                break;
             default:
                 throw new IllegalArgumentException(
-                        "Address mode not supported for ADD instruction: " + getAddressMode());
+                        "Address mode not supported for COMPARE instruction: " + getAddressMode());
         }
+    }
+
+    private void compareDirectDataToRegister(final CPU currentCpu, final int[] data) {
+        int sourceValue = data[0];
+        int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
+        int result = destinationValue - sourceValue;
+
+        setFlags(currentCpu, sourceValue, destinationValue, result);
     }
 
     private void compareIndirectRegisterData(final CPU currentCpu) {
@@ -42,11 +53,7 @@ public class CompareInstruction extends Instruction {
         int sourceValue = currentCpu.readByteFromAddress(addressValue);
         int result =  destinationValue - sourceValue;
 
-        currentCpu.setSubtract(true);
-        currentCpu.setHalfCarry((destinationValue & BitMasks.HALF_CARRY_8_BIT_RESULT)
-                < (sourceValue & BitMasks.HALF_CARRY_8_BIT_RESULT));
-        currentCpu.setCarry(destinationValue < sourceValue);
-        currentCpu.setZero((result & BitMasks.MASK_8_BIT_DATA) == 0);
+        setFlags(currentCpu, sourceValue, destinationValue, result);
     }
 
     private void compareRegisters(final CPU currentCpu) {
@@ -54,6 +61,11 @@ public class CompareInstruction extends Instruction {
         int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
         int result = destinationValue - sourceValue;
 
+        setFlags(currentCpu, sourceValue, destinationValue, result);
+    }
+
+    private void setFlags(final CPU currentCpu, final int sourceValue,
+            final int destinationValue, final int result) {
         currentCpu.setSubtract(true);
         currentCpu.setHalfCarry((destinationValue & BitMasks.HALF_CARRY_8_BIT_RESULT)
                 < (sourceValue & BitMasks.HALF_CARRY_8_BIT_RESULT));

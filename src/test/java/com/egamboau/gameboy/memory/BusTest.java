@@ -79,4 +79,11 @@ class BusTest {
                 () -> bus.readByteFromAddress(0x10000));
         assertTrue(exception.getMessage().contains("not implemented"));
     }
+
+    @Test
+    void testReadByteFromAddressBelowMemoryMap() {
+        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
+                () -> bus.readByteFromAddress(-1));
+        assertTrue(exception.getMessage().contains("not implemented"));
+    }
 }
