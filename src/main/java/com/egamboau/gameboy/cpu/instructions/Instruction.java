@@ -133,25 +133,23 @@ public abstract class Instruction {
         if (getAddressMode() == null) {
             return new int[0];
         } else {
-            switch (getAddressMode()) {
+            return switch (getAddressMode()) {
                 case REGISTER_TO_MEMORY_ADDRESS_DATA, DATA_16_BITS_TO_REGISTER:
                     // Read 2 bytes from memory.
                     int firstByte = currentCpu.getDataFromPCAndIncrement();
                     int secondByte = currentCpu.getDataFromPCAndIncrement();
-                    return new int[] {firstByte, secondByte };
+                    yield new int[] {firstByte, secondByte };
                 case DATA_8_BIT_TO_REGISTER, DATA_8_BIT_TO_MEMORY_ADDRESS_REGISTER:
                     int data = currentCpu.getDataFromPCAndIncrement();
-                    return new int[] {data };
+                    yield new int[] {data };
                 case REGISTER_8_BIT, REGISTER_TO_REGISTER, REGISTER_16_BIT, REGISTER_16_BIT_TO_REGISTER_16_BIT,
                         REGISTER_TO_INDIRECT_REGISTER,
                         MEMORY_ADDRESS_REGISTER_TO_REGISTER, REGISTER_TO_INCREMENT_16_BIT_MEMORY_ADDRESS,
                         INCREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER,
                         REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS, MEMORY_ADDRESS_REGISTER, DECREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER:
                     // Data is on the register itself, so no data to fetch.
-                    return new int[0];
-                default:
-                    throw new IllegalArgumentException("Address mode not supported: " + getAddressMode());
-            }
+                    yield new int[0];
+            };
         }
     }
 
@@ -219,7 +217,7 @@ public abstract class Instruction {
                     case 0:
                         return generateJumpAndAssortedInstructions(y);
                     case 1:
-                        return generate16BitInmediateLoadInstruction(opcode, p, q);
+                        return generate16BitInmediateLoadInstruction(p, q);
                     case 2:
                         return generateIndirectLoadInstruction(p, q);
                     case 3:
@@ -248,12 +246,9 @@ public abstract class Instruction {
                             return new LoadInstruction(AddressMode.DATA_8_BIT_TO_MEMORY_ADDRESS_REGISTER, null, loadRegister);
                         }
                         return new LoadInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, loadRegister);
-                    case 7:
-                        return generateFlagAndAccumulatorOperations(y);
                     default:
-                        break;
+                        return generateFlagAndAccumulatorOperations(y);
                 }
-                break;
             case 1:
                 if (z == 6 && y == 6) {
                     return new HaltInstruction();
@@ -273,9 +268,9 @@ public abstract class Instruction {
                 }
             case 2:
                 return generateOperationOnAccumulatorAndRegisterOrMemory(y, z);
-            case 3:
+            default:
                 if (z == 0) {
-                    if (y >= 0 && y <= 3) {
+                    if (y <= 3) {
                         ReturnInstruction instruction =  new ReturnInstruction(null, null, RegisterType.PC);
                         instruction.setCondition(InstructionCondition.getInstructionConditionFromIndex(y));
                         return instruction;
@@ -283,7 +278,7 @@ public abstract class Instruction {
                 } else if (z == 1) {
                     if (q == 0) {
                         return new PopInstruction(null, null, RegisterType.getRegisterPairFeaturingAF(p));
-                    } else if (q == 1) {
+                    } else {
                         if (p == 0) {
                             return new ReturnInstruction(null, null, RegisterType.PC);
                         } else if (p == 2) {
@@ -293,7 +288,7 @@ public abstract class Instruction {
                         }
                     }
                 } else if (z == 2) {
-                    if (y >= 0 && y <= 3) {
+                    if (y <= 3) {
                         JumpInstruction instruction =  new JumpInstruction(
                             AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.PC);
                         instruction.setCondition(InstructionCondition.getInstructionConditionFromIndex(y));
@@ -306,7 +301,7 @@ public abstract class Instruction {
                         return instruction;
                     }
                 } else if (z == 4) {
-                    if (y >= 0 && y <= 3) {
+                    if (y <= 3) {
                         CallInstruction instruction =  new CallInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.PC);
                         instruction.setCondition(InstructionCondition.getInstructionConditionFromIndex(y));
                         return instruction;
@@ -314,20 +309,33 @@ public abstract class Instruction {
                 } else if (z == 5) {
                     if (q == 0) {
                         return new PushInstruction(null, RegisterType.getRegisterPairFeaturingAF(p), null);
-                    } else if (q == 1) {
+                    } else {
                         if (p == 0) {
                         CallInstruction instruction =  new CallInstruction(AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.PC);
                         return instruction;
                         }
                     }
-                } else if (z == 7) {
+                } else if (z == 6) {
+                    return generateOperationOnAccumulatorAndMemory(y);
+                } else {
                     return new ResetInstruction(y * 8);
                 }
-            default:
                 throw new IllegalArgumentException(String.format("\"Opcode still not implemented: \": %02x", opcode));
          }
+    }
 
-         throw new IllegalArgumentException(String.format("\"Opcode still not implemented: \": %02x", opcode));
+    private static Instruction generateOperationOnAccumulatorAndMemory(final int aluOperationPosition) {
+        AluOperationType operation = AluOperationType.getAluOperationType(aluOperationPosition);
+        return switch (operation) {
+            case ADD_A -> new AddInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.A);
+            case ADC_A -> new AddWithCarryInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.A);
+            case AND -> new AndInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.A);
+            case CP -> new CompareInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.A);
+            case OR -> new OrInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.A);
+            case SBC_A -> new SubWithCarryInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.A);
+            case SUB -> new SubInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.A);
+            case XOR -> new XorInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.A);
+        };
     }
 
     /**
@@ -344,26 +352,16 @@ public abstract class Instruction {
         AddressMode addressMode = register.equals(RegisterType.HL)
             ? AddressMode.MEMORY_ADDRESS_REGISTER_TO_REGISTER
             : AddressMode.REGISTER_TO_REGISTER;
-        switch (operationType) {
-            case ADD_A:
-                return new AddInstruction(addressMode, register, RegisterType.A);
-            case ADC_A:
-                return new AddWithCarryInstruction(addressMode, register, RegisterType.A);
-            case SUB:
-                return new SubInstruction(addressMode, register, RegisterType.A);
-            case SBC_A:
-                return new SubWithCarryInstruction(addressMode, register, RegisterType.A);
-            case AND:
-                return new AndInstruction(addressMode, register, RegisterType.A);
-            case XOR:
-                return new XorInstruction(addressMode, register, RegisterType.A);
-            case OR:
-                return new OrInstruction(addressMode, register, RegisterType.A);
-            case CP:
-                return new CompareInstruction(addressMode, register, RegisterType.A);
-            default:
-                throw new IllegalArgumentException(String.format("\"Opcode still not implemented: \": %s", operationType));
-        }
+        return switch (operationType) {
+            case ADD_A -> new AddInstruction(addressMode, register, RegisterType.A);
+            case ADC_A -> new AddWithCarryInstruction(addressMode, register, RegisterType.A);
+            case SUB -> new SubInstruction(addressMode, register, RegisterType.A);
+            case SBC_A -> new SubWithCarryInstruction(addressMode, register, RegisterType.A);
+            case AND -> new AndInstruction(addressMode, register, RegisterType.A);
+            case XOR -> new XorInstruction(addressMode, register, RegisterType.A);
+            case OR -> new OrInstruction(addressMode, register, RegisterType.A);
+            case CP -> new CompareInstruction(addressMode, register, RegisterType.A);
+        };
     }
 
     /**
@@ -389,10 +387,8 @@ public abstract class Instruction {
                 return new OneComplementInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A);
             case 6:
                 return new SetCarryFlagInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A);
-            case 7:
-                return new FlipCarryFlagInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A);
             default:
-                return new StopInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A);
+                return new FlipCarryFlagInstruction(AddressMode.REGISTER_8_BIT, RegisterType.A, RegisterType.A);
         }
     }
 
@@ -429,27 +425,22 @@ public abstract class Instruction {
     /**
      * Helper for 16-bit immediate loads and add-to-HL forms (group 01 with z==1).
      *
-     * @param opcode original opcode byte (used only in error messages)
      * @param p the opcode p field selecting register pair
      * @param q the opcode q field selecting load or add
      * @return a LoadInstruction or AddInstruction representing the decoded opcode
      */
-    private static Instruction generate16BitInmediateLoadInstruction(final int opcode, final int p, final int q) {
+    private static Instruction generate16BitInmediateLoadInstruction(final int p, final int q) {
         // 16-bit load immediate/add
-        switch (q) {
-            case 0:
-                return new LoadInstruction(
+        if (q == 0) {
+            return new LoadInstruction(
                     AddressMode.DATA_16_BITS_TO_REGISTER,
                     null,
                     RegisterType.getRegisterPairFeaturingSP(p));
-            case 1:
-                return new AddInstruction(
-                    AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT,
-                    RegisterType.getRegisterPairFeaturingSP(p),
-                    RegisterType.HL);
-            default:
-                throw new IllegalArgumentException("Invalid opcode for instruction " + opcode);
         }
+        return new AddInstruction(
+            AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT,
+            RegisterType.getRegisterPairFeaturingSP(p),
+            RegisterType.HL);
     }
 
     /**
@@ -492,13 +483,9 @@ public abstract class Instruction {
     private static Instruction generate16BitIncrementAndDecrement(final int p, final int q) {
         // 16-bit INC/DEC
         RegisterType register = RegisterType.getRegisterPairFeaturingSP(p);
-        switch (q) {
-            case 0:
-                return new IncrementInstruction(AddressMode.REGISTER_16_BIT, register, register);
-            case 1:
-                return new DecrementInstruction(AddressMode.REGISTER_16_BIT, register, register);
-            default:
-                return new StopInstruction(null, null, null);
+        if (q == 0) {
+            return new IncrementInstruction(AddressMode.REGISTER_16_BIT, register, register);
         }
+        return new DecrementInstruction(AddressMode.REGISTER_16_BIT, register, register);
     }
 }

@@ -28,10 +28,22 @@ public class XorInstruction extends Instruction {
             case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
                 this.xorIndirectRegisterData(currentCpu);
                 break;
+            case DATA_8_BIT_TO_REGISTER:
+                this.xorDirectDataToRegister(currentCpu, data);
+                break;
             default:
                 throw new IllegalArgumentException(
-                        "Address mode not supported for ADD instruction: " + getAddressMode());
+                        "Address mode not supported for XOR instruction: " + getAddressMode());
         }
+    }
+
+    private void xorDirectDataToRegister(final CPU currentCpu, final int[] data) {
+        int sourceValue = data[0];
+        int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
+
+        int result = sourceValue ^ destinationValue;
+        currentCpu.setValueInRegister(result, getDestinationRegister());
+        setFlags(currentCpu, result);
     }
 
     private void xorIndirectRegisterData(final CPU currentCpu) {
@@ -41,10 +53,7 @@ public class XorInstruction extends Instruction {
         int result = sourceValue ^ destinationValue;
 
         currentCpu.setValueInRegister(result, getDestinationRegister());
-        currentCpu.setZero(result == 0);
-        currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry(false);
-        currentCpu.setCarry(false);
+        setFlags(currentCpu, result);
     }
 
     private void xorRegisters(final CPU currentCpu) {
@@ -53,6 +62,10 @@ public class XorInstruction extends Instruction {
 
         int result = sourceValue ^ destinationValue;
         currentCpu.setValueInRegister(result, getDestinationRegister());
+        setFlags(currentCpu, result);
+    }
+
+    private void setFlags(final CPU currentCpu, final int result) {
         currentCpu.setZero(result == 0);
         currentCpu.setSubtract(false);
         currentCpu.setHalfCarry(false);

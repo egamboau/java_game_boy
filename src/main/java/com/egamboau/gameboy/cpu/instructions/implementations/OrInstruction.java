@@ -28,10 +28,22 @@ public class OrInstruction extends Instruction {
             case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
                 this.orIndirectRegisterData(currentCpu);
                 break;
+            case DATA_8_BIT_TO_REGISTER:
+                this.orDirectDataToRegister(currentCpu, data);
+                break;
             default:
                 throw new IllegalArgumentException(
-                        "Address mode not supported for ADD instruction: " + getAddressMode());
+                        "Address mode not supported for OR instruction: " + getAddressMode());
         }
+    }
+
+    private void orDirectDataToRegister(final CPU currentCpu, final int[] data) {
+        int sourceValue = data[0];
+        int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
+
+        int result = sourceValue | destinationValue;
+        currentCpu.setValueInRegister(result, getDestinationRegister());
+        setFlags(currentCpu, result);
     }
 
     private void orIndirectRegisterData(final CPU currentCpu) {
@@ -41,10 +53,7 @@ public class OrInstruction extends Instruction {
         int result = sourceValue | destinationValue;
 
         currentCpu.setValueInRegister(result, getDestinationRegister());
-        currentCpu.setZero(result == 0);
-        currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry(false);
-        currentCpu.setCarry(false);
+        setFlags(currentCpu, result);
     }
 
     private void orRegisters(final CPU currentCpu) {
@@ -53,6 +62,10 @@ public class OrInstruction extends Instruction {
 
         int result = sourceValue | destinationValue;
         currentCpu.setValueInRegister(result, getDestinationRegister());
+        setFlags(currentCpu, result);
+    }
+
+    private void setFlags(final CPU currentCpu, final int result) {
         currentCpu.setZero(result == 0);
         currentCpu.setSubtract(false);
         currentCpu.setHalfCarry(false);

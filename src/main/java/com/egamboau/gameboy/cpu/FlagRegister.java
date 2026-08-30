@@ -49,15 +49,6 @@ public class FlagRegister extends Register {
     }
 
     /**
-     * Constructs a new FlagRegister with the specified initial value.
-     *
-     * @param value The initial value of the flag register.
-     */
-    public FlagRegister(final int value) {
-        super(value);
-    }
-
-    /**
      * Retrieves the value of the flag register, masking out the lower 4 bits.
      *
      * @return The value of the flag register with only the upper 4 bits preserved.

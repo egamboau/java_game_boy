@@ -1,6 +1,7 @@
 package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,11 +10,13 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.egamboau.gameboy.cpu.CPUTestBase;
+import com.egamboau.gameboy.cpu.instructions.AddressMode;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.test.TestUtils;
 
@@ -21,6 +24,15 @@ class IncrementTest extends CPUTestBase {
 
     /** Code for the indirect HL Increment instruction.*/
     private static final int OPCODE_INDIRECT_INC_HL = 0x34;
+
+    @Test
+    void rejectsUnsupportedAddressMode() {
+        IncrementInstruction instruction = new IncrementInstruction(
+                AddressMode.REGISTER_TO_REGISTER, RegisterType.B, RegisterType.A);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> instruction.executeInstruction(getCurrentCpu()));
+    }
 
     @ParameterizedTest(name = "{index}: opcode {0}, INC {2} from {1}")
     @MethodSource("generateTestArgumentsFor8BitTests")
@@ -60,7 +72,7 @@ class IncrementTest extends CPUTestBase {
                 Arguments.of(OPCODE_INDIRECT_INC_HL, 0, RegisterType.HL, false, false, false),
                 Arguments.of(OPCODE_INDIRECT_INC_HL, 0x10, RegisterType.HL, false, false, false),
                 Arguments.of(OPCODE_INDIRECT_INC_HL, 0x0E, RegisterType.HL, false, false, false),
-                Arguments.of(OPCODE_INDIRECT_INC_HL, 0xFF, RegisterType.HL, false, false, true)
+                Arguments.of(OPCODE_INDIRECT_INC_HL, 0xFF, RegisterType.HL, true, false, true)
         );
     }
 
@@ -168,7 +180,7 @@ class IncrementTest extends CPUTestBase {
 
         assertFlagStates(expectedZeroFlag, expectedSubstractFlag, expectedHalfCarryFlag);
 
-        verify(this.getCurrentBus(), times(1)).writeByteToAddress(memoryData + 1, registerData);
+        verify(this.getCurrentBus(), times(1)).writeByteToAddress((memoryData + 1) & 0xFF, registerData);
     }
 
     private void stubNextOpcode(final int opcode) {

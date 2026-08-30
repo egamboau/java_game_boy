@@ -29,10 +29,28 @@ public class AddWithCarryInstruction extends Instruction {
             case MEMORY_ADDRESS_REGISTER_TO_REGISTER:
                 this.addIndirectRegisterData(currentCpu);
                 break;
+            case DATA_8_BIT_TO_REGISTER:
+                this.addDirectDataToRegister(currentCpu, data);
+                break;
             default:
                 throw new IllegalArgumentException(
-                        "Address mode not supported for ADD instruction: " + getAddressMode());
+                        "Address mode not supported for ADC instruction: " + getAddressMode());
         }
+    }
+
+    private void addDirectDataToRegister(final CPU currentCpu, final int[] data) {
+        int sourceValue = data[0];
+        int destinationValue = currentCpu.getValueFromRegister(getDestinationRegister());
+        boolean carry = currentCpu.getCarry();
+        int result = sourceValue + destinationValue;
+        int additionHalfBits = (sourceValue &  BitMasks.HALF_CARRY_8_BIT_RESULT) + (destinationValue &  BitMasks.HALF_CARRY_8_BIT_RESULT);
+        if (carry) {
+            result += 1;
+            additionHalfBits += 1;
+        }
+
+        currentCpu.setValueInRegister(result, getDestinationRegister());
+        setFlags(currentCpu, result, additionHalfBits);
     }
 
     private void addRegisters(final CPU currentCpu) {
@@ -47,10 +65,7 @@ public class AddWithCarryInstruction extends Instruction {
         }
 
         currentCpu.setValueInRegister(result, getDestinationRegister());
-        currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry(additionHalfBits > BitMasks.HALF_CARRY_8_BIT_RESULT);
-        currentCpu.setCarry(result  > BitMasks.CARRY_8_BIT_RESULTS);
-        currentCpu.setZero((result & BitMasks.MASK_8_BIT_DATA) == 0);
+        setFlags(currentCpu, result, additionHalfBits);
 
     }
 
@@ -68,9 +83,13 @@ public class AddWithCarryInstruction extends Instruction {
         }
 
         currentCpu.setValueInRegister(result, getDestinationRegister());
+        setFlags(currentCpu, result, additionHalfBits);
+    }
+
+    private void setFlags(final CPU currentCpu, final int result, final int additionHalfBits) {
         currentCpu.setSubtract(false);
         currentCpu.setHalfCarry(additionHalfBits > BitMasks.HALF_CARRY_8_BIT_RESULT);
-        currentCpu.setCarry(result  > BitMasks.CARRY_8_BIT_RESULTS);
+        currentCpu.setCarry(result > BitMasks.CARRY_8_BIT_RESULTS);
         currentCpu.setZero((result & BitMasks.MASK_8_BIT_DATA) == 0);
     }
 

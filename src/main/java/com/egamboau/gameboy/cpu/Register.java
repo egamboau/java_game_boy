@@ -22,15 +22,6 @@ public class Register {
     }
 
     /**
-     * Creates a new register initialized to the specified value.
-     *
-     * @param newValue The initial value of the register (0-255).
-     */
-    public Register(final int newValue) {
-        set(newValue);
-    }
-
-    /**
      * Retrieves the value of the register as an unsigned 8-bit integer.
      *
      * @return The value of the register (0-255).
@@ -81,19 +72,5 @@ public class Register {
     public static void split(final int value, final Register high, final Register low) {
         high.set((value >> 8) & BitMasks.MASK_8_BIT_DATA);
         low.set(value & BitMasks.MASK_8_BIT_DATA);
-    }
-
-    /**
-     * Increments the value of the register by 1.
-     */
-    public final void incrementValue() {
-        set(get() + 1);
-    }
-
-    /**
-     * Decrements the value of the register by 1.
-     */
-    public final void decrementValue() {
-        set(get() - 1);
     }
 }

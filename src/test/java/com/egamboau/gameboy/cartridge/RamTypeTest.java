@@ -29,4 +29,19 @@ class RamTypeTest {
         });
         assertEquals("Unknown RAM size code: 16", exception.getMessage());
     }
+
+    @Test
+    void testGetCode() {
+        assertEquals((byte) 0x02, RamType.SIZE_8KB.getCode());
+    }
+
+    @Test
+    void testGetRamSize() {
+        assertEquals("8 KiB", RamType.SIZE_8KB.getRamSize());
+    }
+
+    @Test
+    void testGetNumberOfBanks() {
+        assertEquals(1, RamType.SIZE_8KB.getNumberOfBanks());
+    }
 }

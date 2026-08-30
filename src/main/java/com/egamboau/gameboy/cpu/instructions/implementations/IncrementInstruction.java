@@ -37,7 +37,7 @@ public class IncrementInstruction extends Instruction {
                 incrementRegisterPair(currentCpu);
                 break;
             case MEMORY_ADDRESS_REGISTER:
-                incrementIndirectAddres(currentCpu);
+                incrementIndirectAddress(currentCpu);
                 break;
             default:
                 throw new IllegalArgumentException(
@@ -61,26 +61,28 @@ public class IncrementInstruction extends Instruction {
         currentCpu.setValueInRegister(result, getDestinationRegister());
 
         // based on the result, set the needed flags on the F register.
-        currentCpu.setZero(result == 0);
-        currentCpu.setSubtract(false);
-        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT) == 0);
+        setFlags(currentCpu, result);
     }
 
     private void incrementRegisterPair(final CPU currentCpu) {
         currentCpu.increment16BitRegister(getDestinationRegister());
     }
 
-    private void incrementIndirectAddres(final CPU currentCpu) {
+    private void incrementIndirectAddress(final CPU currentCpu) {
         int memoryAddress = currentCpu.getValueFromRegister(getSourceRegister());
         int data = currentCpu.readByteFromAddress(memoryAddress);
-        int result = data + 1;
+        int result = (data + 1) & BitMasks.MASK_8_BIT_DATA;
 
         // based on the result, set the needed flags on the F register.
+        setFlags(currentCpu, result);
+
+        currentCpu.writeByteToAddress(memoryAddress, result);
+    }
+
+    private void setFlags(final CPU currentCpu, final int result) {
         currentCpu.setZero(result == 0);
         currentCpu.setSubtract(false);
         currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT) == 0);
-
-        currentCpu.writeByteToAddress(memoryAddress, result);
     }
 
 }

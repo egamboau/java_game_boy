@@ -60,9 +60,7 @@ public class DecrementInstruction extends Instruction {
     private void decrementRegister(final CPU currentCpu) {
         int result = getDecrementedRegisterData(currentCpu) & BitMasks.MASK_8_BIT_DATA;
         currentCpu.setValueInRegister(result, getDestinationRegister());
-        currentCpu.setZero(result == 0);
-        currentCpu.setSubtract(true);
-        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT) == BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT);
+        setFlags(currentCpu, result);
     }
 
     private int getDecrementedRegisterData(final CPU currentCpu) {
@@ -76,11 +74,16 @@ public class DecrementInstruction extends Instruction {
         int result = data - 1;
 
         // based on the result, set the needed flags on the F register.
-        currentCpu.setZero(result == 0);
-        currentCpu.setSubtract(true);
-        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT) == BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT);
+        setFlags(currentCpu, result);
 
         currentCpu.writeByteToAddress(memoryAddress, result);
+    }
+
+    private void setFlags(final CPU currentCpu, final int result) {
+        currentCpu.setZero(result == 0);
+        currentCpu.setSubtract(true);
+        currentCpu.setHalfCarry((result & BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT)
+                == BitMasks.HALF_CARRY_8_BIT_RESULT_DECREMENT);
     }
 
 
