@@ -35,7 +35,7 @@ public enum AddressMode {
     /**
      * Addressing mode where data is transferred from a register to a specific memory address.
      */
-    REGISTER_TO_MEMORY_ADDRESS_DATA,
+    REGISTER_PAIR_TO_MEMORY_ADDRESS_DATA,
 
     /**
      * Addressing mode where data is transferred from a register to an address pointed to by another register.
@@ -84,4 +84,12 @@ public enum AddressMode {
      * Addressing mode where a memory address is specified by a register.
      */
     MEMORY_ADDRESS_REGISTER,
+
+    REGISTER_TO_MEMORY_ADDRESS_DATA_LOWER_BYTE,
+    REGISTER_TO_INDIRECT_REGISTER_LOWER_BYTE,
+    REGISTER_TO_MEMORY_ADDRESS_DATA,
+
+    MEMORY_ADDRESS_DATA_LOWER_BYTE_TO_REGISTER,
+    INDIRECT_REGISTER_LOWER_BYTE_TO_REGISTER,
+    MEMORY_ADDRESS_DATA_TO_REGISTER
 }

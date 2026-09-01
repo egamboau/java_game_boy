@@ -2,6 +2,7 @@ package com.egamboau.gameboy.cpu.instructions;
 
 import com.egamboau.gameboy.cpu.CPU;
 import com.egamboau.gameboy.cpu.instructions.implementations.AddInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.AddSignedImmediateToStackPointerInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.AddWithCarryInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.AndInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.CallInstruction;
@@ -15,6 +16,7 @@ import com.egamboau.gameboy.cpu.instructions.implementations.HaltInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.IncrementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.JumpRelativeInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.LoadInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.LoadHlFromStackPointerOffsetInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.NoopInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.OneComplementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.OrInstruction;
@@ -134,19 +136,21 @@ public abstract class Instruction {
             return new int[0];
         } else {
             return switch (getAddressMode()) {
-                case REGISTER_TO_MEMORY_ADDRESS_DATA, DATA_16_BITS_TO_REGISTER:
+                case REGISTER_PAIR_TO_MEMORY_ADDRESS_DATA, DATA_16_BITS_TO_REGISTER, REGISTER_TO_MEMORY_ADDRESS_DATA, MEMORY_ADDRESS_DATA_TO_REGISTER:
                     // Read 2 bytes from memory.
                     int firstByte = currentCpu.getDataFromPCAndIncrement();
                     int secondByte = currentCpu.getDataFromPCAndIncrement();
                     yield new int[] {firstByte, secondByte };
-                case DATA_8_BIT_TO_REGISTER, DATA_8_BIT_TO_MEMORY_ADDRESS_REGISTER:
+                case DATA_8_BIT_TO_REGISTER, DATA_8_BIT_TO_MEMORY_ADDRESS_REGISTER, REGISTER_TO_MEMORY_ADDRESS_DATA_LOWER_BYTE,
+                        MEMORY_ADDRESS_DATA_LOWER_BYTE_TO_REGISTER:
                     int data = currentCpu.getDataFromPCAndIncrement();
                     yield new int[] {data };
                 case REGISTER_8_BIT, REGISTER_TO_REGISTER, REGISTER_16_BIT, REGISTER_16_BIT_TO_REGISTER_16_BIT,
                         REGISTER_TO_INDIRECT_REGISTER,
                         MEMORY_ADDRESS_REGISTER_TO_REGISTER, REGISTER_TO_INCREMENT_16_BIT_MEMORY_ADDRESS,
                         INCREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER,
-                        REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS, MEMORY_ADDRESS_REGISTER, DECREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER:
+                        REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS, MEMORY_ADDRESS_REGISTER, DECREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER,
+                        REGISTER_TO_INDIRECT_REGISTER_LOWER_BYTE, INDIRECT_REGISTER_LOWER_BYTE_TO_REGISTER:
                     // Data is on the register itself, so no data to fetch.
                     yield new int[0];
             };
@@ -274,6 +278,14 @@ public abstract class Instruction {
                         ReturnInstruction instruction =  new ReturnInstruction(null, null, RegisterType.PC);
                         instruction.setCondition(InstructionCondition.getInstructionConditionFromIndex(y));
                         return instruction;
+                    } else if (y == 4) {
+                        return new LoadInstruction(AddressMode.REGISTER_TO_MEMORY_ADDRESS_DATA_LOWER_BYTE, RegisterType.A, null);
+                    } else if (y == 5) {
+                        return new AddSignedImmediateToStackPointerInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.SP);
+                    } else if (y == 6) {
+                        return new LoadInstruction(AddressMode.MEMORY_ADDRESS_DATA_LOWER_BYTE_TO_REGISTER, null, RegisterType.A);
+                    } else if (y == 7) {
+                        return new LoadHlFromStackPointerOffsetInstruction(AddressMode.DATA_8_BIT_TO_REGISTER, null, RegisterType.HL);
                     }
                 } else if (z == 1) {
                     if (q == 0) {
@@ -285,6 +297,8 @@ public abstract class Instruction {
                             JumpInstruction instruction =  new JumpInstruction(
                             AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT, RegisterType.HL, RegisterType.PC);
                         return instruction;
+                        } else if (p == 3) {
+                            return new LoadInstruction(AddressMode.REGISTER_TO_REGISTER, RegisterType.HL, RegisterType.SP);
                         }
                     }
                 } else if (z == 2) {
@@ -293,6 +307,14 @@ public abstract class Instruction {
                             AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.PC);
                         instruction.setCondition(InstructionCondition.getInstructionConditionFromIndex(y));
                         return instruction;
+                    } else if (y == 4) {
+                        return new LoadInstruction(AddressMode.REGISTER_TO_INDIRECT_REGISTER_LOWER_BYTE, RegisterType.A, RegisterType.C);
+                    } else if (y == 5) {
+                        return new LoadInstruction(AddressMode.REGISTER_TO_MEMORY_ADDRESS_DATA, RegisterType.A, null);
+                    } else if (y == 6) {
+                        return new LoadInstruction(AddressMode.INDIRECT_REGISTER_LOWER_BYTE_TO_REGISTER, RegisterType.C, RegisterType.A);
+                    } else if (y == 7) {
+                        return new LoadInstruction(AddressMode.MEMORY_ADDRESS_DATA_TO_REGISTER, null, RegisterType.A);
                     }
                 } else if (z == 3) {
                     if (y == 0) {
@@ -456,7 +478,7 @@ public abstract class Instruction {
             case 0:
                 return new NoopInstruction(null, null, null);
             case 1:
-                return new LoadInstruction(AddressMode.REGISTER_TO_MEMORY_ADDRESS_DATA, RegisterType.SP, null);
+                return new LoadInstruction(AddressMode.REGISTER_PAIR_TO_MEMORY_ADDRESS_DATA, RegisterType.SP, null);
             case 2:
                 return new StopInstruction(null, null, null);
             case 3:
