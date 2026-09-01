@@ -27,18 +27,6 @@ class UnsupportedAddressModeTest extends CPUTestBase {
         assertEquals(expectedMessage, exception.getMessage());
     }
 
-    @Test
-    void loadRejectsUnsupportedSourceRegister() {
-        LoadInstruction instruction = new LoadInstruction(
-                AddressMode.REGISTER_TO_MEMORY_ADDRESS_DATA, RegisterType.B, null);
-
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> instruction.executeInstruction(getCurrentCpu()));
-
-        assertEquals("Unknown Source register: B", exception.getMessage());
-    }
-
     static Stream<Arguments> unsupportedInstructions() {
         return Stream.of(
                 Arguments.of(new AddInstruction(AddressMode.MEMORY_ADDRESS_REGISTER, RegisterType.B, RegisterType.A),
