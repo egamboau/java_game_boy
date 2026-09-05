@@ -90,4 +90,6 @@ public final class BitMasks {
     public static final int OPCODE_INSTRUCTION_TYPE_BITS = 0xC0;
 
     public static final int LOAD_ADDRESS_OFFSET = 0xFF00;
+
+    public static final int FIRST_5_BYTES = 0x1F;
 }
