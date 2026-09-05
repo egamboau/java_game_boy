@@ -125,6 +125,11 @@ public final class MemoryMapConstants {
     public static final int IO_REGISTERS_END = 0xFF7F;
 
     /**
+     * Address of the Interrupt Flag Register.
+     */
+    public static final int INTERRUPT_FLAG_REGISTER = 0xFF0F;
+
+    /**
      * Start address of High RAM (HRAM).
      */
     public static final int HRAM_START = 0xFF80;

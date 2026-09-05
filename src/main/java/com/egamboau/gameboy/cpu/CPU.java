@@ -4,6 +4,7 @@ import com.egamboau.gameboy.cpu.instructions.Instruction;
 import com.egamboau.gameboy.cpu.instructions.RegisterType;
 import com.egamboau.gameboy.memory.BitMasks;
 import com.egamboau.gameboy.memory.Bus;
+import com.egamboau.gameboy.memory.MemoryMapConstants;
 
 public class CPU {
 
@@ -75,6 +76,8 @@ public class CPU {
     /** Indicates whether the CPU is currently stopped (true when in the STOP state). */
     private boolean stopped;
 
+    private boolean ime;
+
     /**
      * Constructs a CPU instance and initializes it with the provided memory bus.
      *
@@ -99,6 +102,7 @@ public class CPU {
         this.halted = false;
         this.stopped = false;
         this.cycles = 0;
+        this.ime = false;
     }
 
     /**
@@ -168,6 +172,16 @@ public class CPU {
      * one at a time.
      */
     public void cpuStep() {
+        if (ime || halted) {
+            int pending = getPendingInterrupts();
+            if (pending != 0) {
+                halted = false;
+                if (ime) {
+                    servicePendingInterrupt(pending);
+                    return;
+                }
+            }
+        }
         if (halted || stopped) {
             // CPU is halted or stopped, skip instruction execution
             incrementCpuCycles(1);
@@ -480,5 +494,55 @@ public class CPU {
     public final void incrementPCRegister(final byte address) {
         this.pcRegister += address;
         this.incrementCpuCycles(1);
+    }
+
+    public boolean isImeEnabled() {
+        return this.ime;
+    }
+
+    public void setImeEnabled(final boolean isEnabled) {
+        this.ime = isEnabled;
+    }
+
+    private int getPendingInterrupts() {
+        int ie = memoryBus.readByteFromAddress(
+            MemoryMapConstants.INTERRUPT_ENABLE_REGISTER);
+
+        int interruptFlags = memoryBus.readByteFromAddress(
+                MemoryMapConstants.INTERRUPT_FLAG_REGISTER);
+
+        return (ie & interruptFlags & BitMasks.FIRST_5_BYTES);
+    }
+
+    public boolean hasPendingInterrupt() {
+        return getPendingInterrupts() > 0;
+    }
+
+    public Integer getPendingInterruptVector(int interruptMask) {
+        return switch (interruptMask) {
+            case 0x01 -> 0x0040;
+            case 0x02 -> 0x0048;
+            case 0x04 -> 0x0050;
+            case 0x08 -> 0x0058;
+            case 0x10 -> 0x0060;
+            default -> throw new IllegalStateException("Invalid interrupt");
+        };
+
+    }
+
+    public void servicePendingInterrupt(int interrupts) {
+        int interruptMask = interrupts & -interrupts;
+        int pendingVector = getPendingInterruptVector(interruptMask);
+        this.ime = false;
+        int interruptFlags = memoryBus.readByteFromAddress(
+            MemoryMapConstants.INTERRUPT_FLAG_REGISTER);
+
+        memoryBus.writeByteToAddress(
+            interruptFlags & ~interruptMask,
+            MemoryMapConstants.INTERRUPT_FLAG_REGISTER);
+
+        pushWord(pcRegister);
+        pcRegister = pendingVector;
+        incrementCpuCycles(3);
     }
 }
