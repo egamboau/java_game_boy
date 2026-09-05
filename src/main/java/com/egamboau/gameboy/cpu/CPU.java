@@ -8,6 +8,18 @@ import com.egamboau.gameboy.memory.MemoryMapConstants;
 
 public class CPU {
 
+    private static final int VBLANK_INTERRUPT_MASK = 0x01;
+    private static final int LCD_STAT_INTERRUPT_MASK = 0x02;
+    private static final int TIMER_INTERRUPT_MASK = 0x04;
+    private static final int SERIAL_INTERRUPT_MASK = 0x08;
+    private static final int JOYPAD_INTERRUPT_MASK = 0x10;
+    private static final int VBLANK_INTERRUPT_VECTOR = 0x0040;
+    private static final int LCD_STAT_INTERRUPT_VECTOR = 0x0048;
+    private static final int TIMER_INTERRUPT_VECTOR = 0x0050;
+    private static final int SERIAL_INTERRUPT_VECTOR = 0x0058;
+    private static final int JOYPAD_INTERRUPT_VECTOR = 0x0060;
+    private static final int INTERRUPT_SERVICE_INTERNAL_CYCLES = 3;
+
     /**
      * Logger instance for logging CPU-related information.
      */
@@ -496,10 +508,20 @@ public class CPU {
         this.incrementCpuCycles(1);
     }
 
+    /**
+     * Returns whether the interrupt master enable flag is set.
+     *
+     * @return true when interrupts may be serviced
+     */
     public boolean isImeEnabled() {
         return this.ime;
     }
 
+    /**
+     * Sets the interrupt master enable flag.
+     *
+     * @param isEnabled the new IME state
+     */
     public void setImeEnabled(final boolean isEnabled) {
         this.ime = isEnabled;
     }
@@ -514,23 +536,40 @@ public class CPU {
         return (ie & interruptFlags & BitMasks.FIRST_5_BYTES);
     }
 
+    /**
+     * Checks whether an enabled interrupt has been requested.
+     *
+     * @return true when at least one interrupt is pending
+     */
     public boolean hasPendingInterrupt() {
         return getPendingInterrupts() > 0;
     }
 
-    public Integer getPendingInterruptVector(int interruptMask) {
+    /**
+     * Returns the handler address for an interrupt mask.
+     *
+     * @param interruptMask a single interrupt bit
+     * @return the interrupt handler address
+     * @throws IllegalStateException when the mask is not a supported interrupt
+     */
+    public Integer getPendingInterruptVector(final int interruptMask) {
         return switch (interruptMask) {
-            case 0x01 -> 0x0040;
-            case 0x02 -> 0x0048;
-            case 0x04 -> 0x0050;
-            case 0x08 -> 0x0058;
-            case 0x10 -> 0x0060;
+            case VBLANK_INTERRUPT_MASK -> VBLANK_INTERRUPT_VECTOR;
+            case LCD_STAT_INTERRUPT_MASK -> LCD_STAT_INTERRUPT_VECTOR;
+            case TIMER_INTERRUPT_MASK -> TIMER_INTERRUPT_VECTOR;
+            case SERIAL_INTERRUPT_MASK -> SERIAL_INTERRUPT_VECTOR;
+            case JOYPAD_INTERRUPT_MASK -> JOYPAD_INTERRUPT_VECTOR;
             default -> throw new IllegalStateException("Invalid interrupt");
         };
 
     }
 
-    public void servicePendingInterrupt(int interrupts) {
+    /**
+     * Services the highest-priority interrupt in the supplied mask.
+     *
+     * @param interrupts pending enabled interrupt bits
+     */
+    public void servicePendingInterrupt(final int interrupts) {
         int interruptMask = interrupts & -interrupts;
         int pendingVector = getPendingInterruptVector(interruptMask);
         this.ime = false;
@@ -543,6 +582,6 @@ public class CPU {
 
         pushWord(pcRegister);
         pcRegister = pendingVector;
-        incrementCpuCycles(3);
+        incrementCpuCycles(INTERRUPT_SERVICE_INTERNAL_CYCLES);
     }
 }
