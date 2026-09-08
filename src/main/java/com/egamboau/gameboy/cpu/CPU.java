@@ -90,6 +90,8 @@ public class CPU {
 
     private boolean ime;
 
+    private boolean imeEnablePending;
+
     /**
      * Constructs a CPU instance and initializes it with the provided memory bus.
      *
@@ -199,8 +201,12 @@ public class CPU {
             incrementCpuCycles(1);
             return;
         }
+        boolean enableImeAfterInstruction = imeEnablePending;
         Instruction instruction = this.fetchInstruction();
         incrementCpuCycles(instruction.executeInstruction(this));
+        if (enableImeAfterInstruction && imeEnablePending) {
+            setImeEnabled(true);
+        }
     }
 
     /**
@@ -518,12 +524,20 @@ public class CPU {
     }
 
     /**
-     * Sets the interrupt master enable flag.
+     * Sets the interrupt master enable flag immediately and cancels any delayed enable.
      *
      * @param isEnabled the new IME state
      */
     public void setImeEnabled(final boolean isEnabled) {
         this.ime = isEnabled;
+        this.imeEnablePending = false;
+    }
+
+    /**
+     * Schedules IME enable after the instruction following EI completes.
+     */
+    public void scheduleImeEnable() {
+        this.imeEnablePending = true;
     }
 
     private int getPendingInterrupts() {
@@ -572,7 +586,7 @@ public class CPU {
     public void servicePendingInterrupt(final int interrupts) {
         int interruptMask = interrupts & -interrupts;
         int pendingVector = getPendingInterruptVector(interruptMask);
-        this.ime = false;
+        setImeEnabled(false);
         int interruptFlags = memoryBus.readByteFromAddress(
             MemoryMapConstants.INTERRUPT_FLAG_REGISTER);
 
