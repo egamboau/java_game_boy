@@ -11,6 +11,8 @@ import com.egamboau.gameboy.cpu.instructions.implementations.JumpInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.ReturnInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecimalAdjustAccumulatorInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.DecrementInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.DisableInterruptsInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.EnableInterruptsInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.FlipCarryFlagInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.HaltInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.IncrementInstruction;
@@ -23,6 +25,7 @@ import com.egamboau.gameboy.cpu.instructions.implementations.OrInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.PopInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.PushInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.ResetInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.ReturnFromInterruptInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftCircularInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateLeftInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.RotateRightInstruction;
@@ -293,6 +296,8 @@ public abstract class Instruction {
                     } else {
                         if (p == 0) {
                             return new ReturnInstruction(null, null, RegisterType.PC);
+                        } else if (p == 1) {
+                            return new ReturnFromInterruptInstruction();
                         } else if (p == 2) {
                             JumpInstruction instruction =  new JumpInstruction(
                             AddressMode.REGISTER_16_BIT_TO_REGISTER_16_BIT, RegisterType.HL, RegisterType.PC);
@@ -321,6 +326,10 @@ public abstract class Instruction {
                         JumpInstruction instruction =  new JumpInstruction(
                             AddressMode.DATA_16_BITS_TO_REGISTER, null, RegisterType.PC);
                         return instruction;
+                    } else if (y == 6) {
+                        return new DisableInterruptsInstruction();
+                    } else if (y == 7) {
+                        return new EnableInterruptsInstruction();
                     }
                 } else if (z == 4) {
                     if (y <= 3) {
