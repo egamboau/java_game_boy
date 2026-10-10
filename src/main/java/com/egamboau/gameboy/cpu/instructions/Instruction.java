@@ -23,6 +23,7 @@ import com.egamboau.gameboy.cpu.instructions.implementations.NoopInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.OneComplementInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.OrInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.PopInstruction;
+import com.egamboau.gameboy.cpu.instructions.implementations.PrefixedInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.PushInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.ResetInstruction;
 import com.egamboau.gameboy.cpu.instructions.implementations.ReturnFromInterruptInstruction;
@@ -153,7 +154,8 @@ public abstract class Instruction {
                         MEMORY_ADDRESS_REGISTER_TO_REGISTER, REGISTER_TO_INCREMENT_16_BIT_MEMORY_ADDRESS,
                         INCREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER,
                         REGISTER_TO_DECREMENT_16_BIT_MEMORY_ADDRESS, MEMORY_ADDRESS_REGISTER, DECREMENT_16_BIT_MEMORY_ADDRESS_REGISTER_TO_REGISTER,
-                        REGISTER_TO_INDIRECT_REGISTER_LOWER_BYTE, INDIRECT_REGISTER_LOWER_BYTE_TO_REGISTER:
+                        REGISTER_TO_INDIRECT_REGISTER_LOWER_BYTE, INDIRECT_REGISTER_LOWER_BYTE_TO_REGISTER,
+                        MEMORY_ADDRESS_REGISTER_TO_MEMORY_ADRESS_REGISTER:
                     // Data is on the register itself, so no data to fetch.
                     yield new int[0];
             };
@@ -218,6 +220,10 @@ public abstract class Instruction {
          int p = (opcode & 60) >> 4;
          int q = (opcode & 10) >> 3;
 
+         if (opcode == 0xCB) {
+            //a prefixed instruction. It handles, and redirect the logic based on the parameter
+            return new PrefixedInstruction();
+         }
           switch (x) {
             case 0:
                 switch (z) {

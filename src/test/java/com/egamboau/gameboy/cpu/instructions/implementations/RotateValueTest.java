@@ -234,7 +234,7 @@ class RotateValueTest extends CPUTestBase {
          */
 
         int registerData = 0x01 & 0xFF;
-        int expectedValue = 0x80 & 0xFF;
+        int expectedValue = 0x00 & 0xFF;
 
         runRraTest(registerData, expectedValue);
         //check the flags
@@ -256,7 +256,7 @@ class RotateValueTest extends CPUTestBase {
          */
 
         int registerData = 0x40 & 0xFF;
-        int expectedValue = 0x20 & 0xFF;
+        int expectedValue = 0xA0 & 0xFF;
 
         getCurrentCpu().setCarry(true);
 
@@ -282,7 +282,7 @@ class RotateValueTest extends CPUTestBase {
 
         int registerData = 0x01 & 0xFF;
         getCurrentCpu().setValueInRegister(registerData, RegisterType.A);
-        int[] expectedValues = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
+        int[] expectedValues = {0x00, 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02};
 
         for (int expectedValue: expectedValues) {
             //use the actual register A for the test.

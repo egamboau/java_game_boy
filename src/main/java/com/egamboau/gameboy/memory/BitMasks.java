@@ -19,6 +19,11 @@ public final class BitMasks {
      */
     public static final int MASK_8_BIT_SHIFT = 8;
 
+     /**
+     * Mask to be used to shift a number 4 bits
+     */
+    public static final int MASK_4_BIT_SHIFT = 4;
+
     /**
      * A mask for 8-bit data, representing the maximum value of an 8-bit number (255).
      */
@@ -91,5 +96,9 @@ public final class BitMasks {
 
     public static final int LOAD_ADDRESS_OFFSET = 0xFF00;
 
-    public static final int FIRST_5_BYTES = 0x1F;
+    public static final int FIRST_5_BITS = 0x1F;
+
+    public static final int GET_SEVENTH_BIT = 0x80;
+
+    public static final int RESET_LAST_BIT = 0xFE;
 }
