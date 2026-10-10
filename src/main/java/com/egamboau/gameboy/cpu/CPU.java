@@ -547,7 +547,7 @@ public class CPU {
         int interruptFlags = memoryBus.readByteFromAddress(
                 MemoryMapConstants.INTERRUPT_FLAG_REGISTER);
 
-        return (ie & interruptFlags & BitMasks.FIRST_5_BYTES);
+        return (ie & interruptFlags & BitMasks.FIRST_5_BITS);
     }
 
     /**
