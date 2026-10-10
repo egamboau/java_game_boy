@@ -1,8 +1,12 @@
 package com.egamboau.gameboy.cpu.instructions.implementations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -16,45 +20,58 @@ class StopTest extends CPUTestBase {
 
     @Test
     @SuppressWarnings("checkstyle:magicnumber")
-    void testStop() {
-        /*
-         * Execution of a STOP instruction stops both the system clock and oscillator circuit.
-         * STOP mode is entered and the LCD controller also stops. However, the status of the internal RAM register ports remains unchanged.
-         * STOP mode can be cancelled by a reset signal.
-         * If the RESET terminal goes LOW in STOP mode, it becomes that of a normal reset status.
-         * The following conditions should be met before a STOP instruction is executed and stop mode is entered:
-         * - All interrupt-enable (IE) flags are reset.
-         * - Input to P10-P13 is LOW for all.
-         */
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(0x10);
+    void stopAdvancesPcWithoutChangingRegistersOrMemory() {
+        when(this.getCurrentBus().readByteFromAddress(0)).thenReturn(0x10);
         Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters();
-        long previousCycleCount = getCurrentCpu().getCycles();
+
         this.getCurrentCpu().cpuStep();
-        long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
 
-        //PC should be incremented by one on the old, so it is possible to verify the new one
         oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
-        assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not matching.");
+        assertEquals(1, getCurrentCpu().getCycles());
         assertEquals(oldRegisterValues, newRegisterValues);
         assertTrue(getCurrentCpu().isStopped());
+        verify(getCurrentBus(), never()).writeByteToAddress(org.mockito.ArgumentMatchers.anyInt(),
+                org.mockito.ArgumentMatchers.anyInt());
     }
 
     @Test
     @SuppressWarnings("checkstyle:magicnumber")
-    void testHalt() {
-        when(this.getCurrentBus().readByteFromAddress(anyInt())).thenReturn(0x76);
+    void haltedCpuPreservesRegisters() {
+        when(this.getCurrentBus().readByteFromAddress(0)).thenReturn(0x76);
         Map<RegisterType, Integer> oldRegisterValues = this.getCpuRegisters();
-        long previousCycleCount = getCurrentCpu().getCycles();
+
         this.getCurrentCpu().cpuStep();
-        long currentCycleCount = getCurrentCpu().getCycles();
         Map<RegisterType, Integer> newRegisterValues = this.getCpuRegisters();
 
-        //PC should be incremented by one on the old, so it possible to verify the new one
         oldRegisterValues.computeIfPresent(RegisterType.PC, (t, u) -> u + 1);
-        assertEquals(previousCycleCount + 1, currentCycleCount, "Cycle count not matching.");
+        assertEquals(1, getCurrentCpu().getCycles());
         assertEquals(oldRegisterValues, newRegisterValues);
         assertTrue(getCurrentCpu().isHalted());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void stoppedCpuDoesNotFetchOrServiceInterruptsUntilExplicitlyResumed() {
+        when(this.getCurrentBus().readByteFromAddress(0)).thenReturn(0x10);
+        getCurrentCpu().cpuStep();
+        clearInvocations(getCurrentBus());
+        getCurrentCpu().setImeEnabled(true);
+
+        getCurrentCpu().cpuStep();
+        getCurrentCpu().cpuStep();
+
+        assertEquals(3, getCurrentCpu().getCycles());
+        assertEquals(1, getCurrentCpu().getValueFromRegister(RegisterType.PC));
+        verifyNoInteractions(getCurrentBus());
+
+        when(this.getCurrentBus().readByteFromAddress(1)).thenReturn(0x04);
+        getCurrentCpu().setStopped(false);
+        getCurrentCpu().cpuStep();
+
+        assertFalse(getCurrentCpu().isStopped());
+        assertEquals(1, getCurrentCpu().getValueFromRegister(RegisterType.B));
+        assertEquals(2, getCurrentCpu().getValueFromRegister(RegisterType.PC));
     }
 
 }

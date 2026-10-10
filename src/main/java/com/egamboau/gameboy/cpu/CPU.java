@@ -75,6 +75,9 @@ public class CPU {
      */
     private boolean halted;
 
+    /** Suppresses the PC increment for the opcode fetch following a bugged HALT. */
+    private boolean haltBug;
+
     /**
      * Memory bus used for communication between the CPU and memory.
      */
@@ -114,6 +117,7 @@ public class CPU {
         this.spRegister = 0;
         this.pcRegister = 0;
         this.halted = false;
+        this.haltBug = false;
         this.stopped = false;
         this.cycles = 0;
         this.ime = false;
@@ -135,6 +139,18 @@ public class CPU {
      */
     public final void setHalted(final boolean isHalted) {
         this.halted = isHalted;
+    }
+
+    /**
+     * Executes HALT's state transition, including the one-fetch HALT bug.
+     */
+    public final void enterHalt() {
+        if (!ime && getPendingInterrupts() != 0) {
+            haltBug = true;
+            halted = false;
+        } else {
+            halted = true;
+        }
     }
 
     /**
@@ -186,6 +202,10 @@ public class CPU {
      * one at a time.
      */
     public void cpuStep() {
+        if (stopped) {
+            incrementCpuCycles(1);
+            return;
+        }
         if (ime || halted) {
             int pending = getPendingInterrupts();
             if (pending != 0) {
@@ -196,8 +216,8 @@ public class CPU {
                 }
             }
         }
-        if (halted || stopped) {
-            // CPU is halted or stopped, skip instruction execution
+        if (halted) {
+            // CPU is halted, skip instruction execution
             incrementCpuCycles(1);
             return;
         }
@@ -217,7 +237,12 @@ public class CPU {
      * @return the instruction based on the opcode read from memory
      */
     private Instruction fetchInstruction() {
-        int opcode = readByteFromAddress(this.pcRegister++);
+        int opcode = readByteFromAddress(this.pcRegister);
+        if (haltBug) {
+            haltBug = false;
+        } else {
+            this.pcRegister = (this.pcRegister + 1) & BitMasks.MASK_16_BIT_DATA;
+        }
         return Instruction.geInstructionFromOpcode(opcode);
     }
 
@@ -594,6 +619,10 @@ public class CPU {
             interruptFlags & ~interruptMask,
             MemoryMapConstants.INTERRUPT_FLAG_REGISTER);
 
+        if (haltBug) {
+            pcRegister = (pcRegister - 1) & BitMasks.MASK_16_BIT_DATA;
+            haltBug = false;
+        }
         pushWord(pcRegister);
         pcRegister = pendingVector;
         incrementCpuCycles(INTERRUPT_SERVICE_INTERNAL_CYCLES);
