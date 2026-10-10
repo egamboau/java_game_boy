@@ -27,7 +27,7 @@ public class HaltInstruction extends Instruction {
 
     @Override
     protected final void runInstructionLogic(final CPU currentCpu, final int[] data) {
-        currentCpu.setHalted(true);
+        currentCpu.enterHalt();
     }
 
 }

@@ -204,12 +204,12 @@ public abstract class Instruction {
      * Decode a single opcode byte into a concrete Instruction instance.
      *
      * <p>The decoder interprets the opcode bitfields (x, y, z, p, q) and maps them
-     * to the appropriate Instruction subclass. Not all opcodes are implemented;
-     * unhandled opcodes produce IllegalArgumentException.</p>
+     * to the appropriate Instruction subclass. Invalid opcodes produce
+     * IllegalArgumentException.</p>
      *
      * @param opcode the opcode byte (0..255) to decode
      * @return a new Instruction instance representing the decoded opcode
-     * @throws IllegalArgumentException if the opcode is unimplemented or invalid
+     * @throws IllegalArgumentException if the opcode is invalid
      */
     @SuppressWarnings("checkstyle:magicnumber")
     public static Instruction geInstructionFromOpcode(final int opcode) {
@@ -357,7 +357,7 @@ public abstract class Instruction {
                 } else {
                     return new ResetInstruction(y * 8);
                 }
-                throw new IllegalArgumentException(String.format("\"Opcode still not implemented: \": %02x", opcode));
+                throw new IllegalArgumentException(String.format("Invalid opcode: %02x", opcode));
          }
     }
 

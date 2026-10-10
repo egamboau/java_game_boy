@@ -143,6 +143,124 @@ class CPUTest extends CPUTestBase {
     }
 
     @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void haltWithoutPendingInterruptRemainsHalted() {
+        when(getCurrentBus().readByteFromAddress(0)).thenReturn(0x76);
+
+        getCurrentCpu().cpuStep();
+        getCurrentCpu().cpuStep();
+
+        assertTrue(getCurrentCpu().isHalted());
+        assertEquals(1, getCurrentCpu().getValueFromRegister(RegisterType.PC));
+        assertEquals(2, getCurrentCpu().getCycles());
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void pendingInterruptWakesWithoutServiceWhenImeIsDisabled() {
+        when(getCurrentBus().readByteFromAddress(0)).thenReturn(0x76);
+        when(getCurrentBus().readByteFromAddress(1)).thenReturn(0x00);
+        getCurrentCpu().cpuStep();
+        when(getCurrentBus().readByteFromAddress(MemoryMapConstants.INTERRUPT_ENABLE_REGISTER))
+                .thenReturn(1);
+        when(getCurrentBus().readByteFromAddress(MemoryMapConstants.INTERRUPT_FLAG_REGISTER))
+                .thenReturn(1);
+
+        getCurrentCpu().cpuStep();
+
+        assertFalse(getCurrentCpu().isHalted());
+        assertEquals(2, getCurrentCpu().getValueFromRegister(RegisterType.PC));
+        assertFalse(getCurrentCpu().isImeEnabled());
+        verify(getCurrentBus(), never()).writeByteToAddress(
+                0, MemoryMapConstants.INTERRUPT_FLAG_REGISTER);
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void pendingInterruptWakesAndIsServicedWhenImeIsEnabled() {
+        when(getCurrentBus().readByteFromAddress(0)).thenReturn(0x76);
+        getCurrentCpu().cpuStep();
+        getCurrentCpu().setValueInRegister(0xC100, RegisterType.SP);
+        getCurrentCpu().setImeEnabled(true);
+        when(getCurrentBus().readByteFromAddress(MemoryMapConstants.INTERRUPT_ENABLE_REGISTER))
+                .thenReturn(1);
+        when(getCurrentBus().readByteFromAddress(MemoryMapConstants.INTERRUPT_FLAG_REGISTER))
+                .thenReturn(1);
+
+        getCurrentCpu().cpuStep();
+
+        assertAll(
+                () -> assertFalse(getCurrentCpu().isHalted()),
+                () -> assertFalse(getCurrentCpu().isImeEnabled()),
+                () -> assertEquals(0x0040, getCurrentCpu().getValueFromRegister(RegisterType.PC)),
+                () -> assertEquals(0xC0FE, getCurrentCpu().getValueFromRegister(RegisterType.SP)));
+        verify(getCurrentBus()).writeByteToAddress(0, MemoryMapConstants.INTERRUPT_FLAG_REGISTER);
+        verify(getCurrentBus()).writeByteToAddress(0, 0xC0FF);
+        verify(getCurrentBus()).writeByteToAddress(1, 0xC0FE);
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void haltBugExecutesFollowingOneByteInstructionTwice() {
+        when(getCurrentBus().readByteFromAddress(MemoryMapConstants.INTERRUPT_ENABLE_REGISTER))
+                .thenReturn(1);
+        when(getCurrentBus().readByteFromAddress(MemoryMapConstants.INTERRUPT_FLAG_REGISTER))
+                .thenReturn(1);
+        when(getCurrentBus().readByteFromAddress(0)).thenReturn(0x76);
+        when(getCurrentBus().readByteFromAddress(1)).thenReturn(0x04);
+
+        getCurrentCpu().cpuStep();
+        getCurrentCpu().cpuStep();
+        getCurrentCpu().cpuStep();
+
+        assertFalse(getCurrentCpu().isHalted());
+        assertEquals(2, getCurrentCpu().getValueFromRegister(RegisterType.B));
+        assertEquals(2, getCurrentCpu().getValueFromRegister(RegisterType.PC));
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void haltBugReusesImmediateOpcodeAsOperand() {
+        when(getCurrentBus().readByteFromAddress(MemoryMapConstants.INTERRUPT_ENABLE_REGISTER))
+                .thenReturn(1);
+        when(getCurrentBus().readByteFromAddress(MemoryMapConstants.INTERRUPT_FLAG_REGISTER))
+                .thenReturn(1);
+        when(getCurrentBus().readByteFromAddress(0)).thenReturn(0x76);
+        when(getCurrentBus().readByteFromAddress(1)).thenReturn(0x06);
+        when(getCurrentBus().readByteFromAddress(2)).thenReturn(0x99);
+
+        getCurrentCpu().cpuStep();
+        getCurrentCpu().cpuStep();
+
+        assertEquals(0x06, getCurrentCpu().getValueFromRegister(RegisterType.B));
+        assertEquals(2, getCurrentCpu().getValueFromRegister(RegisterType.PC));
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void delayedEiHaltPushesAdjustedReturnAddressAndClearsHaltBug() {
+        when(getCurrentBus().readByteFromAddress(MemoryMapConstants.INTERRUPT_ENABLE_REGISTER))
+                .thenReturn(1);
+        when(getCurrentBus().readByteFromAddress(MemoryMapConstants.INTERRUPT_FLAG_REGISTER))
+                .thenReturn(1);
+        when(getCurrentBus().readByteFromAddress(0)).thenReturn(0xFB);
+        when(getCurrentBus().readByteFromAddress(1)).thenReturn(0x76);
+        when(getCurrentBus().readByteFromAddress(0x0040)).thenReturn(0x3C);
+        getCurrentCpu().setValueInRegister(0xC100, RegisterType.SP);
+
+        getCurrentCpu().cpuStep();
+        getCurrentCpu().cpuStep();
+        getCurrentCpu().cpuStep();
+        getCurrentCpu().cpuStep();
+
+        assertEquals(1, getCurrentCpu().getValueFromRegister(RegisterType.A));
+        assertEquals(0x0041, getCurrentCpu().getValueFromRegister(RegisterType.PC));
+        verify(getCurrentBus()).writeByteToAddress(0, 0xC0FF);
+        verify(getCurrentBus()).writeByteToAddress(1, 0xC0FE);
+        verify(getCurrentBus()).readByteFromAddress(0x0040);
+    }
+
+    @Test
     void haltedCpuOnlyAdvancesCycles() {
         getCurrentCpu().setHalted(true);
 
