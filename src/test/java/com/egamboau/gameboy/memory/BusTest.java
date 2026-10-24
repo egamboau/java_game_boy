@@ -52,7 +52,7 @@ class BusTest {
                 Arguments.of("ROM", MemoryMapConstants.ROM_BANK_00_START, MemoryMapConstants.ROM_BANK_NN_END),
                 Arguments.of("VRAM", MemoryMapConstants.VRAM_START, MemoryMapConstants.VRAM_END),
                 Arguments.of("external RAM", MemoryMapConstants.EXTERNAL_RAM_START, MemoryMapConstants.EXTERNAL_RAM_END),
-                Arguments.of("WRAM 0", MemoryMapConstants.WRAM_0_START, MemoryMapConstants.WRAM_0_START),
+                Arguments.of("WRAM 0", MemoryMapConstants.WRAM_0_START, MemoryMapConstants.WRAM_0_END),
                 Arguments.of("WRAM 1", MemoryMapConstants.WRAM_1_START, MemoryMapConstants.WRAM_1_END),
                 Arguments.of("echo RAM", MemoryMapConstants.ECHO_RAM_START, MemoryMapConstants.ECHO_RAM_END),
                 Arguments.of("OAM", MemoryMapConstants.OAM_START, MemoryMapConstants.OAM_START),
@@ -60,6 +60,21 @@ class BusTest {
                 Arguments.of("HRAM", MemoryMapConstants.HRAM_START, MemoryMapConstants.HRAM_END),
                 Arguments.of("interrupt enable", MemoryMapConstants.INTERRUPT_ENABLE_REGISTER,
                         MemoryMapConstants.INTERRUPT_ENABLE_REGISTER));
+    }
+
+    @Test
+    @SuppressWarnings("checkstyle:magicnumber")
+    void testEchoRamMirrorsWorkRamInBothDirections() {
+        for (int address = 0xE000; address <= 0xFDFF; address++) {
+            int realAddress = address - 0x2000;
+            int value = (address + 1) & 0xFF;
+            bus.writeByteToAddress(value, realAddress);
+            assertEquals(value, bus.readByteFromAddress(address));
+
+            int mirroredValue = value ^ 0xFF;
+            bus.writeByteToAddress(mirroredValue, address);
+            assertEquals(mirroredValue, bus.readByteFromAddress(realAddress));
+        }
     }
 
     @Test

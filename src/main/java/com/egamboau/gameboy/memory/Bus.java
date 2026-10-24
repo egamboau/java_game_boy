@@ -36,11 +36,6 @@ public class Bus {
     private byte[] wram1 = new byte[MemoryMapConstants.WRAM_1_END - MemoryMapConstants.WRAM_1_START + 1];
 
     /**
-     * Echo RAM memory region (mirrors WRAM).
-     */
-    private byte[] echoRam = new byte[MemoryMapConstants.ECHO_RAM_END - MemoryMapConstants.ECHO_RAM_START + 1];
-
-    /**
      * Object Attribute Memory (OAM) region.
      */
     private byte[] oam = new byte[MemoryMapConstants.OAM_END - MemoryMapConstants.OAM_START + 1];
@@ -98,7 +93,8 @@ public class Bus {
         }
 
         if (isEchoRamMemory(address)) {
-            return this.echoRam[address - MemoryMapConstants.ECHO_RAM_START] & BitMasks.MASK_8_BIT_DATA;
+            int realAddress = address - (MemoryMapConstants.ECHO_RAM_START - MemoryMapConstants.WRAM_0_START);
+            return this.readByteFromAddress(realAddress);
         }
 
         if (isOamMemory(address)) {
@@ -154,7 +150,8 @@ public class Bus {
         }
 
         if (isEchoRamMemory(address)) {
-            this.echoRam[address - MemoryMapConstants.ECHO_RAM_START] = (byte) (value & BitMasks.MASK_8_BIT_DATA);
+            int realAddress = address - (MemoryMapConstants.ECHO_RAM_START - MemoryMapConstants.WRAM_0_START);
+            writeByteToAddress(value, realAddress);
             return;
         }
 
